@@ -1,0 +1,34 @@
+{
+    "name": "interledger/open-payments-php",
+    "description": "Open Payments PHP Library",
+    "author": "Interledger Tech Team <tech@interledger.org>",
+    "license": "Apache-2.0",
+    "autoload": {
+        "psr-4": {
+            "OpenPayments\\": "lib/"
+        }
+    },
+    "require": {
+        "guzzlehttp/guzzle": "^7.9",
+        "nyholm/psr7": "^1.8",
+        "symfony/serializer": "^7.1",
+        "symfony/property-access": "^7.1"
+    },
+    "config": {
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
+    },
+    "require-dev": {
+        "jane-php/open-api-3": "^7.8",
+        "squizlabs/php_codesniffer": "^3.11",
+        "friendsofphp/php-cs-fixer": "^3.64",
+        "phpstan/phpstan": "^2.0"
+    },
+    "scripts": {
+        "test": "phpunit",
+        "analyse": "phpstan analyse",
+        "lint": "php-cs-fixer fix --dry-run",
+        "fix": "php-cs-fixer fix"
+    }
+}
