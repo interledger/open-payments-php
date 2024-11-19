@@ -6,34 +6,18 @@ namespace OpenPayments\Services;
 
 use OpenPayments\OpenApi\Generated\WalletAddressServer\Client as OpenApiClient;
 use OpenPayments\OpenApi\Generated\WalletAddressServer\Model\WalletAddress;
-use OpenPayments\OpenApi\Generated\WalletAddressServer\Endpoint\GetWalletAddressDidDocument;
 use OpenPayments\OpenApi\Generated\WalletAddressServer\Model\JsonWebKeySet;
 use Psr\Http\Message\ResponseInterface;
 
+use OpenPayments\Validators\WalletAddressApiResponseValidator as ApiResponseValidator;
+
 interface WalletAddressRoutes
 {
-    public function get(array $args): WalletAddress;
-    public function getKeys(array $args): JsonWebKeySet;
-    public function getDIDDocument(array $args): ResponseInterface;
+    public function get(): WalletAddress;
+    public function getKeys(): JsonWebKeySet;
+    public function getDIDDocument(): ResponseInterface;
 }
 
-class ApiResponseValidator
-{
-    public static function validateWalletAddress($response): bool
-    {
-        return $response instanceof WalletAddress;
-    }
-
-    public static function validateJWKS($response): bool
-    {
-        return $response instanceof JsonWebKeySet;
-    }
-
-    public static function validateDIDDocument($response): bool
-    {
-        return $response instanceof GetWalletAddressDidDocument;
-    }
-}
 
 class WalletAddressService implements WalletAddressRoutes
 {
@@ -44,7 +28,7 @@ class WalletAddressService implements WalletAddressRoutes
         $this->openApiClient = $openApiClient;
     }
 
-    public function get(array $args): WalletAddress
+    public function get(): WalletAddress
     {
         $response = $this->openApiClient->getWalletAddress();
         if (!ApiResponseValidator::validateWalletAddress($response)) {
@@ -53,7 +37,7 @@ class WalletAddressService implements WalletAddressRoutes
         return $response;
     }
 
-    public function getKeys(array $args): JsonWebKeySet
+    public function getKeys(): JsonWebKeySet
     {
         $response = $this->openApiClient->getWalletAddressKeys();
         if (!ApiResponseValidator::validateJWKS($response)) {
@@ -62,7 +46,7 @@ class WalletAddressService implements WalletAddressRoutes
         return $response;
     }
 
-    public function getDIDDocument(array $args): ResponseInterface
+    public function getDIDDocument(): ResponseInterface
     {
         $response = $this->openApiClient->getWalletAddressDidDocument();
         if (!ApiResponseValidator::validateDIDDocument($response)) {
