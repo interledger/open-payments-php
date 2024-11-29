@@ -25,7 +25,7 @@ class GrantService implements GrantRoutes
         $this->openApiClient = $openApiClient;
     }
 
-    public function request(UnauthenticatedResourceRequestArgs $postArgs, GrantRequest $args): PendingGrant|Grant
+    public function request(GrantRequest $args): PendingGrant|Grant
     {
         $token = new PostBodyAccessToken();
         $token->setAccess($args->accessToken->access);

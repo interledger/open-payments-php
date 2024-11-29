@@ -14,11 +14,10 @@ interface GrantRoutes
     /**
      * Request a new grant.
      *
-     * @param UnauthenticatedResourceRequestArgs $postArgs
      * @param GrantRequest $args
      * @return PendingGrant|Grant
      */
-    public function request(UnauthenticatedResourceRequestArgs $postArgs, GrantRequest $args): PendingGrant|Grant;
+    public function request(GrantRequest $args): PendingGrant|Grant;
 
     /**
      * Continue an existing grant.
