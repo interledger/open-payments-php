@@ -8,7 +8,8 @@
             "OpenPayments\\": "lib/"
         },
         "files": [
-            "lib/Utils/HttpSignature.php"
+            "lib/Utils/HttpSignature.php",
+            "lib/Enums/Actions.php"
         ]
     },
     "require": {
@@ -17,7 +18,9 @@
         "guzzlehttp/guzzle": "^7.9",
         "nyholm/psr7": "^1.8",
         "symfony/serializer": "^7.1",
-        "symfony/property-access": "^7.1"
+        "symfony/property-access": "^7.1",
+        "monolog/monolog": "^3.8",
+        "bakame/http-structured-fields": "^1.3"
     },
     "config": {
         "allow-plugins": {

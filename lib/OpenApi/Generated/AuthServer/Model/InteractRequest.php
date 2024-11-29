@@ -68,4 +68,12 @@ class InteractRequest extends \ArrayObject
         $this->finish = $finish;
         return $this;
     }
+
+    public function toArray(): array
+    {
+        return array_filter([
+            'start' => $this->start,
+            'finish' => $this->finish->toArray(),
+        ]);
+    }
 }

@@ -10,7 +10,7 @@ class CreateContentHeadersTest extends TestCase
 
         // Expected headers
         $expectedHeaders = [
-            'Content-Digest' => 'sha-512=' . base64_encode(hash('sha512', $body, true)),
+            'Content-Digest' => 'sha-512=:' . base64_encode(hash('sha512', $body, true)).':',
             'Content-Length' => strlen($body),
             'Content-Type' => 'application/json'
         ];

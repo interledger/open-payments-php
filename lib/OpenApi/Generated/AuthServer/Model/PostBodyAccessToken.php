@@ -40,4 +40,11 @@ class PostBodyAccessToken extends \ArrayObject
         $this->access = $access;
         return $this;
     }
+
+    public function toArray(): array
+    {
+        return [    
+            'access' => $this->access
+        ];
+    }
 }

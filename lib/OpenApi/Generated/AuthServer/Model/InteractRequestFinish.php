@@ -96,4 +96,13 @@ class InteractRequestFinish extends \ArrayObject
         $this->nonce = $nonce;
         return $this;
     }
+
+    public function toArray(): array
+    {
+        return array_filter([
+            'method' => $this->method,
+            'uri' => $this->uri,
+            'nonce' => $this->nonce,
+        ]);
+    }
 }

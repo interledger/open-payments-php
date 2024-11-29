@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace OpenPayments\Utils;
 
+use Bakame\Http\StructuredFields\Dictionary;
+use Bakame\Http\StructuredFields\ByteSequence;
+
 use SodiumException;
 /**
  * Generates a JWK (JSON Web Key) for an EdDSA (Ed25519) public key.
@@ -31,7 +34,7 @@ function generateJwk($keyId, $providedPrivateKey = null): array {
     }
 
     // Convert the public key to base64 URL-safe encoding (like JWK format)
-    $x = rtrim(strtr(base64_encode($publicKey), '+/', '-_'), '=');
+    $x = base64UrlEncode($publicKey);
 
     // Return the JWK
     return [
@@ -43,6 +46,31 @@ function generateJwk($keyId, $providedPrivateKey = null): array {
     ];
 }
 
+/**
+ * base64UrlEncode
+ *
+ * @param  mixed $data
+ * @return string
+ */
+function base64UrlEncode(string $data): string
+{
+    return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
+}
+
+/**
+ * signData
+ *
+ * @param  mixed $data
+ * @param  mixed $privateKey
+ * @return string
+ */
+function signData(string $data, string $privateKey): string
+{
+    $signature = sodium_crypto_sign_detached($data, $privateKey);
+
+    // Encode the signature as base64url
+    return base64_encode($signature);
+}
 /**
  * isEd25519Key
  *
@@ -171,10 +199,6 @@ function createSignatureHeaders(array $options): array {
         throw new \Exception('Invalid signing options');
     }
 
-    if (strlen($privateKey) !== SODIUM_CRYPTO_SIGN_SECRETKEYBYTES) {
-        throw new \Exception('Invalid private key length');
-    }
-
     // Define components to be included in the signature
     $components = ['@method', '@target-uri'];
     if (!empty($request['headers']['Authorization']) || !empty($request['headers']['authorization'])) {
@@ -188,20 +212,56 @@ function createSignatureHeaders(array $options): array {
     $signingData = prepareSigningData($request, $components);
     $signatureInput = createSignatureInput($components, $keyId);
 
+    $signingData .= "\"@signature-params\": ".str_replace("sig1=","",$signatureInput)."";
+    
     // Sign the message
     try {
-        $signature = base64_encode(sodium_crypto_sign_detached($signingData, $privateKey));
+        if (strlen($privateKey) !== SODIUM_CRYPTO_SIGN_SECRETKEYBYTES) {
+            $seed = extractSeedFromPem($privateKey);
+            // Construct the 64-byte private key
+            $privateKey = construct64BytePrivateKey($seed);
+        }
+        echo "<br><br><br>signingData strlen: ".strlen($signingData)."
+        signData:sodium_crypto_sign_detached <pre>
+
+".$signingData."
+
+        </pre> <br>
+        ";
+        echo $privateKey;
+        // Generate and encode the signature
+        $signature = signData($signingData, $privateKey);
+
+        echo "<br><br><br>
+        signData:sodium_crypto_sign_detached <pre>".print_r($signature, true)."</pre> <br>";
     } catch (SodiumException $e) {
         throw new \Exception("Signing failed: " . $e->getMessage());
     }
 
     return [
-        'Signature' => $signature,
+        'Signature' => "sig1=$signature",
         'Signature-Input' => $signatureInput
     ];
 }
 
+function extractSeedFromPem(string $pemKey): string
+{
+    // Remove PEM headers and footers
+    $pemKey = str_replace(["-----BEGIN PRIVATE KEY-----", "-----END PRIVATE KEY-----", "\n", "\r"], '', $pemKey);
 
+    // Decode the Base64 content
+    $keyData = base64_decode($pemKey);
+    if ($keyData === false) {
+        throw new \InvalidArgumentException("Invalid PEM private key.");
+    }
+    // PKCS#8 format: Extract the 32-byte private key seed
+    $seed = substr($keyData, 16);
+
+    if (strlen($seed) !== 32) {
+        throw new \InvalidArgumentException("Invalid key length: Expected 32 bytes for Ed25519 seed.");
+    }
+    return $seed;
+}
 /**
  * Prepares the string to be signed based on the components.
  *
@@ -215,32 +275,35 @@ function prepareSigningData(array $request, array $components): string {
   foreach ($components as $component) {
       switch ($component) {
           case '@method':
-              $dataToSign .= "method: " . strtoupper($request['method']) . "\n";
+              $dataToSign .= "\"@method\": " . strtoupper($request['method']) . "\n";
               break;
           case '@target-uri':
-              $dataToSign .= "url: " . $request['url'] . "\n";
+              $dataToSign .= "\"@target-uri\": " . $request['url'] . "\n";
               break;
           case 'authorization':
-              $authorization = $request['headers']['Authorization'] ?? $request['headers']['authorization'] ?? '';
-              $dataToSign .= "authorization: $authorization\n";
+              $authorization = $request['headers']['authorization'][0] ?? $request['headers']['Authorization'][0] ?? '';
+              $dataToSign .= "\"authorization\": $authorization\n";
               break;
           case 'content-digest':
-              $contentDigest = base64_encode(sodium_crypto_generichash($request['body'] ?? ''));
-              $dataToSign .= "content-digest: $contentDigest\n";
+              $contentDigest = createContentDigestHeader($request['body'],['sha-512']);
+              $dataToSign .= "\"content-digest\": $contentDigest\n";
               break;
           case 'content-length':
               $contentLength = strlen($request['body'] ?? '');
-              $dataToSign .= "content-length: $contentLength\n";
+              $dataToSign .= "\"content-length\": $contentLength\n";
               break;
           case 'content-type':
               $contentType = $request['headers']['Content-Type'] ?? 'application/octet-stream';
-              $dataToSign .= "content-type: $contentType\n";
+              $dataToSign .= "\"content-type\": $contentType\n";
               break;
           default:
               throw new \Exception("Unsupported component: $component");
       }
   }
 
+
+
+  echo "<br>dataToSign  <pre>".print_r($dataToSign, true)."</pre>";
   return $dataToSign;
 }
 
@@ -252,9 +315,13 @@ function prepareSigningData(array $request, array $components): string {
 * @return string The 'Signature-Input' header.
 */
 function createSignatureInput(array $components, string $keyId): string {
-  $params = 'keyid="' . $keyId . '", created="' . time() . '"';
-  $fields = implode(' ', $components);
-  return 'sig1=(' . $fields . '); ' . $params;
+   $params = 'keyid="' . $keyId . '";created=' . time();
+//   $fields = implode(' ', $components);
+//   return 'sig1=(' . $fields . '); ' . $params;
+
+//  $params = 'created=' . time() . ';keyid="' . $keyId . '"';
+  $fields = implode('" "', $components);
+  return 'sig1=("' . $fields . '");' . $params;
 }
 
 
@@ -270,7 +337,7 @@ function createSignatureInput(array $components, string $keyId): string {
 function validateSignatureHeaders(array $request): bool {
   $sig = $request['headers']['signature'] ?? null;
   $sigInput = $request['headers']['signature-input'] ?? null;
-
+echo "if (!$sig || !$sigInput || !is_string($sig) || !is_string($sigInput)) ";die;
   if (!$sig || !$sigInput || !is_string($sig) || !is_string($sigInput)) {
       return false;
   }
@@ -336,6 +403,7 @@ function sigInputToChallenge(string $sigInput, array $request): ?string {
   }
 
   $signatureBase .= "\"@signature-params\": " . str_replace('sig1=', '', $request['headers']['signature-input'] ?? '');
+  echo  $signatureBase;die;
   return $signatureBase;
 }
 
@@ -349,6 +417,7 @@ function sigInputToChallenge(string $sigInput, array $request): ?string {
 */
 function getSigInputComponents(string $sigInput): ?array {
   $messageComponents = explode('sig1=', $sigInput)[1] ?? '';
+
   $components = explode(';', $messageComponents)[0] ?? '';
   $componentList = explode(' ', $components);
 
@@ -391,32 +460,23 @@ function validateSigInputComponents(array $sigInputComponents, array $request): 
 * @param string $body The message body.
 * @param string $digestHeader The Content-Digest header value.
 * @return bool True if the digest matches; false otherwise.
-* @throws Exception If the digest header is malformed or contains unsupported algorithms.
+* @throws InvalidArgumentException If the digest header is malformed or contains unsupported algorithms.
 */
 function verifyContentDigest(string $body, string $digestHeader): bool
 {
-  $digestParts = explode(', ', $digestHeader);
+    $dictionary = Dictionary::fromHttpValue($digestHeader);
 
-  foreach ($digestParts as $part) {
-      [$algo, $hash] = explode('=', $part, 2);
+    foreach ($dictionary->getIterator() as $algo => $digest) {
+        if (!($digest instanceof ByteSequence)) {
+            throw new \InvalidArgumentException("Invalid value for digest with algorithm key of '{$algo}'");
+        }
+        $hash = base64_encode(hash(nodeAlgo($algo), $body, true));
 
-      switch ($algo) {
-          case 'sha-256':
-              $expectedHash = base64_encode(hash('sha256', $body, true));
-              break;
-          case 'sha-512':
-              $expectedHash = base64_encode(hash('sha512', $body, true));
-              break;
-          default:
-              throw new \Exception("Unsupported digest algorithm: {$algo}");
-      }
-
-      if ($hash !== $expectedHash) {
-          return false;
-      }
-  }
-
-  return true;
+        if ($digest->encoded() !== $hash) {
+            return false;
+        }
+    }
+    return true;
 }
 
 /**
@@ -429,23 +489,26 @@ function verifyContentDigest(string $body, string $digestHeader): bool
  */
 function createContentDigestHeader(string $body, array $algorithms): string
 {
-    $digestParts = [];
+    $digestMap = [];
 
     foreach ($algorithms as $algo) {
-        switch ($algo) {
-            case 'sha-256':
-                $hash = base64_encode(hash('sha256', $body, true));
-                break;
-            case 'sha-512':
-                $hash = base64_encode(hash('sha512', $body, true));
-                break;
-            default:
-                throw new \Exception("Unsupported digest algorithm: {$algo}");
-        }
-        $digestParts[] = "{$algo}={$hash}";
+        $hash = hash(nodeAlgo($algo), $body, true);
+        $digestMap[$algo] = ByteSequence::fromEncoded(base64_encode($hash));
     }
 
-    return implode(', ', $digestParts);
+    // Use fromAssociative to create a Dictionary from the map
+    $dictionary = Dictionary::fromAssociative($digestMap);
+
+    return $dictionary->toHttpValue();
+}
+
+function nodeAlgo(string $algorithm): string
+{
+    return match ($algorithm) {
+        'sha-256' => 'sha256',
+        'sha-512' => 'sha512',
+        default => throw new \InvalidArgumentException("Unsupported digest algorithm {$algorithm}.")
+    };
 }
 
 /**
@@ -457,6 +520,7 @@ function createContentDigestHeader(string $body, array $algorithms): string
 function createContentHeaders($body) {
     return [
         'Content-Digest' => createContentDigestHeader($body,['sha-512']),
+        //'Content-Digest' => "sha-512=:".base64_encode(hash('sha512', $body, true)).":",
         'Content-Length' => strlen($body),
         'Content-Type' => 'application/json'
     ];
@@ -473,7 +537,7 @@ function createHeaders(array $options): array {
     $request = $options['request'];
     $privateKey = $options['privateKey'];
     $keyId = $options['keyId'];
-
+    //echo "createHeaders request headers: <pre>";print_r($request['headers']);echo "</pre><br>";
     // Generate content headers if the request body is present
     $contentHeaders = isset($request['body']) ? createContentHeaders($request['body']) : [];
 
@@ -492,3 +556,15 @@ function createHeaders(array $options): array {
     return array_merge($contentHeaders, $signatureHeaders);
 }
 
+function construct64BytePrivateKey(string $seed): string
+{
+    if (strlen($seed) !== SODIUM_CRYPTO_SIGN_SEEDBYTES) {
+        throw new \InvalidArgumentException("Seed must be 32 bytes.");
+    }
+
+    // Generate the keypair from the seed
+    $keyPair = sodium_crypto_sign_seed_keypair($seed);
+
+    // Extract the 64-byte private key
+    return sodium_crypto_sign_secretkey($keyPair);
+}

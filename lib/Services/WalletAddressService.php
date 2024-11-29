@@ -10,14 +10,7 @@ use OpenPayments\OpenApi\Generated\WalletAddressServer\Model\JsonWebKeySet;
 use Psr\Http\Message\ResponseInterface;
 
 use OpenPayments\Validators\WalletAddressApiResponseValidator as ApiResponseValidator;
-
-interface WalletAddressRoutes
-{
-    public function get(): WalletAddress;
-    public function getKeys(): JsonWebKeySet;
-    public function getDIDDocument(): ResponseInterface;
-}
-
+use OpenPayments\Contracts\WalletAddressRoutes;
 
 class WalletAddressService implements WalletAddressRoutes
 {
