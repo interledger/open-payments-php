@@ -1,0 +1,86 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "oneOf": [
+    {
+      "description": "Create quote for a receiver that is an Incoming Payment with an incomingAmount",
+      "type": "object",
+      "properties": {
+        "walletAddress": {
+          "type": "string",
+          "format": "uri",
+          "description": "The URL of the wallet address from which this quote's payment would be sent."
+        },
+        "receiver": {
+          "type": "string",
+          "format": "uri",
+          "description": "The URL of the incoming payment that the quote is created for."
+        },
+        "method": {
+          "type": "string",
+          "enum": ["ilp"],
+          "description": "The payment method to use."
+        }
+      },
+      "required": ["walletAddress", "receiver", "method"],
+      "additionalProperties": false
+    },
+    {
+      "description": "Create a quote with a fixed-receive amount",
+      "type": "object",
+      "properties": {
+        "walletAddress": {
+          "type": "string",
+          "format": "uri"
+        },
+        "receiver": {
+          "type": "string",
+          "format": "uri"
+        },
+        "method": {
+          "type": "string",
+          "enum": ["ilp"]
+        },
+        "receiveAmount": {
+          "type": "object",
+          "properties": {
+            "value": { "type": "string" },
+            "assetCode": { "type": "string" },
+            "assetScale": { "type": "integer" }
+          },
+          "required": ["value", "assetCode", "assetScale"]
+        }
+      },
+      "required": ["walletAddress", "receiver", "method", "receiveAmount"],
+      "additionalProperties": false
+    },
+    {
+      "description": "Create a quote with a fixed-send amount",
+      "type": "object",
+      "properties": {
+        "walletAddress": {
+          "type": "string",
+          "format": "uri"
+        },
+        "receiver": {
+          "type": "string",
+          "format": "uri"
+        },
+        "method": {
+          "type": "string",
+          "enum": ["ilp"]
+        },
+        "debitAmount": {
+          "type": "object",
+          "properties": {
+            "value": { "type": "string" },
+            "assetCode": { "type": "string" },
+            "assetScale": { "type": "integer" }
+          },
+          "required": ["value", "assetCode", "assetScale"]
+        }
+      },
+      "required": ["walletAddress", "receiver", "method", "debitAmount"],
+      "additionalProperties": false
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string", "format": "uri" },
+    "walletAddress": { "type": "string", "format": "uri" },
+    "receiver": { "type": "string", "format": "uri" },
+    "debitAmount": {
+      "type": "object",
+      "properties": {
+        "value": { "type": "string" },
+        "assetCode": { "type": "string" },
+        "assetScale": { "type": "integer" }
+      },
+      "required": ["value", "assetCode", "assetScale"]
+    },
+    "receiveAmount": {
+      "type": "object",
+      "properties": {
+        "value": { "type": "string" },
+        "assetCode": { "type": "string" },
+        "assetScale": { "type": "integer" }
+      },
+      "required": ["value", "assetCode", "assetScale"]
+    },
+    "sentAmount": {
+      "type": "object",
+      "properties": {
+        "value": { "type": "string" },
+        "assetCode": { "type": "string" },
+        "assetScale": { "type": "integer" }
+      },
+      "required": ["value", "assetCode", "assetScale"]
+    },
+    "metadata": { "type": "object", "additionalProperties": true },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" }
+  },
+  "required": [
+    "id",
+    "walletAddress",
+    "receiver",
+    "debitAmount",
+    "receiveAmount",
+    "sentAmount",
+    "createdAt",
+    "updatedAt"
+  ]
+}

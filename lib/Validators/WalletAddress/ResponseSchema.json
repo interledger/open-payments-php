@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Wallet Address Response",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uri",
+      "readOnly": true
+    },
+    "publicName": {
+      "type": "string",
+      "readOnly": true
+    },
+    "assetCode": {
+      "type": "string",
+      "minLength": 1,
+      "readOnly": true
+    },
+    "assetScale": {
+      "type": "integer",
+      "minimum": 0,
+      "readOnly": true
+    },
+    "authServer": {
+      "type": "string",
+      "format": "uri",
+      "readOnly": true
+    },
+    "resourceServer": {
+      "type": "string",
+      "format": "uri",
+      "readOnly": true
+    }
+  },
+  "required": ["id", "assetCode", "assetScale", "authServer", "resourceServer"],
+  "additionalProperties": false
+}

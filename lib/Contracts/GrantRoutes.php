@@ -14,19 +14,19 @@ interface GrantRoutes
     /**
      * Request a new grant.
      *
-     * @param GrantRequest $args
+     * @param array $args
      * @return PendingGrant|Grant
      */
-    public function request(GrantRequest $args): PendingGrant|Grant;
+    public function request(array $args): PendingGrant|Grant;
 
     /**
      * Continue an existing grant.
      *
-     * @param UnauthenticatedResourceRequestArgs $postArgs
+     * @param array $postArgs
      * @param GrantContinuationRequest|null $args
      * @return Grant|GrantContinuation
      */
-    public function continue(UnauthenticatedResourceRequestArgs $postArgs, ?GrantContinuationRequest $args = null): Grant|GrantContinuation;
+    public function continue(array $postArgs, ?GrantContinuationRequest $args = null): Grant|GrantContinuation;
 
     /**
      * Cancel an existing grant.

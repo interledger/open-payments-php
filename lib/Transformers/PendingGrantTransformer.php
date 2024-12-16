@@ -7,10 +7,11 @@ use OpenPayments\Models\PendingGrant;
 use OpenPayments\Models\PendingGrantInteract;
 use OpenPayments\Models\PendingGrantContinue;
 use OpenPayments\Models\SimpleAccessToken;
+use stdClass;
 
 class PendingGrantTransformer
 {
-    public static function createPendingGrantFromResponse(ResponseInterface $response): PendingGrant
+    public static function createPendingGrantFromResponse(stdClass | ResponseInterface $response): PendingGrant
     {
         // Create PendingGrantInteract instance
         $interactData = $response->interact;

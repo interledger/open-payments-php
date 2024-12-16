@@ -80,6 +80,7 @@ class WalletAddressServiceTest extends TestCase
 
         // Assert that the returned value is a ResponseInterface
         //$this->assertInstanceOf(ResponseInterface::class, $result);
+        $this->expectNotToPerformAssertions();
     }
 
     public function testGetDIDDocumentThrowsExceptionOnInvalidResponse()

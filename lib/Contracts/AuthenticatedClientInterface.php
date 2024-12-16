@@ -8,13 +8,11 @@ interface AuthenticatedClientInterface
 
     public function grant(string $authServer): GrantRoutes;
 
-    //public function quote(): QuoteRoutes;
+    public function quote(string $resourceServer, string $accessToken): QuoteRoutes;
 
-    public function incomingPayment(): IncomingPaymentRoutes;
+    public function incomingPayment(string $resourceServer, string $accessToken): IncomingPaymentRoutes;
 
     //public function outgoingPayment(): OutgoingPaymentRoutes;
 
     //public function token(): TokenRoutes;
-
-    //public function incomingPayment(): IncomingPaymentRoutes;
 }

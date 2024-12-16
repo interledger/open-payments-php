@@ -1,0 +1,51 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uri",
+      "description": "The URL identifying the incoming payment."
+    },
+    "walletAddress": {
+      "type": "string",
+      "format": "uri",
+      "description": "The URL of the wallet address this payment is being made into."
+    },
+    "incomingAmount": {
+      "type": "object",
+      "properties": {
+        "value": { "type": "string" },
+        "assetCode": { "type": "string" },
+        "assetScale": { "type": "integer" }
+      },
+      "required": ["value", "assetCode", "assetScale"]
+    },
+    "receivedAmount": {
+      "type": "object",
+      "properties": {
+        "value": { "type": "string" },
+        "assetCode": { "type": "string" },
+        "assetScale": { "type": "integer" }
+      },
+      "required": ["value", "assetCode", "assetScale"]
+    },
+    "completed": { "type": "boolean" },
+    "expiresAt": { "type": "string", "format": "date-time" },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "required": [
+    "id",
+    "walletAddress",
+    "incomingAmount",
+    "receivedAmount",
+    "completed",
+    "createdAt",
+    "updatedAt"
+  ]
+}

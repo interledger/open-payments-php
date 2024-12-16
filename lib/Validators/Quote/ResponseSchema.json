@@ -1,0 +1,67 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uri",
+      "description": "The URL identifying the quote."
+    },
+    "walletAddress": {
+      "type": "string",
+      "format": "uri",
+      "description": "The URL of the wallet address from which this quote's payment would be sent."
+    },
+    "receiver": {
+      "type": "string",
+      "format": "uri",
+      "description": "The URL of the incoming payment that the quote is created for."
+    },
+    "receiveAmount": {
+      "type": "object",
+      "properties": {
+        "value": { "type": "string" },
+        "assetCode": { "type": "string" },
+        "assetScale": { "type": "integer" }
+      },
+      "required": ["value", "assetCode", "assetScale"],
+      "description": "The total amount that should be received by the receiver when the corresponding outgoing payment has been paid."
+    },
+    "debitAmount": {
+      "type": "object",
+      "properties": {
+        "value": { "type": "string" },
+        "assetCode": { "type": "string" },
+        "assetScale": { "type": "integer" }
+      },
+      "required": ["value", "assetCode", "assetScale"],
+      "description": "The total amount that should be deducted from the sender's account when the corresponding outgoing payment has been paid."
+    },
+    "method": {
+      "type": "string",
+      "enum": ["ilp"],
+      "description": "The payment method used."
+    },
+    "expiresAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "The date and time when the calculated `debitAmount` is no longer valid."
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "The date and time when the quote was created."
+    }
+  },
+  "required": [
+    "id",
+    "walletAddress",
+    "receiver",
+    "receiveAmount",
+    "debitAmount",
+    "method",
+    "expiresAt",
+    "createdAt"
+  ],
+  "additionalProperties": false
+}

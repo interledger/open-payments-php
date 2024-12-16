@@ -9,10 +9,13 @@ use OpenPayments\Models\IncomingPaymentAccess;
 use OpenPayments\Models\OutgoingPaymentAccess;
 use OpenPayments\Models\QuoteAccess;
 use OpenPayments\Models\GrantContinue;
+use stdClass;
+
+//use stdClass;
 
 class GrantTransformer
 {
-    public static function createGrantFromResponse(ResponseInterface $response): Grant
+    public static function createGrantFromResponse(stdClass | ResponseInterface $response): Grant
     {
         $accessTokenData = $response->access_token;
         $accessData = $accessTokenData->access[0];

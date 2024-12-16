@@ -1,0 +1,7 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DID Document Response",
+  "type": "object",
+  "description": "A DID Document using JSON encoding",
+  "additionalProperties": true
+}

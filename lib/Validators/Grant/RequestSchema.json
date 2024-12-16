@@ -1,0 +1,35 @@
+{
+  "type": "object",
+  "required": ["access_token", "client"],
+  "properties": {
+    "access_token": {
+      "type": "object",
+      "required": ["access"],
+      "properties": {
+        "access": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["type", "actions"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["quote","incoming-payment","outgoing-payment"]
+              },
+              "actions": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "client": {
+      "type": "string",
+      "format": "uri"
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "walletAddress": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL of a wallet address hosted by a Rafiki instance."
+    },
+    "incomingAmount": {
+      "type": "object",
+      "properties": {
+        "value": { "type": "string" },
+        "assetCode": { "type": "string" },
+        "assetScale": { "type": "integer" }
+      },
+      "required": ["value", "assetCode", "assetScale"],
+      "additionalProperties": false,
+      "description": "The maximum amount that should be paid into the wallet address under this incoming payment."
+    },
+    "expiresAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "The date and time when payments into the incoming payment must no longer be accepted."
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Additional metadata associated with the incoming payment. (Optional)"
+    }
+  },
+  "required": ["walletAddress"]
+}

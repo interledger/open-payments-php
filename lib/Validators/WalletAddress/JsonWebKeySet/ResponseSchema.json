@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "JSON Web Key Set Response",
+  "type": "object",
+  "properties": {
+    "keys": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "kid": {
+            "type": "string"
+          },
+          "alg": {
+            "type": "string",
+            "enum": ["EdDSA"]
+          },
+          "use": {
+            "type": "string",
+            "enum": ["sig"]
+          },
+          "kty": {
+            "type": "string",
+            "enum": ["OKP"]
+          },
+          "crv": {
+            "type": "string",
+            "enum": ["Ed25519"]
+          },
+          "x": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9-_]+$"
+          }
+        },
+        "required": ["kid", "alg", "use", "kty", "crv", "x"]
+      }
+    }
+  },
+  "required": ["keys"],
+  "additionalProperties": false
+}

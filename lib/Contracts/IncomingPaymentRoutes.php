@@ -6,6 +6,7 @@ namespace OpenPayments\Contracts;
 
 use OpenPayments\OpenApi\Generated\ResourceServer\Model\PublicIncomingPayment;
 use OpenPayments\OpenApi\Generated\ResourceServer\Model\IncomingPayment;
+use OpenPayments\OpenApi\Generated\ResourceServer\Model\IncomingPaymentWithMethods;
 use OpenPayments\Models\IncomingPaymentWithPaymentMethods;
 use OpenPayments\Models\PaginationResult;
 
@@ -36,7 +37,7 @@ interface IncomingPaymentRoutes
      * @param string|null $accessToken
      * @return IncomingPaymentWithPaymentMethods
      */
-    public function create(string $url, array $createArgs, ?string $accessToken = null): IncomingPaymentWithPaymentMethods;
+    public function create(string $url, array $createArgs, ?string $accessToken = null): IncomingPaymentWithMethods;
 
     /**
      * Complete an incoming payment.

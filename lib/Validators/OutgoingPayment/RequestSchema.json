@@ -1,0 +1,54 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "walletAddress": {
+          "type": "string",
+          "format": "uri",
+          "description": "The URL of the wallet address this outgoing payment originates from."
+        },
+        "quoteId": {
+          "type": "string",
+          "format": "uri",
+          "description": "The URL of the quote defining this payment's amounts."
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "required": ["walletAddress", "quoteId"],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "walletAddress": {
+          "type": "string",
+          "format": "uri"
+        },
+        "incomingPayment": {
+          "type": "string",
+          "format": "uri"
+        },
+        "debitAmount": {
+          "type": "object",
+          "properties": {
+            "value": { "type": "string" },
+            "assetCode": { "type": "string" },
+            "assetScale": { "type": "integer" }
+          },
+          "required": ["value", "assetCode", "assetScale"]
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "required": ["walletAddress", "incomingPayment", "debitAmount"],
+      "additionalProperties": false
+    }
+  ]
+}
