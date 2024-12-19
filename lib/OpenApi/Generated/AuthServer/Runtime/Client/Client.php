@@ -54,6 +54,7 @@ abstract class Client
         $queryString = $endpoint->getQueryString();
         $uriGlue = false === strpos($endpoint->getUri(), '?') ? '?' : '&';
         $uri = $queryString !== '' ? $endpoint->getUri() . $uriGlue . $queryString : $endpoint->getUri();
+        
         $request = $this->requestFactory->createRequest($endpoint->getMethod(), $uri);
         if ($body) {
             if ($body instanceof StreamInterface) {
@@ -70,13 +71,13 @@ abstract class Client
         foreach ($endpoint->getHeaders($bodyHeaders) as $name => $value) {
             $request = $request->withHeader($name, !is_bool($value) ? $value : ($value ? 'true' : 'false'));
         }
-        if (count($endpoint->getAuthenticationScopes()) > 0) {
-            $scopes = [];
-            foreach ($endpoint->getAuthenticationScopes() as $scope) {
-                $scopes[] = $scope;
-            }
-            $request = $request->withHeader(AuthenticationRegistry::SCOPES_HEADER, $scopes);
-        }
+        // if (count($endpoint->getAuthenticationScopes()) > 0) {
+        //     $scopes = [];
+        //     foreach ($endpoint->getAuthenticationScopes() as $scope) {
+        //         $scopes[] = $scope;
+        //     }
+        //     $request = $request->withHeader(AuthenticationRegistry::SCOPES_HEADER, $scopes);
+        // }
         return $this->httpClient->sendRequest($request);
     }
 }

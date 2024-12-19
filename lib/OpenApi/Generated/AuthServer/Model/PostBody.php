@@ -112,9 +112,11 @@ class PostBody extends \ArrayObject implements \JsonSerializable
     public function jsonSerialize(): array
     {
         $array = [
-            'access_token' => $this->accessToken->toArray(), // Assuming PostBodyAccessToken has a toArray() method
-            'client' => $this->client
+            'access_token' => $this->accessToken->toArray() // Assuming PostBodyAccessToken has a toArray() method
         ];
+        if ($this->initialized['client']) {
+            $array['client'] = $this->client;
+        }
         if ($this->interact !== null) {
             $array['interact'] = $this->interact->toArray(); // Assuming InteractRequest has a toArray() method
         }

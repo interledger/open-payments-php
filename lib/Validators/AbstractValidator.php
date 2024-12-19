@@ -29,12 +29,10 @@ abstract class AbstractValidator
 
     protected function validate(array $data, object $schema): void
     {
-        //$data = json_encode($data, JSON_UNESCAPED_SLASHES);
         $data = json_decode(json_encode($data, JSON_UNESCAPED_SLASHES));
         $this->validator->validate($data, $schema, Constraint::CHECK_MODE_APPLY_DEFAULTS);
 
         if (!$this->validator->isValid()) {
-          //echo "<pre>validate ->errors: ".print_r($this->validator->getErrors(), true)."</pre>";//die;
             $errors = array_map(fn ($error) => "{$error['property']}: {$error['message']}", $this->validator->getErrors());
             throw new RuntimeException('JSON validation failed: ' . implode(', ', $errors));
         }

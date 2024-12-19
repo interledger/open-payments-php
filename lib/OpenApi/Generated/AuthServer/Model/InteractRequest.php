@@ -29,6 +29,17 @@ class InteractRequest extends \ArrayObject
      *
      * @return list<string>
      */
+
+    public function __construct(array $data = [])
+    {
+        $this->start = $data['start'] ?? [];
+        if($data['finish'] ?? false){
+            $this->finish = new InteractRequestFinish($data['finish']);
+        }
+
+        $this->initialized = $this->initialized + array_fill_keys(array_keys($data), true);
+    }
+
     public function getStart(): array
     {
         return $this->start;

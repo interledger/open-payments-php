@@ -30,7 +30,7 @@ class CreateQuote extends \OpenPayments\OpenApi\Generated\ResourceServer\Runtime
     public function getBody(\Symfony\Component\Serializer\SerializerInterface $serializer, $streamFactory = null): array
     {
         if (isset($this->body)) {
-            return [['Content-Type' => ['application/json']], json_encode($this->body)];
+            return [['Content-Type' => ['application/json']], json_encode($this->body,JSON_UNESCAPED_SLASHES)];
         }
         return [[], null];
     }
@@ -38,14 +38,14 @@ class CreateQuote extends \OpenPayments\OpenApi\Generated\ResourceServer\Runtime
     {
         return ['Accept' => ['application/json']];
     }
-    protected function getHeadersOptionsResolver(): \Symfony\Component\OptionsResolver\OptionsResolver
-    {
-        $optionsResolver = parent::getHeadersOptionsResolver();
-        $optionsResolver->setDefined(['Signature-Input', 'Signature']);
-        $optionsResolver->setRequired(['Signature-Input', 'Signature']);
-        $optionsResolver->setDefaults([]);
-        return $optionsResolver;
-    }
+    // protected function getHeadersOptionsResolver(): \Symfony\Component\OptionsResolver\OptionsResolver
+    // {
+    //     $optionsResolver = parent::getHeadersOptionsResolver();
+    //     $optionsResolver->setDefined(['Signature-Input', 'Signature']);
+    //     $optionsResolver->setRequired(['Signature-Input', 'Signature']);
+    //     $optionsResolver->setDefaults([]);
+    //     return $optionsResolver;
+    // }
     /**
      * {@inheritdoc}
      *
@@ -60,7 +60,8 @@ class CreateQuote extends \OpenPayments\OpenApi\Generated\ResourceServer\Runtime
         $status = $response->getStatusCode();
         $body = (string) $response->getBody();
         if (is_null($contentType) === false && (201 === $status && mb_strpos($contentType, 'application/json') !== false)) {
-            return $serializer->deserialize($body, 'OpenPayments\OpenApi\Generated\ResourceServer\Model\Quote', 'json');
+            
+            return json_decode($body, true);//$serializer->deserialize($body, 'OpenPayments\OpenApi\Generated\ResourceServer\Model\Quote', 'json');
         }
         if (400 === $status) {
             throw new \OpenPayments\OpenApi\Generated\ResourceServer\Exception\CreateQuoteBadRequestException($response);

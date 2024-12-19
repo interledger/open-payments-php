@@ -6,8 +6,8 @@ class CreateOutgoingPayment extends \OpenPayments\OpenApi\Generated\ResourceServ
 {
     /**
     * An **outgoing payment** is a sub-resource of a wallet address. It represents a payment from the wallet address.
-    
-    Once created, it is already authorized and SHOULD be processed immediately. If payment fails, the Account Servicing Entity must mark the **outgoing payment** as `failed`.
+    *
+    * Once created, it is already authorized and SHOULD be processed immediately. If payment fails, the Account Servicing Entity must mark the **outgoing payment** as `failed`.
     *
     * @param mixed $requestBody 
     * @param array $headerParameters {
@@ -32,7 +32,9 @@ class CreateOutgoingPayment extends \OpenPayments\OpenApi\Generated\ResourceServ
     public function getBody(\Symfony\Component\Serializer\SerializerInterface $serializer, $streamFactory = null): array
     {
         if (isset($this->body)) {
-            return [['Content-Type' => ['application/json']], json_encode($this->body)];
+            
+            $json = json_encode($this->body,JSON_UNESCAPED_SLASHES);
+            return [['Content-Type' => ['application/json']], $json];
         }
         return [[], null];
     }
@@ -40,14 +42,14 @@ class CreateOutgoingPayment extends \OpenPayments\OpenApi\Generated\ResourceServ
     {
         return ['Accept' => ['application/json']];
     }
-    protected function getHeadersOptionsResolver(): \Symfony\Component\OptionsResolver\OptionsResolver
-    {
-        $optionsResolver = parent::getHeadersOptionsResolver();
-        $optionsResolver->setDefined(['Signature-Input', 'Signature']);
-        $optionsResolver->setRequired(['Signature-Input', 'Signature']);
-        $optionsResolver->setDefaults([]);
-        return $optionsResolver;
-    }
+    // protected function getHeadersOptionsResolver(): \Symfony\Component\OptionsResolver\OptionsResolver
+    // {
+    //     $optionsResolver = parent::getHeadersOptionsResolver();
+    //     $optionsResolver->setDefined(['Signature-Input', 'Signature']);
+    //     $optionsResolver->setRequired(['Signature-Input', 'Signature']);
+    //     $optionsResolver->setDefaults([]);
+    //     return $optionsResolver;
+    // }
     /**
      * {@inheritdoc}
      *
@@ -61,7 +63,8 @@ class CreateOutgoingPayment extends \OpenPayments\OpenApi\Generated\ResourceServ
         $status = $response->getStatusCode();
         $body = (string) $response->getBody();
         if (is_null($contentType) === false && (201 === $status && mb_strpos($contentType, 'application/json') !== false)) {
-            return $serializer->deserialize($body, 'OpenPayments\OpenApi\Generated\ResourceServer\Model\OutgoingPaymentWithSpentAmounts', 'json');
+            return json_decode($body, true);
+            //return $serializer->deserialize($body, 'OpenPayments\OpenApi\Generated\ResourceServer\Model\OutgoingPaymentWithSpentAmounts', 'json');
         }
         if (401 === $status) {
             throw new \OpenPayments\OpenApi\Generated\ResourceServer\Exception\CreateOutgoingPaymentUnauthorizedException($response);

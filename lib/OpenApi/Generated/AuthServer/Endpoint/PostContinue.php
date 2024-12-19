@@ -28,7 +28,9 @@ class PostContinue extends \OpenPayments\OpenApi\Generated\AuthServer\Runtime\Cl
     public function getBody(\Symfony\Component\Serializer\SerializerInterface $serializer, $streamFactory = null): array
     {
         if ($this->body instanceof \OpenPayments\OpenApi\Generated\AuthServer\Model\ContinueIdPostBody) {
-            return [['Content-Type' => ['application/json']], $serializer->serialize($this->body, 'json')];
+            $json = json_encode($this->body->jsonSerialize(),JSON_UNESCAPED_SLASHES);//, JSON_PRETTY_PRINT);
+            $headers = ['Content-Type' => ['application/json']];
+            return [$headers, $json];
         }
         return [[], null];
     }
@@ -50,7 +52,8 @@ class PostContinue extends \OpenPayments\OpenApi\Generated\AuthServer\Runtime\Cl
         $status = $response->getStatusCode();
         $body = (string) $response->getBody();
         if (is_null($contentType) === false && (200 === $status && mb_strpos($contentType, 'application/json') !== false)) {
-            return $serializer->deserialize($body, 'OpenPayments\OpenApi\Generated\AuthServer\Model\ContinueIdPostResponse200', 'json');
+            return json_decode($body, true);
+            //return $serializer->deserialize($body, 'OpenPayments\OpenApi\Generated\AuthServer\Model\ContinueIdPostResponse200', 'json');
         }
         if (400 === $status) {
             throw new \OpenPayments\OpenApi\Generated\AuthServer\Exception\PostContinueBadRequestException($response);

@@ -77,6 +77,28 @@ class IncomingPaymentWithMethods extends \ArrayObject
      *
      * @return string
      */
+    public function __construct(array $data)
+    {
+        $this->id = $data['id'] ?? '';
+        $this->walletAddress = $data['walletAddress'] ?? '';
+        $this->completed = $data['completed'] ?? false;
+        if($data['incomingAmount'] ?? false){
+            $this->incomingAmount = new IncomingPaymentIncomingAmount($data['incomingAmount']);
+        }
+        if($data['receivedAmount'] ?? false){
+            $this->receivedAmount = new IncomingPaymentIncomingAmount($data['receivedAmount']);
+        }
+        $this->expiresAt = $data['expiresAt'] ?? null;
+        $this->metadata = $data['metadata'] ?? [];
+        $this->createdAt = $data['createdAt'] ?? null;
+        $this->updatedAt = $data['updatedAt'] ?? null;
+        if($data['methods'] ?? false){
+            $this->methods = array_map(function($data) {
+                return new IlpPaymentMethod($data);
+            }, $data['methods']);
+        }
+
+    }
     public function getId(): string
     {
         return $this->id;

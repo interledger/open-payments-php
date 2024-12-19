@@ -320,4 +320,58 @@ class OutgoingPayment
         $this->updatedAt = $updatedAt;
         return $this;
     }
+    /**
+     * @return array
+     */
+    public function toArray(){
+
+        // TODO: Implement toArray() method to return dinamycally only properties that are set
+        $arry = [];
+        if ($this->isInitialized('id')) {
+            $arry['id'] = $this->id;
+        }
+        if ($this->isInitialized('walletAddress')) {
+            $arry['walletAddress'] = $this->walletAddress;
+        }
+        if ($this->isInitialized('quoteId')) {
+            $arry['quoteId'] = $this->quoteId;
+        }
+        if ($this->isInitialized('failed')) {
+            $arry['failed'] = $this->failed;
+        }
+        if ($this->isInitialized('receiver')) {
+            $arry['receiver'] = $this->receiver;
+        }
+        if (count($this->receiveAmount->toArray()) > 0) {
+            $arry['receiveAmount'] = $this->receiveAmount->toArray();
+        }
+        if (count($this->debitAmount->toArray()) > 0) {
+            $arry['debitAmount'] = $this->debitAmount->toArray();
+        }
+        if (count($this->sentAmount->toArray()) > 0) {
+            $arry['sentAmount'] = $this->sentAmount->toArray();
+        }
+        if ($this->isInitialized('metadata')) {
+            $arry['metadata'] = $this->metadata;
+        }
+        if ($this->isInitialized('createdAt')) {
+            $arry['createdAt'] = $this->createdAt->format("Y-m-d\TH:i:s.v\Z");
+        }
+        if ($this->isInitialized('updatedAt')) {
+            $arry['updatedAt'] = $this->updatedAt->format("Y-m-d\TH:i:s.v\Z");
+        }
+        return $arry;
+        // return [
+        //     'id' => $this->id,
+        //     'walletAddress' => $this->walletAddress,
+        //     'quoteId' => $this->quoteId,
+        //     'failed' => $this->failed,
+        //     'receiver' => $this->receiver,
+        //     'receiveAmount' => $this->receiveAmount->toArray(),
+        //     'debitAmount' => $this->debitAmount->toArray(),
+        //     'sentAmount' => $this->sentAmount->toArray(),
+        //     'metadata' => $this->metadata,
+        //     'createdAt' => $this->createdAt->format("Y-m-d\TH:i:s.v\Z"),
+        //     'updatedAt' => $this->updatedAt->format("Y-m-d\TH:i:s.v\Z")
+        // ];
 }

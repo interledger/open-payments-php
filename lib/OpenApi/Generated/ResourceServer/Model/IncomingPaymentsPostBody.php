@@ -83,11 +83,11 @@ class IncomingPaymentsPostBody
     /**
      * The date and time when payments into the incoming payment must no longer be accepted.
      *
-     * @return \DateTime
+     * @return string
      */
-    public function getExpiresAt(): \DateTime
+    public function getExpiresAt(): string
     {
-        return $this->expiresAt;
+        return $this->expiresAt->format("Y-m-d\TH:i:s.v\Z");
     }
     /**
      * The date and time when payments into the incoming payment must no longer be accepted.
@@ -109,7 +109,7 @@ class IncomingPaymentsPostBody
      */
     public function getMetadata(): iterable
     {
-        return $this->metadata;
+        return $this->metadata ?? []; // Return an empty array if $metadata is null;
     }
     /**
      * Additional metadata associated with the incoming payment. (Optional)
@@ -123,5 +123,23 @@ class IncomingPaymentsPostBody
         $this->initialized['metadata'] = true;
         $this->metadata = $metadata;
         return $this;
+    }
+
+    /**
+     * Customize JSON serialization of this object.
+     */
+    public function jsonSerialize(): array
+    {
+        $array = [
+            'walletAddress' => $this->walletAddress,
+            'incomingAmount' => $this->incomingAmount->toArray() // Assuming PostBodyAccessToken has a toArray() method
+        ];
+        if ($this->expiresAt !== null) {
+            $array['expiresAt'] = $this->expiresAt->format("Y-m-d\TH:i:s.v\Z"); // \DateTime::ATOM Format as ISO 8601
+        }
+        if (!empty($this->metadata)) { // Only include metadata if it has values
+            $array['metadata'] = $this->metadata;
+        }
+        return $array;
     }
 }

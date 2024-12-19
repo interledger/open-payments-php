@@ -221,19 +221,9 @@ function createSignatureHeaders(array $options): array {
             // Construct the 64-byte private key
             $privateKey = construct64BytePrivateKey($seed);
         }
-        echo "<br><br><br>signingData strlen: ".strlen($signingData)."
-        signData:sodium_crypto_sign_detached <pre>
-
-".$signingData."
-
-        </pre> <br>
-        ";
-        echo $privateKey;
         // Generate and encode the signature
         $signature = signData($signingData, $privateKey);
 
-        echo "<br><br><br>
-        signData:sodium_crypto_sign_detached <pre>".print_r($signature, true)."</pre> <br>";
     } catch (SodiumException $e) {
         throw new \Exception("Signing failed: " . $e->getMessage());
     }
@@ -301,9 +291,6 @@ function prepareSigningData(array $request, array $components): string {
       }
   }
 
-
-
-  echo "<br>dataToSign  <pre>".print_r($dataToSign, true)."</pre>";
   return $dataToSign;
 }
 
@@ -337,7 +324,6 @@ function createSignatureInput(array $components, string $keyId): string {
 function validateSignatureHeaders(array $request): bool {
   $sig = $request['headers']['signature'] ?? null;
   $sigInput = $request['headers']['signature-input'] ?? null;
-echo "if (!$sig || !$sigInput || !is_string($sig) || !is_string($sigInput)) ";die;
   if (!$sig || !$sigInput || !is_string($sig) || !is_string($sigInput)) {
       return false;
   }
@@ -403,7 +389,7 @@ function sigInputToChallenge(string $sigInput, array $request): ?string {
   }
 
   $signatureBase .= "\"@signature-params\": " . str_replace('sig1=', '', $request['headers']['signature-input'] ?? '');
-  echo  $signatureBase;die;
+  
   return $signatureBase;
 }
 
@@ -537,7 +523,6 @@ function createHeaders(array $options): array {
     $request = $options['request'];
     $privateKey = $options['privateKey'];
     $keyId = $options['keyId'];
-    //echo "createHeaders request headers: <pre>";print_r($request['headers']);echo "</pre><br>";
     // Generate content headers if the request body is present
     $contentHeaders = isset($request['body']) ? createContentHeaders($request['body']) : [];
 

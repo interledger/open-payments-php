@@ -4,6 +4,7 @@ namespace OpenPayments\OpenApi\Generated\ResourceServer\Model;
 
 class Quote
 {
+    
     /**
      * @var array
      */
@@ -60,6 +61,24 @@ class Quote
      * @var \DateTime
      */
     protected $createdAt;
+
+    public function __construct(array $data = [])
+    {
+        $this->id = $data['id'] ?? '';
+        $this->walletAddress = $data['walletAddress'] ?? '';
+        $this->receiver = $data['receiver'] ?? '';
+        if($data['receiveAmount'] ?? false){
+            $this->receiveAmount = new IncomingPaymentIncomingAmount($data['receiveAmount']);
+        }
+        if($data['debitAmount'] ?? false){
+            $this->debitAmount = new IncomingPaymentIncomingAmount($data['debitAmount']);
+        }
+        $this->method = $data['method'] ?? '';
+        $this->expiresAt = $data['expiresAt'] ?? '';
+        $this->createdAt = $data['expiresAt'] ?? '';
+
+        $this->initialized = $this->initialized + array_fill_keys(array_keys($data), true);
+    }
     /**
      * The URL identifying the quote.
      *
@@ -235,5 +254,35 @@ class Quote
         $this->initialized['createdAt'] = true;
         $this->createdAt = $createdAt;
         return $this;
+    }
+
+    public function toArray(): array
+    {
+        $array = [];
+        if ($this->isInitialized('id')) {
+            $array['id'] = $this->id;
+        }
+        if ($this->isInitialized('walletAddress')) {
+            $array['walletAddress'] = $this->walletAddress;
+        }
+        if ($this->isInitialized('receiver')) {
+            $array['receiver'] = $this->receiver;
+        }
+        if (count($this->receiveAmount->toArray()) > 0) {
+            $array['receiveAmount'] = $this->receiveAmount->toArray();
+        }
+        if (count($this->debitAmount->toArray()) > 0) {
+            $array['debitAmount'] = $this->debitAmount->toArray();
+        }
+        if ($this->isInitialized('method')) {
+            $array['method'] = $this->method;
+        }
+        if ($this->isInitialized('expiresAt')) {
+            $array['expiresAt'] = $this->expiresAt;
+        }
+        if ($this->isInitialized('createdAt')) {
+            $array['createdAt'] = $this->expiresAt;
+        }
+        return $array;
     }
 }

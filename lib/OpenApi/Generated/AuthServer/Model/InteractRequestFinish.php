@@ -35,6 +35,14 @@ class InteractRequestFinish extends \ArrayObject
      *
      * @return string
      */
+
+    public function __construct(array $data = [])
+    {
+        $this->method = $data['method'] ?? '';
+        $this->uri = $data['uri'] ?? '';
+        $this->nonce = $data['nonce'] ?? '';
+        $this->initialized = $this->initialized + array_fill_keys(array_keys($data), true);
+    }
     public function getMethod(): string
     {
         return $this->method;

@@ -35,6 +35,13 @@ class IncomingPaymentIncomingAmount extends \ArrayObject
      *
      * @return string
      */
+
+     public function __construct(array $data)
+    {
+        $this->setValue($data['value']);
+        $this->setAssetCode($data['assetCode']);
+        $this->setAssetScale($data['assetScale']);
+    }
     public function getValue(): string
     {
         return $this->value;
@@ -46,10 +53,10 @@ class IncomingPaymentIncomingAmount extends \ArrayObject
      *
      * @return self
      */
-    public function setValue(string $value): self
+    public function setValue(string | int $value): self
     {
         $this->initialized['value'] = true;
-        $this->value = $value;
+        $this->value = "$value";
         return $this;
     }
     /**
@@ -95,5 +102,16 @@ class IncomingPaymentIncomingAmount extends \ArrayObject
         $this->initialized['assetScale'] = true;
         $this->assetScale = $assetScale;
         return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function toArray(){
+        return [
+            'value' => $this->value,
+            'assetCode' => $this->assetCode,
+            'assetScale' => $this->assetScale
+        ];
     }
 }

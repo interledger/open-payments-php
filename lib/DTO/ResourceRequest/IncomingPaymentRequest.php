@@ -1,12 +1,11 @@
 <?php
 
 namespace OpenPayments\DTO\ResourceRequest;
+
 use OpenPayments\Enums\IncomingPaymentRequestAction;
-use OpenPayments\Traits\ArraySerializableTrait;
 
 class IncomingPaymentRequest
 {
-    use ArraySerializableTrait;
     public const TYPE = 'incoming-payment';
 
     public string $type = self::TYPE;
@@ -43,12 +42,15 @@ class IncomingPaymentRequest
      * @return array
      */
     public function toArray(): array
-    {
-        return [
+    {   
+        $array = [
             'type' => $this->type,
             'actions' => array_map(fn($action) => $action->value, $this->actions),
-            //'identifier' => $this->identifier,
         ];
+        if ($this->identifier !== null) {
+            $array['identifier'] = $this->identifier;
+        }
+        return $array;
     }
 
 }

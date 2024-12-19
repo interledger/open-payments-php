@@ -1,0 +1,184 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "oneOf": [
+    {
+      "type": "object",
+      "required": ["access_token", "continue"],
+      "properties": {
+        "access_token": {
+          "type": "object",
+          "required": ["value", "manage", "access"],
+          "properties": {
+            "value": {
+              "type": "string"
+            },
+            "manage": {
+              "type": "string",
+              "format": "uri"
+            },
+            "expires_in": {
+              "type": "integer"
+            },
+            "access": {
+              "type": "array",
+              "items": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "required": ["type", "actions"],
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": ["incoming-payment","quote"]
+                      },
+                      "actions": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": ["create", "read", "read-all", "complete", "list"]
+                        }
+                      },
+                      "identifier": {
+                        "type": "string",
+                        "format": "uri"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "required": ["type", "actions", "identifier"],
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": ["outgoing-payment"]
+                      },
+                      "actions": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": ["create", "read", "read-all", "list"]
+                        }
+                      },
+                      "identifier": {
+                        "type": "string",
+                        "format": "uri"
+                      },
+                      "limits": {
+                        "type": "object",
+                        "properties": {
+                          "receiver": {
+                            "type": "string",
+                            "format": "uri"
+                          },
+                          "interval": {
+                            "type": "string"
+                          },
+                          "debitAmount": {
+                            "type": "object",
+                            "required": ["value", "assetCode", "assetScale"],
+                            "properties": {
+                              "value": {
+                                "type": "string",
+                                "pattern": "^[0-9]+$"
+                              },
+                              "assetCode": {
+                                "type": "string"
+                              },
+                              "assetScale": {
+                                "type": "integer"
+                              }
+                            }
+                          },
+                          "receiveAmount": {
+                            "type": "object",
+                            "required": ["value", "assetCode", "assetScale"],
+                            "properties": {
+                              "value": {
+                                "type": "string",
+                                "pattern": "^[0-9]+$"
+                              },
+                              "assetCode": {
+                                "type": "string"
+                              },
+                              "assetScale": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "continue": {
+          "type": "object",
+          "required": ["access_token", "uri"],
+          "properties": {
+            "access_token": {
+              "type": "object",
+              "required": ["value"],
+              "properties": {
+                "value": {
+                  "type": "string"
+                }
+              }
+            },
+            "uri": {
+              "type": "string",
+              "format": "uri"
+            },
+            "wait": {
+              "type": "integer"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": ["interact", "continue"],
+      "properties": {
+        "interact": {
+          "type": "object",
+          "required": ["redirect", "finish"],
+          "properties": {
+            "redirect": {
+              "type": "string",
+              "format": "uri"
+            },
+            "finish": {
+              "type": "string"
+            }
+          }
+        },
+        "continue": {
+          "type": "object",
+          "required": ["access_token", "uri"],
+          "properties": {
+            "access_token": {
+              "type": "object",
+              "required": ["value"],
+              "properties": {
+                "value": {
+                  "type": "string"
+                }
+              }
+            },
+            "uri": {
+              "type": "string",
+              "format": "uri"
+            },
+            "wait": {
+              "type": "integer"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

@@ -7,10 +7,6 @@ use OpenPayments\OpenApi\Generated\ResourceServer\Model\IlpPaymentMethod;
 
 class IncomingPaymentWithPaymentMethods extends IncomingPaymentWithMethods
 {
-    /**
-     * @var array<PaymentMethod>
-     */
-    private array $methods;
 
     /**
      * Constructor.
@@ -22,10 +18,14 @@ class IncomingPaymentWithPaymentMethods extends IncomingPaymentWithMethods
         parent::__construct($data);
 
         // Ensure 'methods' exists and is an array of PaymentMethod
-        $this->methods = array_map(
-            fn($methodData) => new IlpPaymentMethod($methodData),
-            $data['methods'] ?? []
-        );
+        if (!isset($data['methods']) || !is_array($data['methods'])) {
+            throw new \InvalidArgumentException('Missing or invalid methods');
+        }
+        $this->setMethods($data);
+        
+
+
+
     }
 
     /**

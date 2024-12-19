@@ -49,7 +49,7 @@ class Client extends \OpenPayments\OpenApi\Generated\ResourceServer\Runtime\Clie
     * @throws \OpenPayments\OpenApi\Generated\ResourceServer\Exception\CreateIncomingPaymentUnauthorizedException
     * @throws \OpenPayments\OpenApi\Generated\ResourceServer\Exception\CreateIncomingPaymentForbiddenException
     *
-    * @return null|\OpenPayments\OpenApi\Generated\ResourceServer\Model\IncomingPaymentWithMethods|\Psr\Http\Message\ResponseInterface
+    * @return null|array|\OpenPayments\OpenApi\Generated\ResourceServer\Model\IncomingPaymentWithMethods|\Psr\Http\Message\ResponseInterface
     */
     public function createIncomingPayment(\OpenPayments\OpenApi\Generated\ResourceServer\Model\IncomingPaymentsPostBody $requestBody, array $headerParameters = [], string $fetch = self::FETCH_OBJECT)
     {

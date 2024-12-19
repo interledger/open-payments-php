@@ -8,6 +8,7 @@ use OpenPayments\DTO\GrantContinuationRequest;
 use OpenPayments\Models\Grant;
 use OpenPayments\Models\PendingGrant;
 use OpenPayments\Models\GrantContinuation;
+use stdClass;
 
 interface GrantRoutes
 {
@@ -17,16 +18,16 @@ interface GrantRoutes
      * @param array $args
      * @return PendingGrant|Grant
      */
-    public function request(array $args): PendingGrant|Grant;
+    public function request(array $args): array|PendingGrant|Grant;
 
     /**
      * Continue an existing grant.
      *
      * @param array $postArgs
-     * @param GrantContinuationRequest|null $args
+     * @param string|null $accessToken
      * @return Grant|GrantContinuation
      */
-    public function continue(array $postArgs, ?GrantContinuationRequest $args = null): Grant|GrantContinuation;
+    public function continue(array $postArgs, ?string $accessToken = null): array|stdClass|Grant|GrantContinuation;
 
     /**
      * Cancel an existing grant.

@@ -6,16 +6,11 @@ class CreateIncomingPayment extends \OpenPayments\OpenApi\Generated\ResourceServ
 {
     /**
     * A client MUST create an **incoming payment** resource before it is possible to send any payments to the wallet address.
-    
-    When a client creates an **incoming payment** the receiving Account Servicing Entity generates unique payment details that can be used to address payments to the account and returns these details to the client as properties of the new **incoming payment**. Any payments received using those details are then associated with the **incoming payment**.
-    
-    All of the input parameters are _optional_.
-    
-    For example, the client could use the `metadata` property to store an external reference on the **incoming payment** and this can be shared with the account holder to assist with reconciliation.
-    
-    If `incomingAmount` is specified and the total received using the payment details equals or exceeds the specified `incomingAmount`, then the receiving Account Servicing Entity MUST reject any further payments and set `completed` to `true`.
-    
-    If an `expiresAt` value is defined, and the current date and time on the receiving Account Servicing Entity's systems exceeds that value, the receiving Account Servicing Entity MUST reject any further payments.
+    * When a client creates an **incoming payment** the receiving Account Servicing Entity generates unique payment details that can be used to address payments to the account and returns these details to the client as properties of the new **incoming payment**. Any payments received using those details are then associated with the **incoming payment**.
+    * All of the input parameters are _optional_.
+    * For example, the client could use the `metadata` property to store an external reference on the **incoming payment** and this can be shared with the account holder to assist with reconciliation.
+    * If `incomingAmount` is specified and the total received using the payment details equals or exceeds the specified `incomingAmount`, then the receiving Account Servicing Entity MUST reject any further payments and set `completed` to `true`.
+    * If an `expiresAt` value is defined, and the current date and time on the receiving Account Servicing Entity's systems exceeds that value, the receiving Account Servicing Entity MUST reject any further payments.
     *
     * @param \OpenPayments\OpenApi\Generated\ResourceServer\Model\IncomingPaymentsPostBody $requestBody 
     * @param array $headerParameters {
@@ -40,7 +35,9 @@ class CreateIncomingPayment extends \OpenPayments\OpenApi\Generated\ResourceServ
     public function getBody(\Symfony\Component\Serializer\SerializerInterface $serializer, $streamFactory = null): array
     {
         if ($this->body instanceof \OpenPayments\OpenApi\Generated\ResourceServer\Model\IncomingPaymentsPostBody) {
-            return [['Content-Type' => ['application/json']], $serializer->serialize($this->body, 'json')];
+            $json = json_encode($this->body->jsonSerialize(),JSON_UNESCAPED_SLASHES);//, JSON_PRETTY_PRINT);
+            $headers = ['Content-Type' => ['application/json']];
+            return [$headers, $json];
         }
         return [[], null];
     }
@@ -48,28 +45,28 @@ class CreateIncomingPayment extends \OpenPayments\OpenApi\Generated\ResourceServ
     {
         return ['Accept' => ['application/json']];
     }
-    protected function getHeadersOptionsResolver(): \Symfony\Component\OptionsResolver\OptionsResolver
-    {
-        $optionsResolver = parent::getHeadersOptionsResolver();
-        $optionsResolver->setDefined(['Signature-Input', 'Signature']);
-        $optionsResolver->setRequired(['Signature-Input', 'Signature']);
-        $optionsResolver->setDefaults([]);
-        return $optionsResolver;
-    }
+    // protected function getHeadersOptionsResolver(): \Symfony\Component\OptionsResolver\OptionsResolver
+    // {
+    //     $optionsResolver = parent::getHeadersOptionsResolver();
+    //     $optionsResolver->setDefined(['Signature-Input', 'Signature']);
+    //     $optionsResolver->setRequired(['Signature-Input', 'Signature']);
+    //     $optionsResolver->setDefaults([]);
+    //     return $optionsResolver;
+    // }
     /**
      * {@inheritdoc}
      *
      * @throws \OpenPayments\OpenApi\Generated\ResourceServer\Exception\CreateIncomingPaymentUnauthorizedException
      * @throws \OpenPayments\OpenApi\Generated\ResourceServer\Exception\CreateIncomingPaymentForbiddenException
      *
-     * @return null|\OpenPayments\OpenApi\Generated\ResourceServer\Model\IncomingPaymentWithMethods
+     * @return null|array|\OpenPayments\OpenApi\Generated\ResourceServer\Model\IncomingPaymentWithMethods
      */
     protected function transformResponseBody(\Psr\Http\Message\ResponseInterface $response, \Symfony\Component\Serializer\SerializerInterface $serializer, ?string $contentType = null)
     {
         $status = $response->getStatusCode();
         $body = (string) $response->getBody();
         if (is_null($contentType) === false && (201 === $status && mb_strpos($contentType, 'application/json') !== false)) {
-            return $serializer->deserialize($body, 'OpenPayments\OpenApi\Generated\ResourceServer\Model\IncomingPaymentWithMethods', 'json');
+            return json_decode($body, true);//$serializer->deserialize($body, 'OpenPayments\OpenApi\Generated\ResourceServer\Model\IncomingPaymentWithMethods', 'json');
         }
         if (401 === $status) {
             throw new \OpenPayments\OpenApi\Generated\ResourceServer\Exception\CreateIncomingPaymentUnauthorizedException($response);

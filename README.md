@@ -27,7 +27,10 @@ https://openpayments.dev.
 
 - [Interledger](https://interledger.org/developers/rfcs/interledger-protocol/)
 - PHP 8.3
-- Sodium extension
+- Sodium extension - for generating keys
+- BCMath extension - for big numbers comparisons
+- bakame/http-structured-fields - used in http signature
+- justinrainbow/json-schema - for json chema validation
 
 ### New to Interledger?
 

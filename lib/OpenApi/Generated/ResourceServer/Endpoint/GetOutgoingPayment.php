@@ -36,14 +36,14 @@ class GetOutgoingPayment extends \OpenPayments\OpenApi\Generated\ResourceServer\
     {
         return ['Accept' => ['application/json']];
     }
-    protected function getHeadersOptionsResolver(): \Symfony\Component\OptionsResolver\OptionsResolver
-    {
-        $optionsResolver = parent::getHeadersOptionsResolver();
-        $optionsResolver->setDefined(['Signature-Input', 'Signature']);
-        $optionsResolver->setRequired(['Signature-Input', 'Signature']);
-        $optionsResolver->setDefaults([]);
-        return $optionsResolver;
-    }
+    // protected function getHeadersOptionsResolver(): \Symfony\Component\OptionsResolver\OptionsResolver
+    // {
+    //     $optionsResolver = parent::getHeadersOptionsResolver();
+    //     $optionsResolver->setDefined(['Signature-Input', 'Signature']);
+    //     $optionsResolver->setRequired(['Signature-Input', 'Signature']);
+    //     $optionsResolver->setDefaults([]);
+    //     return $optionsResolver;
+    // }
     /**
      * {@inheritdoc}
      *
@@ -58,7 +58,7 @@ class GetOutgoingPayment extends \OpenPayments\OpenApi\Generated\ResourceServer\
         $status = $response->getStatusCode();
         $body = (string) $response->getBody();
         if (is_null($contentType) === false && (200 === $status && mb_strpos($contentType, 'application/json') !== false)) {
-            return $serializer->deserialize($body, 'OpenPayments\OpenApi\Generated\ResourceServer\Model\OutgoingPayment', 'json');
+            return json_decode($body);
         }
         if (401 === $status) {
             throw new \OpenPayments\OpenApi\Generated\ResourceServer\Exception\GetOutgoingPaymentUnauthorizedException($response);

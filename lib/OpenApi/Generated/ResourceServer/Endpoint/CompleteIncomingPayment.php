@@ -8,7 +8,7 @@ class CompleteIncomingPayment extends \OpenPayments\OpenApi\Generated\ResourceSe
     /**
     * A client with the appropriate permissions MAY mark a non-expired **incoming payment** as `completed` indicating that the client is not going to make any further payments toward this **incoming payment**, even though the full `incomingAmount` may not have been received.
     
-    This indicates to the receiving Account Servicing Entity that it can begin any post processing of the payment such as generating account statements or notifying the account holder of the completed payment.
+    * This indicates to the receiving Account Servicing Entity that it can begin any post processing of the payment such as generating account statements or notifying the account holder of the completed payment.
     *
     * @param string $id Sub-resource identifier
     * @param array $headerParameters {

@@ -11,19 +11,22 @@ use stdClass;
 
 class PendingGrantTransformer
 {
-    public static function createPendingGrantFromResponse(stdClass | ResponseInterface $response): PendingGrant
+    public static function createPendingGrantFromResponse(array | stdClass | ResponseInterface $response): PendingGrant
     {
+        if( $response instanceof stdClass) {
+            $response = json_decode(json_encode($response), true);
+        }
         // Create PendingGrantInteract instance
-        $interactData = $response->interact;
+        $interactData = $response['interact'];
         $pendingGrantInteract = new PendingGrantInteract(
-            $interactData->redirect,
-            $interactData->finish
+            $interactData['redirect'],
+            $interactData['finish']
         );
 
         // Create AccessToken instance for the continue field
-        $continueData = $response->continue;
+        $continueData = $response['continue'];
         $accessToken = new SimpleAccessToken(
-            $continueData->access_token->value,
+            $continueData['access_token']['value'],
             '', // The 'manage' field is not applicable here.
             null
         );
@@ -31,8 +34,8 @@ class PendingGrantTransformer
         // Create PendingGrantContinue instance
         $pendingGrantContinue = new PendingGrantContinue(
             $accessToken,
-            $continueData->uri,
-            $continueData->wait ?? null
+            $continueData['uri'],
+            $continueData['wait'] ?? null
         );
 
         // Create and return the PendingGrant instance

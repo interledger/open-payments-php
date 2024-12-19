@@ -1,7 +1,7 @@
 <?php
 
 namespace OpenPayments\OpenApi\Generated\AuthServer;
-
+use stdClass;
 class Client extends \OpenPayments\OpenApi\Generated\AuthServer\Runtime\Client\Client
 {
     /**
@@ -13,7 +13,7 @@ class Client extends \OpenPayments\OpenApi\Generated\AuthServer\Runtime\Client\C
      * @throws \OpenPayments\OpenApi\Generated\AuthServer\Exception\PostRequestUnauthorizedException
      * @throws \OpenPayments\OpenApi\Generated\AuthServer\Exception\PostRequestInternalServerErrorException
      *
-     * @return null|\Psr\Http\Message\ResponseInterface
+     * @return null|array|\Psr\Http\Message\ResponseInterface
      */
     public function postRequest(?\OpenPayments\OpenApi\Generated\AuthServer\Model\PostBody $requestBody = null, string $fetch = self::FETCH_OBJECT)
     {
@@ -44,7 +44,7 @@ class Client extends \OpenPayments\OpenApi\Generated\AuthServer\Runtime\Client\C
      * @throws \OpenPayments\OpenApi\Generated\AuthServer\Exception\PostContinueUnauthorizedException
      * @throws \OpenPayments\OpenApi\Generated\AuthServer\Exception\PostContinueNotFoundException
      *
-     * @return null|\OpenPayments\OpenApi\Generated\AuthServer\Model\ContinueIdPostResponse200|\Psr\Http\Message\ResponseInterface
+     * @return null|stdClass|\OpenPayments\OpenApi\Generated\AuthServer\Model\ContinueIdPostResponse200|\Psr\Http\Message\ResponseInterface
      */
     public function postContinue(string $id, ?\OpenPayments\OpenApi\Generated\AuthServer\Model\ContinueIdPostBody $requestBody = null, string $fetch = self::FETCH_OBJECT)
     {
