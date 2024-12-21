@@ -40,4 +40,10 @@ class TokenIdPostResponse200 extends \ArrayObject
         $this->accessToken = $accessToken;
         return $this;
     }
+    public function toArray()
+    {
+        return [
+            'access_token' => $this->accessToken->toArray()
+        ];
+    }
 }

@@ -45,7 +45,7 @@ class PostToken extends \OpenPayments\OpenApi\Generated\AuthServer\Runtime\Clien
         $status = $response->getStatusCode();
         $body = (string) $response->getBody();
         if (is_null($contentType) === false && (200 === $status && mb_strpos($contentType, 'application/json') !== false)) {
-            return $serializer->deserialize($body, 'OpenPayments\OpenApi\Generated\AuthServer\Model\TokenIdPostResponse200', 'json');
+            return json_decode($body, true);
         }
         if (400 === $status) {
             throw new \OpenPayments\OpenApi\Generated\AuthServer\Exception\PostTokenBadRequestException($response);

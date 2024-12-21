@@ -124,4 +124,13 @@ class LimitsOutgoing extends \ArrayObject
         $this->interval = $interval;
         return $this;
     }
+    public function toArray()
+    {
+        return array_filter([
+            'receiver' => $this->receiver,
+            'debitAmount' => $this->debitAmount->toArray(),
+            'receiveAmount' => $this->receiveAmount->toArray(),
+            'interval' => $this->interval
+        ]);
+    }
 }

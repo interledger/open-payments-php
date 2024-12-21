@@ -130,7 +130,7 @@ class Client extends \OpenPayments\OpenApi\Generated\ResourceServer\Runtime\Clie
      * @throws \OpenPayments\OpenApi\Generated\ResourceServer\Exception\GetIncomingPaymentForbiddenException
      * @throws \OpenPayments\OpenApi\Generated\ResourceServer\Exception\GetIncomingPaymentNotFoundException
      *
-     * @return null|\Psr\Http\Message\ResponseInterface
+     * @return null|array|\Psr\Http\Message\ResponseInterface
      */
     public function getIncomingPayment(string $id, array $headerParameters = [], string $fetch = self::FETCH_OBJECT)
     {
@@ -151,7 +151,7 @@ class Client extends \OpenPayments\OpenApi\Generated\ResourceServer\Runtime\Clie
     * @throws \OpenPayments\OpenApi\Generated\ResourceServer\Exception\CompleteIncomingPaymentForbiddenException
     * @throws \OpenPayments\OpenApi\Generated\ResourceServer\Exception\CompleteIncomingPaymentNotFoundException
     *
-    * @return null|\OpenPayments\OpenApi\Generated\ResourceServer\Model\IncomingPayment|\Psr\Http\Message\ResponseInterface
+    * @return null|array|\OpenPayments\OpenApi\Generated\ResourceServer\Model\IncomingPayment|\Psr\Http\Message\ResponseInterface
     */
     public function completeIncomingPayment(string $id, array $headerParameters = [], string $fetch = self::FETCH_OBJECT)
     {

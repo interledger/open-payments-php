@@ -49,7 +49,7 @@ class ContinueIdPostBody extends \ArrayObject
         $this->interactRef = $interactRef;
         return $this;
     }
-    public function jsonSerialize()
+    public function toArray()
     {
         return [
             'interact_ref' => $this->interactRef

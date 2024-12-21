@@ -96,4 +96,12 @@ class AccessIncoming extends \ArrayObject
         $this->identifier = $identifier;
         return $this;
     }
+    public function toArray()
+    {
+        return [
+            'type' => $this->type,
+            'actions' => $this->actions,
+            'identifier' => $this->identifier
+        ];
+    }
 }

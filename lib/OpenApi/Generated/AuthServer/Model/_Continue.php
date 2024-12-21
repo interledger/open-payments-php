@@ -96,4 +96,12 @@ class _Continue extends \ArrayObject
         $this->wait = $wait;
         return $this;
     }
+    public function toArray()
+    {
+        return [
+            'access_token' => $this->accessToken->toArray(),
+            'uri' => $this->uri,
+            'wait' => $this->wait,
+        ];
+    }
 }

@@ -124,4 +124,13 @@ class AccessOutgoing extends \ArrayObject
         $this->limits = $limits;
         return $this;
     }
+    public function toArray()
+    {
+        return [
+            'type' => $this->type,
+            'actions' => $this->actions,
+            'identifier' => $this->identifier,
+            'limits' => $this->limits->toArray(),
+        ];
+    }
 }

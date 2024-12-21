@@ -68,4 +68,11 @@ class OutgoingPaymentsGetResponse200 extends \ArrayObject
         $this->result = $result;
         return $this;
     }
+    public function toArray()
+    {
+        return array_filter([
+            'pagination' => $this->pagination,
+            'result' => $this->result
+        ]);
+    }
 }

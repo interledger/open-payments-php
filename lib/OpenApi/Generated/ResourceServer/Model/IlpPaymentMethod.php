@@ -8,6 +8,13 @@ class IlpPaymentMethod
      * @var array
      */
     protected $initialized = [];
+
+    public function __construct(array $data)
+    {
+        $this->setType($data['type']);
+        $this->setIlpAddress($data['ilpAddress']);
+        $this->setSharedSecret($data['sharedSecret']);
+    }
     public function isInitialized($property): bool
     {
         return array_key_exists($property, $this->initialized);
@@ -95,5 +102,14 @@ class IlpPaymentMethod
         $this->initialized['sharedSecret'] = true;
         $this->sharedSecret = $sharedSecret;
         return $this;
+    }
+
+    public function toArray()
+    {
+        return [
+            'type' => $this->type,
+            'ilpAddress' => $this->ilpAddress,
+            'sharedSecret' => $this->sharedSecret
+        ];
     }
 }

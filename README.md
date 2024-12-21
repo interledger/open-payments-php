@@ -30,7 +30,7 @@ https://openpayments.dev.
 - Sodium extension - for generating keys
 - BCMath extension - for big numbers comparisons
 - bakame/http-structured-fields - used in http signature
-- justinrainbow/json-schema - for json chema validation
+- justinrainbow/json-schema - for json schema validation
 
 ### New to Interledger?
 

@@ -17,15 +17,18 @@ use OpenPayments\OpenApi\Generated\ResourceServer\Exception\{
     CreateOutgoingPaymentForbiddenException
 };
 use OpenPayments\OpenApi\Generated\ResourceServer\Client as OpenApiResourceServerClient;
+use OpenPayments\Validators\OutgoingPaymentValidator;
 use Psr\Http\Message\ResponseInterface;
 
 class OutgoingPaymentService implements OutgoingPaymentRoutes
 {
     private OpenApiResourceServerClient $openApiClient;
+    private OutgoingPaymentValidator $validator;
 
-    public function __construct(OpenApiResourceServerClient $openApiClient)
+    public function __construct(OpenApiResourceServerClient $openApiClient, OutgoingPaymentValidator $validator)
     {
         $this->openApiClient = $openApiClient;
+        $this->validator = $validator;
     }
 
     /**
@@ -62,12 +65,13 @@ class OutgoingPaymentService implements OutgoingPaymentRoutes
      *
      * @param mixed $requestBody The body of the request for creating an outgoing payment.
      * @param array $headerParameters Headers including `Signature-Input` and `Signature`.
-     * @return OutgoingPaymentWithSpentAmounts|ResponseInterface|null
+     * @return OutgoingPaymentWithSpentAmounts|ResponseInterface|array|null
      * @throws CreateOutgoingPaymentUnauthorizedException
      * @throws CreateOutgoingPaymentForbiddenException
      */
-    public function create($requestBody, array $headerParameters): OutgoingPaymentWithSpentAmounts
+    public function create($requestBody, array $headerParameters): array|OutgoingPaymentWithSpentAmounts
     {
+        $this->validator->validateRequest($requestBody);
         return $this->openApiClient->createOutgoingPayment($requestBody, $headerParameters);
     }
 }

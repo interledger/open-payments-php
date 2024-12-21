@@ -28,7 +28,7 @@ class PostContinue extends \OpenPayments\OpenApi\Generated\AuthServer\Runtime\Cl
     public function getBody(\Symfony\Component\Serializer\SerializerInterface $serializer, $streamFactory = null): array
     {
         if ($this->body instanceof \OpenPayments\OpenApi\Generated\AuthServer\Model\ContinueIdPostBody) {
-            $json = json_encode($this->body->jsonSerialize(),JSON_UNESCAPED_SLASHES);//, JSON_PRETTY_PRINT);
+            $json = json_encode($this->body->toArray(),JSON_UNESCAPED_SLASHES);//, JSON_PRETTY_PRINT);
             $headers = ['Content-Type' => ['application/json']];
             return [$headers, $json];
         }

@@ -68,4 +68,11 @@ class ContinueIdPostResponse200 extends \ArrayObject
         $this->continue = $continue;
         return $this;
     }
+    public function toArray()
+    {
+        return [
+            'accessToken' => $this->accessToken->toArray(),
+            'continue' => $this->continue->toArray()
+        ];
+    }
 }

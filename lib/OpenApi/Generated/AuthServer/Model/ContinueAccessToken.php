@@ -40,4 +40,10 @@ class ContinueAccessToken extends \ArrayObject
         $this->value = $value;
         return $this;
     }
+    public function toArray()
+    {
+        return [
+            'value' => $this->value
+        ];
+    }
 }

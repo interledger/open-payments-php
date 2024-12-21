@@ -124,4 +124,13 @@ class AccessToken
         $this->access = $access;
         return $this;
     }
+    public function toArray()
+    {
+        return [
+            'value' => $this->value,
+            'manage' => $this->manage,
+            'expires_in' => $this->expiresIn,
+            'access' => $this->access
+        ];
+    }
 }

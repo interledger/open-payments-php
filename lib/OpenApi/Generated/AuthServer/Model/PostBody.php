@@ -2,7 +2,7 @@
 
 namespace OpenPayments\OpenApi\Generated\AuthServer\Model;
 
-class PostBody extends \ArrayObject implements \JsonSerializable
+class PostBody extends \ArrayObject
 {
     /**
      * @var array
@@ -107,9 +107,9 @@ class PostBody extends \ArrayObject implements \JsonSerializable
     }
 
     /**
-     * Customize JSON serialization of this object.
+     * @return array
      */
-    public function jsonSerialize(): array
+    public function toArray(): array
     {
         $array = [
             'access_token' => $this->accessToken->toArray() // Assuming PostBodyAccessToken has a toArray() method

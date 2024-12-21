@@ -58,7 +58,7 @@ class GetQuote extends \OpenPayments\OpenApi\Generated\ResourceServer\Runtime\Cl
         $status = $response->getStatusCode();
         $body = (string) $response->getBody();
         if (is_null($contentType) === false && (200 === $status && mb_strpos($contentType, 'application/json') !== false)) {
-            return $serializer->deserialize($body, 'OpenPayments\OpenApi\Generated\ResourceServer\Model\Quote', 'json');
+            return json_decode($body, true);//$serializer->deserialize($body, 'OpenPayments\OpenApi\Generated\ResourceServer\Model\Quote', 'json');
         }
         if (401 === $status) {
             throw new \OpenPayments\OpenApi\Generated\ResourceServer\Exception\GetQuoteUnauthorizedException($response);

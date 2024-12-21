@@ -24,8 +24,6 @@ use OpenPayments\Contracts\AuthenticatedClientInterface;
 use OpenPayments\Config\Config;
 use OpenPayments\Contracts\WalletAddressRoutes;
 use OpenPayments\Http\ApiRequest;
-use OpenPayments\DTO\CreateUnauthenticatedClientArgs;
-use OpenPayments\Models\Grant;
 use OpenPayments\Services\WalletAddressService;
 use OpenPayments\Services\IncomingPaymentService;
 use OpenPayments\Services\OutgoingPaymentService;
@@ -35,6 +33,9 @@ use OpenPayments\OpenApi\Generated\ResourceServer\Client as OpenApiResourceServe
 use OpenPayments\OpenApi\Generated\AuthServer\Client as OpenApiAuthServerClient;
 use OpenPayments\Services\GrantService;
 use OpenPayments\Validators\GrantValidator;
+use OpenPayments\Validators\IncomingPaymentValidator;
+use OpenPayments\Validators\OutgoingPaymentValidator;
+use OpenPayments\Validators\QuoteValidator;
 
 /**
  * Client
@@ -126,7 +127,7 @@ class AuthenticatedClient implements AuthenticatedClientInterface
             $serializer,
             $streamFactory
         );
-        $this->outgoingPaymentService =  new OutgoingPaymentService($openApiClient);
+        $this->outgoingPaymentService =  new OutgoingPaymentService($openApiClient, new OutgoingPaymentValidator());
         return $this->outgoingPaymentService;
 
     }
@@ -160,7 +161,7 @@ class AuthenticatedClient implements AuthenticatedClientInterface
             $serializer,
             $streamFactory
         );
-        $this->incomingPaymentService =  new IncomingPaymentService($openApiClient);
+        $this->incomingPaymentService =  new IncomingPaymentService($openApiClient, new IncomingPaymentValidator());
         return $this->incomingPaymentService;
     }
 
@@ -193,7 +194,7 @@ class AuthenticatedClient implements AuthenticatedClientInterface
             $serializer,
             $streamFactory
         );
-        $this->quoteService =  new QuoteService($openApiClient);
+        $this->quoteService =  new QuoteService($openApiClient, new QuoteValidator());
         return $this->quoteService;
     }
 

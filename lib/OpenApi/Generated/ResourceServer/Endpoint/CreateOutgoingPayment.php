@@ -32,7 +32,6 @@ class CreateOutgoingPayment extends \OpenPayments\OpenApi\Generated\ResourceServ
     public function getBody(\Symfony\Component\Serializer\SerializerInterface $serializer, $streamFactory = null): array
     {
         if (isset($this->body)) {
-            
             $json = json_encode($this->body,JSON_UNESCAPED_SLASHES);
             return [['Content-Type' => ['application/json']], $json];
         }

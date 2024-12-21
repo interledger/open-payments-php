@@ -12,132 +12,155 @@ use OpenPayments\OpenApi\Generated\ResourceServer\Model\IncomingPayment;
 use OpenPayments\OpenApi\Generated\ResourceServer\Model\IncomingPaymentsPostBody;
 use OpenPayments\OpenApi\Generated\ResourceServer\Model\IncomingPaymentIncomingAmount;
 use OpenPayments\OpenApi\Generated\ResourceServer\Model\IncomingPaymentWithMethods;
+use OpenPayments\OpenApi\Generated\ResourceServer\Model\IncomingPaymentsGetResponse200 as IncomingPaymentPaginationResult;
 use OpenPayments\Models\IncomingPaymentWithPaymentMethods;
 use OpenPayments\Models\PaginationResult;
-
+use OpenPayments\OpenApi\Generated\ResourceServer\Exception\{
+    GetIncomingPaymentUnauthorizedException,
+    GetIncomingPaymentForbiddenException,
+    GetIncomingPaymentNotFoundException,
+    ListIncomingPaymentsUnauthorizedException,
+    ListIncomingPaymentsForbiddenException,
+    CreateIncomingPaymentUnauthorizedException,
+    CreateIncomingPaymentForbiddenException
+};
 // use Psr\Log\LoggerInterface;
-use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Exception\RequestException;
 use OpenPayments\OpenApi\Generated\ResourceServer\Client as OpenApiResourceServerClient;
-use OpenPayments\Validators\IncomingPaymentApiResponseValidator as ApiResponseValidator;
 use OpenPayments\Exceptions\ValidationException;
+use OpenPayments\Validators\IncomingPaymentValidator;
 
 class IncomingPaymentService implements IncomingPaymentRoutes
 {
     private OpenApiResourceServerClient $openApiClient;
-    // private LoggerInterface $logger;
+    private IncomingPaymentValidator $validator;
 
     public function __construct(
-        OpenApiResourceServerClient $openApiClient
+        OpenApiResourceServerClient $openApiClient,
+        IncomingPaymentValidator $validator
     ) {
         $this->openApiClient = $openApiClient;
+        $this->validator = $validator;
     }
 
-    public function get(string $url, ?string $accessToken = null): IncomingPaymentWithPaymentMethods
+    private function getIncomingPaymentIdFromUrl(string $url): string
     {
-        try {
-            $paymentUrl = $args->url;
-            $response = $this->openApiClient->getIncomingPayment();
-            $response = $this->httpClient->get($url, $this->getHeaders($accessToken));
-            $payment = json_decode($response->getBody()->getContents(), true);
-
-            if (!ApiResponseValidator::validateIncomingPayment($payment)) {
-                throw new \Exception("Incoming amount does not match received amount.'");
-            }
-            return new IncomingPaymentWithPaymentMethods($payment);
-        } catch (RequestException $e) {
-            $this->handleValidationError('GET', $url, $e);
-        }
+        $urlParts = explode('/', $url);
+        return end($urlParts);
     }
-
-    public function getPublic(string $url): PublicIncomingPayment
+    /**
+     * Fetches the latest state of an incoming payment by its ID.
+     *
+     * @param string $url The identifier of the incoming payment.
+     * @param bool|null $returnArray
+     * @return IncomingPaymentWithPaymentMethods|array
+     * @throws GetIncomingPaymentUnauthorizedException
+     * @throws GetIncomingPaymentForbiddenException
+     * @throws GetIncomingPaymentNotFoundException
+     */
+    public function get(string $url, ?bool $returnArray = false): array|IncomingPaymentWithPaymentMethods
     {
-        try {
-            $response = $this->openApiClient->getIncomingPayment($url);
-            // $data = json_decode($response->getBody()->getContents(), true);
+        $id = $this->getIncomingPaymentIdFromUrl($url);
 
-            // return new PublicIncomingPayment($data); // Assuming PublicIncomingPayment has a constructor for validation.
-            return new IncomingPayment($response, 200);
+        $response = $this->openApiClient->getIncomingPayment($id);
 
-        } catch (RequestException $e) {
-            $this->handleValidationError('GET', $url, $e);
+        $this->validator->validateResponse($response);
+
+        return new IncomingPaymentWithPaymentMethods($response);
+       
+    }
+    /**
+     * Fetches the latest state of an incoming payment by its ID.
+     *
+     * @param string $url The identifier of the incoming payment.
+     * @param bool|null $returnArray
+     * @return IncomingPaymentWithPaymentMethods|array
+     * @throws GetIncomingPaymentUnauthorizedException
+     * @throws GetIncomingPaymentForbiddenException
+     * @throws GetIncomingPaymentNotFoundException
+     */
+    public function getPublic(string $url, ?bool $returnArray = false): array|PublicIncomingPayment
+    {
+       
+        $response = $this->openApiClient->getIncomingPayment($url);
+
+        if($returnArray) {
+            return $response;
         }
+        return new PublicIncomingPayment($response, 200);
+
     }
 
+    /**
+     * Creates a new incoming payment.
+     *
+     * @param array $incomingPaymentRequest The incoming payment request.
+     * @param bool|null $returnArray
+     * @return IncomingPaymentWithMethods|array
+     * @throws CreateIncomingPaymentUnauthorizedException
+     * @throws CreateIncomingPaymentForbiddenException
+     */
     public function create(
-        string $walletAddressUrl,
-        array $createArgs,
-        ?string $accessToken = null
-    ): IncomingPaymentWithMethods {
-        try {
-            $amount = new IncomingPaymentIncomingAmount($createArgs);
+        array $incomingPaymentRequest,
+        ?bool $returnArray = false
+    ): array|IncomingPaymentWithMethods {
+       
+        $this->validator->validateRequest($incomingPaymentRequest);
 
-            $createIPArgs = new IncomingPaymentsPostBody();
-            $createIPArgs->setWalletAddress($walletAddressUrl);
-            $createIPArgs->setIncomingAmount($amount);
-            $expiresAt = (new \DateTime())
-                ->add(new \DateInterval('PT10M')); // Add 10 minutes
+        $amount = new IncomingPaymentIncomingAmount($incomingPaymentRequest['incomingAmount']);
 
-            $createIPArgs->setExpiresAt($expiresAt);
-            $payment = $this->openApiClient->createIncomingPayment($createIPArgs);
+        $createIPArgs = new IncomingPaymentsPostBody();
+        $createIPArgs->setWalletAddress($incomingPaymentRequest['walletAddress']);
+        $createIPArgs->setIncomingAmount($amount);
+        $createIPArgs->setMetadata($incomingPaymentRequest['metadata'] ?? null);
 
-            
-            if (!ApiResponseValidator::validateCreatedIncomingPayment($payment)) {
-                throw new ValidationException("create Incoming Payment response validation failed");
-            }
-            return new IncomingPaymentWithMethods($payment);
-        } catch (RequestException $e) {
-            $this->handleValidationError('POST', 'RequestException ' , $e);
-        }catch (ValidationException $e) {
-            $this->handleValidationError('POST', 'ValidationException', $e);
+        $createIPArgs->setExpiresAt($incomingPaymentRequest['expiresAt'] ?? (new \DateTime())
+            ->add(new \DateInterval('PT10M'))->format("Y-m-d\TH:i:s.v\Z"));
+        $payment = $this->openApiClient->createIncomingPayment($createIPArgs);
+
+        $this->validator->validateResponse($payment);
+
+        if($returnArray) {
+            return $payment;
         }
+        return new IncomingPaymentWithMethods($payment);
+        
     }
 
-    public function complete(string $url, ?string $accessToken = null): IncomingPayment
+    /**
+     * Completes an incoming payment.
+     *
+     * @param string $url The identifier of the incoming payment.
+     * @param bool|null $returnArray
+     * @return IncomingPayment|array
+     * @throws CompleteIncomingPaymentUnauthorizedException
+     * @throws CompleteIncomingPaymentForbiddenException
+     * @throws CompleteIncomingPaymentNotFoundException
+     */
+    public function complete(string $url, ?bool $returnArray = false): IncomingPayment
     {
-        try {
-            //CompleteIncomingPayment
-            $response = $this->openApiClient->completeIncomingPayment($url . '/complete', $this->getHeaders($accessToken));
-            $data = json_decode($response->getBody()->getContents(), true);
-
-            return $this->validateCompletedIncomingPayment($data);
-        } catch (RequestException $e) {
-            $this->handleValidationError('POST', $url, $e);
+        $id = $this->getIncomingPaymentIdFromUrl($url);
+        //CompleteIncomingPayment
+        $response = $this->openApiClient->completeIncomingPayment($id);
+        if($returnArray) {
+            return $response;
         }
+        return new IncomingPaymentWithMethods($response);
+       
     }
 
     public function list(
-        string $url,
-        ?string $accessToken = null,
-        ?array $pagination = null
-    ): PaginationResult {
-        try {
+        array $queryParams,
+        ?bool $returnArray = false
+    ): IncomingPaymentPaginationResult {
+
             $queryParams = $pagination ?? [];
-            $response = $this->httpClient->get($url, [
-                'query' => $queryParams,
-                'headers' => $this->getHeaders($accessToken),
+            $response = $this->openApiClient->listIncomingPayments([
+                'wallet-address' => $queryParams['wallet-address'] ?? null,
+                'headers' => $queryParams['wallet-address'] ?? null,
             ]);
-            $data = json_decode($response->getBody()->getContents(), true);
 
-            return new PaginationResult($data);
-        } catch (RequestException $e) {
-            $this->handleValidationError('GET', $url, $e);
-        }
-    }
+            return new IncomingPaymentPaginationResult($response);
 
-
-    private function getHeaders(?string $accessToken): array
-    {
-        return $accessToken ? ['Authorization' => "GNAP $accessToken"] : [];
-    }
-
-    private function handleValidationError(string $method, string $url, ValidationException | RequestException $exception): void
-    {
-        // $this->logger->error("Error during $method request to $url", [
-        //     'message' => $exception->getMessage(),
-        //     'code' => $exception->getCode(),
-        // ]);
-
-        throw $exception;
     }
 }

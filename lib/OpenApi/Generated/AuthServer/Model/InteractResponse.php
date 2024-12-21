@@ -68,4 +68,11 @@ class InteractResponse extends \ArrayObject
         $this->finish = $finish;
         return $this;
     }
+    public function toArray()
+    {
+        return [
+            'redirect' => $this->redirect,
+            'finish' => $this->finish
+        ];
+    }
 }

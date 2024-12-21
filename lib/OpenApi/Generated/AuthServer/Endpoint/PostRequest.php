@@ -25,8 +25,7 @@ class PostRequest extends \OpenPayments\OpenApi\Generated\AuthServer\Runtime\Cli
     public function getBody(\Symfony\Component\Serializer\SerializerInterface $serializer, $streamFactory = null): array
     {
         if ($this->body instanceof \OpenPayments\OpenApi\Generated\AuthServer\Model\PostBody) {
-            $json = json_encode($this->body->jsonSerialize(),JSON_UNESCAPED_SLASHES);//, JSON_PRETTY_PRINT);
-            
+            $json = json_encode($this->body->toArray(),JSON_UNESCAPED_SLASHES);
             $headers = ['Content-Type' => ['application/json']];
             return [$headers, $json];
         }
@@ -50,7 +49,7 @@ class PostRequest extends \OpenPayments\OpenApi\Generated\AuthServer\Runtime\Cli
         $status = $response->getStatusCode();
         $body = (string) $response->getBody();
         if (is_null($contentType) === false && (200 === $status && mb_strpos($contentType, 'application/json') !== false)) {
-            return json_decode($body, true);//$serializer->deserialize($body, 'OpenPayments\OpenApi\Generated\AuthServer\Model\PostResponse200', 'json');
+            return json_decode($body, true);
         }
         if (400 === $status) {
             throw new \OpenPayments\OpenApi\Generated\AuthServer\Exception\PostRequestBadRequestException($response);

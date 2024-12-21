@@ -7,7 +7,9 @@ namespace OpenPayments\Contracts;
 use OpenPayments\OpenApi\Generated\ResourceServer\Model\PublicIncomingPayment;
 use OpenPayments\OpenApi\Generated\ResourceServer\Model\IncomingPayment;
 use OpenPayments\OpenApi\Generated\ResourceServer\Model\IncomingPaymentWithMethods;
+use OpenPayments\OpenApi\Generated\ResourceServer\Model\IncomingPaymentsGetResponse200 as IncomingPaymentPaginationResult;
 use OpenPayments\Models\IncomingPaymentWithPaymentMethods;
+
 use OpenPayments\Models\PaginationResult;
 
 interface IncomingPaymentRoutes
@@ -17,45 +19,44 @@ interface IncomingPaymentRoutes
      *
      * @param string $url
      * @param string|null $accessToken
-     * @return IncomingPaymentWithPaymentMethods
+     * @return array|IncomingPaymentWithPaymentMethods
      */
-    public function get(string $url, ?string $accessToken = null): IncomingPaymentWithPaymentMethods;
+    public function get(string $url, ?bool $returnArray = false): array|IncomingPaymentWithPaymentMethods;
 
     /**
      * Get a public incoming payment by URL.
      *
      * @param string $url
-     * @return PublicIncomingPayment
+     * @return array|PublicIncomingPayment
      */
-    public function getPublic(string $url): PublicIncomingPayment;
+    public function getPublic(string $url, ?bool $returnArray = false): array|PublicIncomingPayment;
 
     /**
      * Create an incoming payment.
      *
-     * @param string $url
-     * @param array $createArgs
+     * @param array $incomingPaymentRequest
      * @param string|null $accessToken
-     * @return IncomingPaymentWithPaymentMethods
+     * @return array|IncomingPaymentWithPaymentMethods
      */
-    public function create(string $url, array $createArgs, ?string $accessToken = null): IncomingPaymentWithMethods;
+    public function create( array $incomingPaymentRequest, ?bool $returnArray = false): array|IncomingPaymentWithMethods;
 
     /**
      * Complete an incoming payment.
      *
      * @param string $url
      * @param string|null $accessToken
-     * @return IncomingPayment
+     * @return array|IncomingPayment
      */
-    public function complete(string $url, ?string $accessToken = null): IncomingPayment;
+    public function complete(string $url, ?bool $returnArray = false): array|IncomingPayment;
 
     /**
      * List incoming payments.
      *
-     * @param string $url
+     * @param array $queryParams
      * @param string|null $accessToken
      * @param array|null $pagination
-     * @return PaginationResult
+     * @return array|IncomingPaymentPaginationResult
      */
-    public function list(string $url, ?string $accessToken = null, ?array $pagination = null): PaginationResult;
+    public function list(array $queryParams, ?bool $returnArray = false): array|IncomingPaymentPaginationResult;
 }
 

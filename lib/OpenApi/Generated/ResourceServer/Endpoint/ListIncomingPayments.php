@@ -52,14 +52,14 @@ class ListIncomingPayments extends \OpenPayments\OpenApi\Generated\ResourceServe
         $optionsResolver->addAllowedTypes('last', ['int']);
         return $optionsResolver;
     }
-    protected function getHeadersOptionsResolver(): \Symfony\Component\OptionsResolver\OptionsResolver
-    {
-        $optionsResolver = parent::getHeadersOptionsResolver();
-        $optionsResolver->setDefined(['Signature-Input', 'Signature']);
-        $optionsResolver->setRequired(['Signature-Input', 'Signature']);
-        $optionsResolver->setDefaults([]);
-        return $optionsResolver;
-    }
+    // protected function getHeadersOptionsResolver(): \Symfony\Component\OptionsResolver\OptionsResolver
+    // {
+    //     $optionsResolver = parent::getHeadersOptionsResolver();
+    //     $optionsResolver->setDefined(['Signature-Input', 'Signature']);
+    //     $optionsResolver->setRequired(['Signature-Input', 'Signature']);
+    //     $optionsResolver->setDefaults([]);
+    //     return $optionsResolver;
+    // }
     /**
      * {@inheritdoc}
      *
@@ -73,7 +73,7 @@ class ListIncomingPayments extends \OpenPayments\OpenApi\Generated\ResourceServe
         $status = $response->getStatusCode();
         $body = (string) $response->getBody();
         if (is_null($contentType) === false && (200 === $status && mb_strpos($contentType, 'application/json') !== false)) {
-            return $serializer->deserialize($body, 'OpenPayments\OpenApi\Generated\ResourceServer\Model\IncomingPaymentsGetResponse200', 'json');
+            return json_decode($body, true);
         }
         if (401 === $status) {
             throw new \OpenPayments\OpenApi\Generated\ResourceServer\Exception\ListIncomingPaymentsUnauthorizedException($response);

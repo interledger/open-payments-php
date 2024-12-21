@@ -68,4 +68,11 @@ class AccessQuote extends \ArrayObject
         $this->actions = $actions;
         return $this;
     }
+    public function toArray()
+    {
+        return [
+            'type' => $this->type,
+            'actions' => $this->actions
+        ];
+    }
 }

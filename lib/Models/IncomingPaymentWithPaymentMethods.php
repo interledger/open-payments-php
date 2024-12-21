@@ -21,7 +21,6 @@ class IncomingPaymentWithPaymentMethods extends IncomingPaymentWithMethods
         if (!isset($data['methods']) || !is_array($data['methods'])) {
             throw new \InvalidArgumentException('Missing or invalid methods');
         }
-        $this->setMethods($data);
         
 
 

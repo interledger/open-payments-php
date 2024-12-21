@@ -93,8 +93,8 @@ class IncomingPaymentWithMethods extends \ArrayObject
         $this->createdAt = $data['createdAt'] ?? null;
         $this->updatedAt = $data['updatedAt'] ?? null;
         if($data['methods'] ?? false){
-            $this->methods = array_map(function($data) {
-                return new IlpPaymentMethod($data);
+            $this->methods = array_map(function($methods) {
+                return new IlpPaymentMethod($methods);
             }, $data['methods']);
         }
 
@@ -313,5 +313,24 @@ class IncomingPaymentWithMethods extends \ArrayObject
         $this->initialized['methods'] = true;
         $this->methods = $methods;
         return $this;
+    }
+    /**
+     * @return array
+     */
+    public function toArray(){
+        return [
+            'id' => $this->id,
+            'walletAddress' => $this->walletAddress,
+            'completed' => $this->completed,
+            'incomingAmount' => $this->incomingAmount->toArray(),
+            'receivedAmount' => $this->receivedAmount->toArray(),
+            'expiresAt' => $this->expiresAt,
+            'metadata' => $this->metadata,
+            'createdAt' => $this->createdAt,
+            'updatedAt' => $this->updatedAt,
+            'methods' => array_map(function($methods) {
+                return $methods->toArray();
+            }, $this->methods)
+        ];
     }
 }

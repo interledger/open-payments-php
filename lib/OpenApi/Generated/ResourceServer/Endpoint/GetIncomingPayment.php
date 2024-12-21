@@ -36,16 +36,16 @@ class GetIncomingPayment extends \OpenPayments\OpenApi\Generated\ResourceServer\
     {
         return ['Accept' => ['application/json']];
     }
-    protected function getHeadersOptionsResolver(): \Symfony\Component\OptionsResolver\OptionsResolver
-    {
-        $optionsResolver = parent::getHeadersOptionsResolver();
-        $optionsResolver->setDefined(['Signature-Input', 'Signature']);
-        $optionsResolver->setRequired([]);
-        $optionsResolver->setDefaults([]);
-        $optionsResolver->addAllowedTypes('Signature-Input', ['string']);
-        $optionsResolver->addAllowedTypes('Signature', ['string']);
-        return $optionsResolver;
-    }
+    // protected function getHeadersOptionsResolver(): \Symfony\Component\OptionsResolver\OptionsResolver
+    // {
+    //     $optionsResolver = parent::getHeadersOptionsResolver();
+    //     $optionsResolver->setDefined(['Signature-Input', 'Signature']);
+    //     $optionsResolver->setRequired([]);
+    //     $optionsResolver->setDefaults([]);
+    //     $optionsResolver->addAllowedTypes('Signature-Input', ['string']);
+    //     $optionsResolver->addAllowedTypes('Signature', ['string']);
+    //     return $optionsResolver;
+    // }
     /**
      * {@inheritdoc}
      *
@@ -60,7 +60,7 @@ class GetIncomingPayment extends \OpenPayments\OpenApi\Generated\ResourceServer\
         $status = $response->getStatusCode();
         $body = (string) $response->getBody();
         if (is_null($contentType) === false && (200 === $status && mb_strpos($contentType, 'application/json') !== false)) {
-            return json_decode($body);
+            return json_decode($body, true);
         }
         if (401 === $status) {
             throw new \OpenPayments\OpenApi\Generated\ResourceServer\Exception\GetIncomingPaymentUnauthorizedException($response);
