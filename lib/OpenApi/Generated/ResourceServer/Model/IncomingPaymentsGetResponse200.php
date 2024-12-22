@@ -29,6 +29,13 @@ class IncomingPaymentsGetResponse200 extends \ArrayObject
      *
      * @return PageInfo
      */
+
+    public function __construct(array $data = [])
+    {
+        $this->pagination = $data['pagination'] ?? '';
+        $this->result = $data['result'] ?? '';
+        $this->initialized = $this->initialized + array_fill_keys(array_keys($data), true);
+    }
     public function getPagination(): PageInfo
     {
         return $this->pagination;
@@ -67,5 +74,12 @@ class IncomingPaymentsGetResponse200 extends \ArrayObject
         $this->initialized['result'] = true;
         $this->result = $result;
         return $this;
+    }
+    public function toArray()
+    {
+        return [
+            'pagination' => $this->pagination,
+            'result' => $this->result
+        ];
     }
 }

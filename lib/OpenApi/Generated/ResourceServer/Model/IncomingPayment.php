@@ -66,6 +66,19 @@ class IncomingPayment extends \ArrayObject
      * @var \DateTime
      */
     protected $updatedAt;
+
+    public function __construct(array $data = [])
+    {
+        $this->id = $data['id'] ?? null;
+        $this->walletAddress = $data['walletAddress'] ?? null;
+        $this->completed = $data['completed'] ?? false;
+        $this->incomingAmount = isset($data['incomingAmount']) ? new IncomingPaymentIncomingAmount($data['incomingAmount']) : null;
+        $this->receivedAmount = isset($data['receivedAmount']) ? new IncomingPaymentIncomingAmount($data['receivedAmount']) : null;
+        $this->expiresAt = \DateTime::createFromFormat('Y-m-d\TH:i:s.v\Z', $data['expiresAt']) ?? null;
+        $this->metadata = $data['metadata'] ?? null;
+        $this->createdAt = \DateTime::createFromFormat('Y-m-d\TH:i:s.v\Z', $data['createdAt']) ?? null;
+        $this->updatedAt = \DateTime::createFromFormat('Y-m-d\TH:i:s.v\Z', $data['updatedAt']) ?? null;
+    }
     /**
      * The URL identifying the incoming payment.
      *
@@ -263,5 +276,19 @@ class IncomingPayment extends \ArrayObject
         $this->initialized['updatedAt'] = true;
         $this->updatedAt = $updatedAt;
         return $this;
+    }
+    public function toArray()
+    {
+        return array_filter([
+            'id' => $this->id,
+            'walletAddress' => $this->walletAddress,
+            'completed' => $this->completed,
+            'incomingAmount' => $this->incomingAmount ? $this->incomingAmount->toArray() : null,
+            'receivedAmount' => $this->receivedAmount ? $this->receivedAmount->toArray() : null,
+            'expiresAt' => $this->expiresAt ? $this->expiresAt->format('Y-m-d\TH:i:s.v\Z') : null,
+            'metadata' => $this->metadata,
+            'createdAt' => $this->createdAt ? $this->createdAt->format('Y-m-d\TH:i:s.v\Z') : null,
+            'updatedAt' => $this->updatedAt ? $this->updatedAt->format('Y-m-d\TH:i:s.v\Z') : null,
+        ]);
     }
 }

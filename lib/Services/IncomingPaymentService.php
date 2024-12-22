@@ -14,12 +14,13 @@ use OpenPayments\OpenApi\Generated\ResourceServer\Model\IncomingPaymentIncomingA
 use OpenPayments\OpenApi\Generated\ResourceServer\Model\IncomingPaymentWithMethods;
 use OpenPayments\OpenApi\Generated\ResourceServer\Model\IncomingPaymentsGetResponse200 as IncomingPaymentPaginationResult;
 use OpenPayments\Models\IncomingPaymentWithPaymentMethods;
-use OpenPayments\Models\PaginationResult;
+
 use OpenPayments\OpenApi\Generated\ResourceServer\Exception\{
     GetIncomingPaymentUnauthorizedException,
     GetIncomingPaymentForbiddenException,
     GetIncomingPaymentNotFoundException,
-    ListIncomingPaymentsUnauthorizedException,
+    CompleteIncomingPaymentNotFoundException,
+    CompleteIncomingPaymentConflictException,
     ListIncomingPaymentsForbiddenException,
     CreateIncomingPaymentUnauthorizedException,
     CreateIncomingPaymentForbiddenException
@@ -53,12 +54,13 @@ class IncomingPaymentService implements IncomingPaymentRoutes
      *
      * @param string $url The identifier of the incoming payment.
      * @param bool|null $returnArray
-     * @return IncomingPaymentWithPaymentMethods|array
+     * @return IncomingPaymentWithMethods|array
      * @throws GetIncomingPaymentUnauthorizedException
      * @throws GetIncomingPaymentForbiddenException
      * @throws GetIncomingPaymentNotFoundException
+     * @throws CompleteIncomingPaymentNotFoundException
      */
-    public function get(string $url, ?bool $returnArray = false): array|IncomingPaymentWithPaymentMethods
+    public function get(string $url, ?bool $returnArray = false): array|IncomingPaymentWithMethods
     {
         $id = $this->getIncomingPaymentIdFromUrl($url);
 
@@ -66,7 +68,7 @@ class IncomingPaymentService implements IncomingPaymentRoutes
 
         $this->validator->validateResponse($response);
 
-        return new IncomingPaymentWithPaymentMethods($response);
+        return new IncomingPaymentWithMethods($response);
        
     }
     /**
@@ -136,6 +138,7 @@ class IncomingPaymentService implements IncomingPaymentRoutes
      * @throws CompleteIncomingPaymentUnauthorizedException
      * @throws CompleteIncomingPaymentForbiddenException
      * @throws CompleteIncomingPaymentNotFoundException
+     * @throws CompleteIncomingPaymentConflictException
      */
     public function complete(string $url, ?bool $returnArray = false): IncomingPayment
     {
@@ -145,7 +148,7 @@ class IncomingPaymentService implements IncomingPaymentRoutes
         if($returnArray) {
             return $response;
         }
-        return new IncomingPaymentWithMethods($response);
+        return new IncomingPayment($response);
        
     }
 
@@ -153,14 +156,11 @@ class IncomingPaymentService implements IncomingPaymentRoutes
         array $queryParams,
         ?bool $returnArray = false
     ): IncomingPaymentPaginationResult {
+        $response = $this->openApiClient->listIncomingPayments([
+            'wallet-address' => $queryParams['wallet-address'] ?? null,
+        ]);
 
-            $queryParams = $pagination ?? [];
-            $response = $this->openApiClient->listIncomingPayments([
-                'wallet-address' => $queryParams['wallet-address'] ?? null,
-                'headers' => $queryParams['wallet-address'] ?? null,
-            ]);
-
-            return new IncomingPaymentPaginationResult($response);
+        return new IncomingPaymentPaginationResult($response);
 
     }
 }

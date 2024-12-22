@@ -323,7 +323,8 @@ class OutgoingPayment
     /**
      * @return array
      */
-    public function toArray(){
+    public function toArray(): array
+    {
 
         // TODO: Implement toArray() method to return dinamycally only properties that are set
         $arry = [];
@@ -361,17 +362,6 @@ class OutgoingPayment
             $arry['updatedAt'] = $this->updatedAt->format("Y-m-d\TH:i:s.v\Z");
         }
         return $arry;
-        // return [
-        //     'id' => $this->id,
-        //     'walletAddress' => $this->walletAddress,
-        //     'quoteId' => $this->quoteId,
-        //     'failed' => $this->failed,
-        //     'receiver' => $this->receiver,
-        //     'receiveAmount' => $this->receiveAmount->toArray(),
-        //     'debitAmount' => $this->debitAmount->toArray(),
-        //     'sentAmount' => $this->sentAmount->toArray(),
-        //     'metadata' => $this->metadata,
-        //     'createdAt' => $this->createdAt->format("Y-m-d\TH:i:s.v\Z"),
-        //     'updatedAt' => $this->updatedAt->format("Y-m-d\TH:i:s.v\Z")
-        // ];
+    }
+    
 }

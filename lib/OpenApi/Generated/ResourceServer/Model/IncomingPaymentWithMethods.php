@@ -97,7 +97,7 @@ class IncomingPaymentWithMethods extends \ArrayObject
                 return new IlpPaymentMethod($methods);
             }, $data['methods']);
         }
-
+        $this->initialized = $this->initialized + array_fill_keys(array_keys($data), true);
     }
     public function getId(): string
     {

@@ -21,7 +21,7 @@ class Client extends \OpenPayments\OpenApi\Generated\ResourceServer\Runtime\Clie
      * @throws \OpenPayments\OpenApi\Generated\ResourceServer\Exception\ListIncomingPaymentsUnauthorizedException
      * @throws \OpenPayments\OpenApi\Generated\ResourceServer\Exception\ListIncomingPaymentsForbiddenException
      *
-     * @return null|\OpenPayments\OpenApi\Generated\ResourceServer\Model\IncomingPaymentsGetResponse200|\Psr\Http\Message\ResponseInterface
+     * @return null|array|\OpenPayments\OpenApi\Generated\ResourceServer\Model\IncomingPaymentsGetResponse200|\Psr\Http\Message\ResponseInterface
      */
     public function listIncomingPayments(array $queryParameters = [], array $headerParameters = [], string $fetch = self::FETCH_OBJECT)
     {

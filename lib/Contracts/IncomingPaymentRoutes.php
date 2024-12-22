@@ -8,7 +8,6 @@ use OpenPayments\OpenApi\Generated\ResourceServer\Model\PublicIncomingPayment;
 use OpenPayments\OpenApi\Generated\ResourceServer\Model\IncomingPayment;
 use OpenPayments\OpenApi\Generated\ResourceServer\Model\IncomingPaymentWithMethods;
 use OpenPayments\OpenApi\Generated\ResourceServer\Model\IncomingPaymentsGetResponse200 as IncomingPaymentPaginationResult;
-use OpenPayments\Models\IncomingPaymentWithPaymentMethods;
 
 use OpenPayments\Models\PaginationResult;
 
@@ -19,9 +18,9 @@ interface IncomingPaymentRoutes
      *
      * @param string $url
      * @param string|null $accessToken
-     * @return array|IncomingPaymentWithPaymentMethods
+     * @return array|IncomingPaymentWithMethods
      */
-    public function get(string $url, ?bool $returnArray = false): array|IncomingPaymentWithPaymentMethods;
+    public function get(string $url, ?bool $returnArray = false): array|IncomingPaymentWithMethods;
 
     /**
      * Get a public incoming payment by URL.
@@ -36,7 +35,7 @@ interface IncomingPaymentRoutes
      *
      * @param array $incomingPaymentRequest
      * @param string|null $accessToken
-     * @return array|IncomingPaymentWithPaymentMethods
+     * @return array|IncomingPaymentWithMethods
      */
     public function create( array $incomingPaymentRequest, ?bool $returnArray = false): array|IncomingPaymentWithMethods;
 

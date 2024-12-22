@@ -52,6 +52,7 @@ class CompleteIncomingPayment extends \OpenPayments\OpenApi\Generated\ResourceSe
      * @throws \OpenPayments\OpenApi\Generated\ResourceServer\Exception\CompleteIncomingPaymentUnauthorizedException
      * @throws \OpenPayments\OpenApi\Generated\ResourceServer\Exception\CompleteIncomingPaymentForbiddenException
      * @throws \OpenPayments\OpenApi\Generated\ResourceServer\Exception\CompleteIncomingPaymentNotFoundException
+     * @throws \OpenPayments\OpenApi\Generated\ResourceServer\Exception\CompleteIncomingPaymentConflictException
      *
      * @return null|\OpenPayments\OpenApi\Generated\ResourceServer\Model\IncomingPayment
      */
@@ -60,7 +61,7 @@ class CompleteIncomingPayment extends \OpenPayments\OpenApi\Generated\ResourceSe
         $status = $response->getStatusCode();
         $body = (string) $response->getBody();
         if (is_null($contentType) === false && (200 === $status && mb_strpos($contentType, 'application/json') !== false)) {
-            return json_decode($body);//$serializer->deserialize($body, 'OpenPayments\OpenApi\Generated\ResourceServer\Model\IncomingPayment', 'json');
+            return json_decode($body, true);
         }
         if (401 === $status) {
             throw new \OpenPayments\OpenApi\Generated\ResourceServer\Exception\CompleteIncomingPaymentUnauthorizedException($response);
@@ -70,6 +71,9 @@ class CompleteIncomingPayment extends \OpenPayments\OpenApi\Generated\ResourceSe
         }
         if (404 === $status) {
             throw new \OpenPayments\OpenApi\Generated\ResourceServer\Exception\CompleteIncomingPaymentNotFoundException($response);
+        }
+        if (409 === $status) {
+            throw new \OpenPayments\OpenApi\Generated\ResourceServer\Exception\CompleteIncomingPaymentConflictException($response);
         }
     }
     public function getAuthenticationScopes(): array
