@@ -1,6 +1,6 @@
 <?php
 
-namespace OpenPayments\DTO\ResourceRequest;
+namespace OpenPayments\Models;
 
 class Amount
 {   

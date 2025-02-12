@@ -9,7 +9,6 @@ require_once __DIR__ . '/../vendor/autoload.php';
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
-use GuzzleHttp\Psr7\Utils;
 use Psr\Http\Message\RequestInterface;
 
 use Nyholm\Psr7\Factory\Psr17Factory;
@@ -18,8 +17,6 @@ use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Encoder\JsonEncode;
 use Symfony\Component\Serializer\Normalizer\ArrayDenormalizer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
-use Monolog\Logger;
-use Monolog\Handler\StreamHandler;
 use OpenPayments\Contracts\AuthenticatedClientInterface;
 use OpenPayments\Config\Config;
 use OpenPayments\Contracts\WalletAddressRoutes;
@@ -60,11 +57,6 @@ class AuthenticatedClient implements AuthenticatedClientInterface
     public function __construct(Config $config)
     {
         $this->config = $config;
-
-        // Create a logger instance
-        $logger = new Logger('custom_logger');
-        $logger->pushHandler(new StreamHandler('php://stdout'));
-        
     }
     
     /**
