@@ -4,8 +4,7 @@
 namespace OpenPayments\Services;
 
 use OpenPayments\Contracts\OutgoingPaymentRoutes;
-use OpenPayments\OpenApi\Generated\ResourceServer\Model\OutgoingPayment;
-use OpenPayments\OpenApi\Generated\ResourceServer\Model\OutgoingPaymentWithSpentAmounts;
+use OpenPayments\Models\OutgoingPayment;
 use OpenPayments\OpenApi\Generated\ResourceServer\Model\OutgoingPaymentsGetResponse200 as OutgoingPaymentPaginationResult;
 use OpenPayments\OpenApi\Generated\ResourceServer\Exception\{
     GetOutgoingPaymentUnauthorizedException,
@@ -43,7 +42,14 @@ class OutgoingPaymentService implements OutgoingPaymentRoutes
      */
     public function get(string $id, array $headerParameters): OutgoingPayment
     {
-        return $this->openApiClient->getOutgoingPayment($id, $headerParameters);
+        $response =  $this->openApiClient->getOutgoingPayment($id, $headerParameters);
+
+        if (is_array($response)) {
+            $this->validator->validateResponse($response);
+            return new OutgoingPayment($response);
+        } else {
+            throw new \UnexpectedValueException('Unexpected response type '.gettype($response).' '.print_r($response, true));
+        }
     }
 
     /**
@@ -65,13 +71,25 @@ class OutgoingPaymentService implements OutgoingPaymentRoutes
      *
      * @param mixed $requestBody The body of the request for creating an outgoing payment.
      * @param array $headerParameters Headers including `Signature-Input` and `Signature`.
-     * @return OutgoingPaymentWithSpentAmounts|ResponseInterface|array|null
+     * @return OutgoingPayment|array|null
      * @throws CreateOutgoingPaymentUnauthorizedException
      * @throws CreateOutgoingPaymentForbiddenException
+     * @throws ValidationException
+     * @throws \UnexpectedValueException
      */
-    public function create($requestBody, array $headerParameters): array|OutgoingPaymentWithSpentAmounts
+    public function create(
+        $requestBody, 
+        array $headerParameters
+    ): array|OutgoingPayment
     {
         $this->validator->validateRequest($requestBody);
-        return $this->openApiClient->createOutgoingPayment($requestBody, $headerParameters);
+        $response = $this->openApiClient->createOutgoingPayment($requestBody, $headerParameters);
+
+        if (is_array($response)) {
+            $this->validator->validateResponse($response);
+            return new OutgoingPayment($response);
+        } else {
+            throw new \UnexpectedValueException('Unexpected response type '.gettype($response).' '.print_r($response, true));
+        }
     }
 }

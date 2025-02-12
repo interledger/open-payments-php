@@ -60,15 +60,17 @@ class IncomingPaymentService implements IncomingPaymentRoutes
      * @throws GetIncomingPaymentNotFoundException
      * @throws CompleteIncomingPaymentNotFoundException
      */
-    public function get(string $url, ?bool $returnArray = false): array|IncomingPaymentWithMethods
+    public function get(string $url): IncomingPaymentWithMethods
     {
         $id = $this->getIncomingPaymentIdFromUrl($url);
 
         $response = $this->openApiClient->getIncomingPayment($id);
-
-        $this->validator->validateResponse($response);
-
-        return new IncomingPaymentWithMethods($response);
+        if(is_array($response)) {
+            $this->validator->validateResponse($response);
+            return new IncomingPaymentWithMethods($response);
+        } else {
+            throw new \UnexpectedValueException('Unexpected response type '.gettype($response).' '.print_r($response, true));
+        }
        
     }
     /**
@@ -81,15 +83,16 @@ class IncomingPaymentService implements IncomingPaymentRoutes
      * @throws GetIncomingPaymentForbiddenException
      * @throws GetIncomingPaymentNotFoundException
      */
-    public function getPublic(string $url, ?bool $returnArray = false): array|PublicIncomingPayment
+    public function getPublic(string $url): PublicIncomingPayment
     {
        
         $response = $this->openApiClient->getIncomingPayment($url);
-
-        if($returnArray) {
-            return $response;
+        if(is_array($response)) {
+            $this->validator->validateResponse($response);
+            return new PublicIncomingPayment($response, 200);
+        } else {
+            throw new \UnexpectedValueException('Unexpected response type '.gettype($response).' '.print_r($response, true));
         }
-        return new PublicIncomingPayment($response, 200);
 
     }
 
@@ -98,14 +101,15 @@ class IncomingPaymentService implements IncomingPaymentRoutes
      *
      * @param array $incomingPaymentRequest The incoming payment request.
      * @param bool|null $returnArray
-     * @return IncomingPaymentWithMethods|array
+     * @return IncomingPaymentWithPaymentMethods|array
      * @throws CreateIncomingPaymentUnauthorizedException
      * @throws CreateIncomingPaymentForbiddenException
+     * @throws ValidationException
+     * @throws \UnexpectedValueException
      */
     public function create(
-        array $incomingPaymentRequest,
-        ?bool $returnArray = false
-    ): array|IncomingPaymentWithMethods {
+        array $incomingPaymentRequest
+    ): IncomingPaymentWithPaymentMethods {
        
         $this->validator->validateRequest($incomingPaymentRequest);
 
@@ -118,15 +122,14 @@ class IncomingPaymentService implements IncomingPaymentRoutes
 
         $createIPArgs->setExpiresAt($incomingPaymentRequest['expiresAt'] ?? (new \DateTime())
             ->add(new \DateInterval('PT10M'))->format("Y-m-d\TH:i:s.v\Z"));
-        $payment = $this->openApiClient->createIncomingPayment($createIPArgs);
+        $response = $this->openApiClient->createIncomingPayment($createIPArgs);
 
-        $this->validator->validateResponse($payment);
-
-        if($returnArray) {
-            return $payment;
+        if(is_array($response)) {
+            $this->validator->validateResponse($response);
+            return new IncomingPaymentWithPaymentMethods($response);
+        } else {
+            throw new \UnexpectedValueException('Unexpected response type '.gettype($response).' '.print_r($response, true));
         }
-        return new IncomingPaymentWithMethods($payment);
-        
     }
 
     /**
@@ -140,21 +143,18 @@ class IncomingPaymentService implements IncomingPaymentRoutes
      * @throws CompleteIncomingPaymentNotFoundException
      * @throws CompleteIncomingPaymentConflictException
      */
-    public function complete(string $url, ?bool $returnArray = false): IncomingPayment
+    public function complete(string $url): IncomingPayment
     {
         $id = $this->getIncomingPaymentIdFromUrl($url);
-        //CompleteIncomingPayment
+       
         $response = $this->openApiClient->completeIncomingPayment($id);
-        if($returnArray) {
-            return $response;
-        }
+        
         return new IncomingPayment($response);
        
     }
 
     public function list(
-        array $queryParams,
-        ?bool $returnArray = false
+        array $queryParams
     ): IncomingPaymentPaginationResult {
         $response = $this->openApiClient->listIncomingPayments([
             'wallet-address' => $queryParams['wallet-address'] ?? null,

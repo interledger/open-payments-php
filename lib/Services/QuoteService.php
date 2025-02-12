@@ -2,12 +2,8 @@
 
 namespace OpenPayments\Services;
 
-
-use JsonSchema\Validator;
-use JsonSchema\Constraints\Constraint;
-
 use OpenPayments\Contracts\QuoteRoutes;
-use OpenPayments\OpenApi\Generated\ResourceServer\Model\Quote;
+use OpenPayments\Models\Quote;
 use OpenPayments\OpenApi\Generated\ResourceServer\Exception\{
     GetQuoteUnauthorizedException,
     GetQuoteForbiddenException,
@@ -17,18 +13,22 @@ use OpenPayments\OpenApi\Generated\ResourceServer\Exception\{
     CreateQuoteForbiddenException
 };
 use OpenPayments\OpenApi\Generated\ResourceServer\Client as OpenApiResourceServerClient;
+use OpenPayments\Validators\QuoteValidator;
+use OpenPayments\Exceptions\ValidationException;
 use Psr\Http\Message\ResponseInterface;
 
 class QuoteService implements QuoteRoutes
 {
   private OpenApiResourceServerClient $openApiClient;
-  private Validator $validator;
+  private QuoteValidator $validator;
 
-    public function __construct(OpenApiResourceServerClient $httpClient)
+    public function __construct(
+        OpenApiResourceServerClient $httpClient,
+        QuoteValidator $validator)
     {
         $this->openApiClient = $httpClient;
 
-        $this->validator = new Validator();
+        $this->validator = $validator;
     }
 
     /**
@@ -40,20 +40,16 @@ class QuoteService implements QuoteRoutes
      * @throws GetQuoteUnauthorizedException
      * @throws GetQuoteForbiddenException
      * @throws GetQuoteNotFoundException
+     * @throws ValidationException
      */
-    public function get(string $id, array $headerParameters): Quote
+    public function get(string $id, ?bool $returnArray = false): Quote
     {
-        $response = $this->openApiClient->getQuote($id, $headerParameters);
+        $response = $this->openApiClient->getQuote($id);
+
+        $this->validator->validateResponse($response);
+
         if (is_array($response)) {
-            // Assuming the array contains the necessary data to create a Quote object
             return new Quote($response);
-        } elseif ($response instanceof Quote) {
-            return $response;
-        } elseif ($response instanceof ResponseInterface) {
-            // Handle the response, e.g., decode JSON body
-            $responseBody = $response->getBody()->getContents();
-            $data = json_decode($responseBody, true);
-            return new Quote($data);
         } else {
             throw new \UnexpectedValueException('Unexpected response type');
         }
@@ -68,28 +64,18 @@ class QuoteService implements QuoteRoutes
      * @throws CreateQuoteBadRequestException
      * @throws CreateQuoteUnauthorizedException
      * @throws CreateQuoteForbiddenException
+     * @throws ValidationException
      */
-    public function create($requestBody, ?string $accessToken = null): Quote
+    public function create($requestBody, ?bool $returnArray = false): Quote
     {
-        // $data = json_decode($requestBody);
-        // $schema = json_decode($jsonSchema);
-        
-        //$this->validator->validate($data, $schema, Constraint::CHECK_MODE_APPLY_DEFAULTS);
-        
-
+        $this->validator->validateRequest($requestBody);
     
-        $response = $this->openApiClient->createQuote($requestBody);
+        $quote = $this->openApiClient->createQuote($requestBody);
+        echo "<pre>".print_r($quote, true)."</pre>";
+        $this->validator->validateResponse($quote);
 
-        if (is_array($response)) {
-            // Assuming the array contains the necessary data to create a Quote object
-            return new Quote($response);
-        } elseif ($response instanceof Quote) {
-            return $response;
-        } elseif ($response instanceof ResponseInterface) {
-            // Handle the response, e.g., decode JSON body
-            $responseBody = $response->getBody()->getContents();
-            $data = json_decode($responseBody, true);
-            return new Quote($data);
+        if (is_array($quote)) {
+            return new Quote($quote);
         } else {
             throw new \UnexpectedValueException('Unexpected response type');
         }
