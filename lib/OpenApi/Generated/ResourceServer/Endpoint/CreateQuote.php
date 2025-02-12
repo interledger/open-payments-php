@@ -38,14 +38,7 @@ class CreateQuote extends \OpenPayments\OpenApi\Generated\ResourceServer\Runtime
     {
         return ['Accept' => ['application/json']];
     }
-    // protected function getHeadersOptionsResolver(): \Symfony\Component\OptionsResolver\OptionsResolver
-    // {
-    //     $optionsResolver = parent::getHeadersOptionsResolver();
-    //     $optionsResolver->setDefined(['Signature-Input', 'Signature']);
-    //     $optionsResolver->setRequired(['Signature-Input', 'Signature']);
-    //     $optionsResolver->setDefaults([]);
-    //     return $optionsResolver;
-    // }
+
     /**
      * {@inheritdoc}
      *
@@ -53,7 +46,7 @@ class CreateQuote extends \OpenPayments\OpenApi\Generated\ResourceServer\Runtime
      * @throws \OpenPayments\OpenApi\Generated\ResourceServer\Exception\CreateQuoteUnauthorizedException
      * @throws \OpenPayments\OpenApi\Generated\ResourceServer\Exception\CreateQuoteForbiddenException
      *
-     * @return null|\OpenPayments\OpenApi\Generated\ResourceServer\Model\Quote
+     * @return null|array|\OpenPayments\OpenApi\Generated\ResourceServer\Model\Quote
      */
     protected function transformResponseBody(\Psr\Http\Message\ResponseInterface $response, \Symfony\Component\Serializer\SerializerInterface $serializer, ?string $contentType = null)
     {
@@ -61,7 +54,7 @@ class CreateQuote extends \OpenPayments\OpenApi\Generated\ResourceServer\Runtime
         $body = (string) $response->getBody();
         if (is_null($contentType) === false && (201 === $status && mb_strpos($contentType, 'application/json') !== false)) {
             
-            return json_decode($body, true);//$serializer->deserialize($body, 'OpenPayments\OpenApi\Generated\ResourceServer\Model\Quote', 'json');
+            return json_decode($body, true);
         }
         if (400 === $status) {
             throw new \OpenPayments\OpenApi\Generated\ResourceServer\Exception\CreateQuoteBadRequestException($response);

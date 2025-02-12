@@ -35,7 +35,7 @@ class CreateIncomingPayment extends \OpenPayments\OpenApi\Generated\ResourceServ
     public function getBody(\Symfony\Component\Serializer\SerializerInterface $serializer, $streamFactory = null): array
     {
         if ($this->body instanceof \OpenPayments\OpenApi\Generated\ResourceServer\Model\IncomingPaymentsPostBody) {
-            $json = json_encode($this->body->toArray(),JSON_UNESCAPED_SLASHES);//, JSON_PRETTY_PRINT);
+            $json = json_encode($this->body->toArray(),JSON_UNESCAPED_SLASHES);
             $headers = ['Content-Type' => ['application/json']];
             return [$headers, $json];
         }
@@ -45,14 +45,7 @@ class CreateIncomingPayment extends \OpenPayments\OpenApi\Generated\ResourceServ
     {
         return ['Accept' => ['application/json']];
     }
-    // protected function getHeadersOptionsResolver(): \Symfony\Component\OptionsResolver\OptionsResolver
-    // {
-    //     $optionsResolver = parent::getHeadersOptionsResolver();
-    //     $optionsResolver->setDefined(['Signature-Input', 'Signature']);
-    //     $optionsResolver->setRequired(['Signature-Input', 'Signature']);
-    //     $optionsResolver->setDefaults([]);
-    //     return $optionsResolver;
-    // }
+ 
     /**
      * {@inheritdoc}
      *
@@ -66,7 +59,7 @@ class CreateIncomingPayment extends \OpenPayments\OpenApi\Generated\ResourceServ
         $status = $response->getStatusCode();
         $body = (string) $response->getBody();
         if (is_null($contentType) === false && (201 === $status && mb_strpos($contentType, 'application/json') !== false)) {
-            return json_decode($body, true);//$serializer->deserialize($body, 'OpenPayments\OpenApi\Generated\ResourceServer\Model\IncomingPaymentWithMethods', 'json');
+            return json_decode($body, true);
         }
         if (401 === $status) {
             throw new \OpenPayments\OpenApi\Generated\ResourceServer\Exception\CreateIncomingPaymentUnauthorizedException($response);

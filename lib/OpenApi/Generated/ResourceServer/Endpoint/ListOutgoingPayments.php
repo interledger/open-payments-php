@@ -52,28 +52,21 @@ class ListOutgoingPayments extends \OpenPayments\OpenApi\Generated\ResourceServe
         $optionsResolver->addAllowedTypes('last', ['int']);
         return $optionsResolver;
     }
-    // protected function getHeadersOptionsResolver(): \Symfony\Component\OptionsResolver\OptionsResolver
-    // {
-    //     $optionsResolver = parent::getHeadersOptionsResolver();
-    //     $optionsResolver->setDefined(['Signature-Input', 'Signature']);
-    //     $optionsResolver->setRequired(['Signature-Input', 'Signature']);
-    //     $optionsResolver->setDefaults([]);
-    //     return $optionsResolver;
-    // }
+   
     /**
      * {@inheritdoc}
      *
      * @throws \OpenPayments\OpenApi\Generated\ResourceServer\Exception\ListOutgoingPaymentsUnauthorizedException
      * @throws \OpenPayments\OpenApi\Generated\ResourceServer\Exception\ListOutgoingPaymentsForbiddenException
      *
-     * @return null|\OpenPayments\OpenApi\Generated\ResourceServer\Model\OutgoingPaymentsGetResponse200
+     * @return null|array|\OpenPayments\OpenApi\Generated\ResourceServer\Model\OutgoingPaymentsGetResponse200
      */
     protected function transformResponseBody(\Psr\Http\Message\ResponseInterface $response, \Symfony\Component\Serializer\SerializerInterface $serializer, ?string $contentType = null)
     {
         $status = $response->getStatusCode();
         $body = (string) $response->getBody();
         if (is_null($contentType) === false && (200 === $status && mb_strpos($contentType, 'application/json') !== false)) {
-            return json_decode($body);//$serializer->deserialize($body, 'OpenPayments\OpenApi\Generated\ResourceServer\Model\OutgoingPaymentsGetResponse200', 'json');
+            return json_decode($body, true);
         }
         if (401 === $status) {
             throw new \OpenPayments\OpenApi\Generated\ResourceServer\Exception\ListOutgoingPaymentsUnauthorizedException($response);

@@ -318,19 +318,28 @@ class IncomingPaymentWithMethods extends \ArrayObject
      * @return array
      */
     public function toArray(){
-        return [
+        $data = [
             'id' => $this->id,
             'walletAddress' => $this->walletAddress,
             'completed' => $this->completed,
-            'incomingAmount' => $this->incomingAmount->toArray(),
-            'receivedAmount' => $this->receivedAmount->toArray(),
-            'expiresAt' => $this->expiresAt,
-            'metadata' => $this->metadata,
-            'createdAt' => $this->createdAt,
-            'updatedAt' => $this->updatedAt,
-            'methods' => array_map(function($methods) {
-                return $methods->toArray();
-            }, $this->methods)
         ];
+        if($this->incomingAmount){
+            $data['incomingAmount'] = $this->incomingAmount->toArray();
+        }
+        
+        $data['receivedAmount'] = $this->receivedAmount->toArray();
+        
+        if($this->expiresAt){
+            $data['expiresAt'] = $this->expiresAt;
+        }
+        if($this->metadata){
+            $data['metadata'] = $this->metadata;
+        }
+        $data['createdAt'] = $this->createdAt;
+        $data['updatedAt'] = $this->updatedAt;
+        $data['methods'] = array_map(function($methods) {
+                return $methods->toArray();
+            }, $this->methods);
+        return $data;
     }
 }

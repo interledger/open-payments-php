@@ -72,7 +72,7 @@ class Client extends \OpenPayments\OpenApi\Generated\ResourceServer\Runtime\Clie
      * @throws \OpenPayments\OpenApi\Generated\ResourceServer\Exception\ListOutgoingPaymentsUnauthorizedException
      * @throws \OpenPayments\OpenApi\Generated\ResourceServer\Exception\ListOutgoingPaymentsForbiddenException
      *
-     * @return null|\OpenPayments\OpenApi\Generated\ResourceServer\Model\OutgoingPaymentsGetResponse200|\Psr\Http\Message\ResponseInterface
+     * @return null|array|\OpenPayments\OpenApi\Generated\ResourceServer\Model\OutgoingPaymentsGetResponse200|\Psr\Http\Message\ResponseInterface
      */
     public function listOutgoingPayments(array $queryParameters = [], array $headerParameters = [], string $fetch = self::FETCH_OBJECT)
     {
@@ -92,7 +92,7 @@ class Client extends \OpenPayments\OpenApi\Generated\ResourceServer\Runtime\Clie
     * @throws \OpenPayments\OpenApi\Generated\ResourceServer\Exception\CreateOutgoingPaymentUnauthorizedException
     * @throws \OpenPayments\OpenApi\Generated\ResourceServer\Exception\CreateOutgoingPaymentForbiddenException
     *
-    * @return null|\OpenPayments\OpenApi\Generated\ResourceServer\Model\OutgoingPaymentWithSpentAmounts|\Psr\Http\Message\ResponseInterface
+    * @return null|array|\OpenPayments\OpenApi\Generated\ResourceServer\Model\OutgoingPaymentWithSpentAmounts|\Psr\Http\Message\ResponseInterface
     */
     public function createOutgoingPayment($requestBody, array $headerParameters = [], string $fetch = self::FETCH_OBJECT)
     {
@@ -111,7 +111,7 @@ class Client extends \OpenPayments\OpenApi\Generated\ResourceServer\Runtime\Clie
      * @throws \OpenPayments\OpenApi\Generated\ResourceServer\Exception\CreateQuoteUnauthorizedException
      * @throws \OpenPayments\OpenApi\Generated\ResourceServer\Exception\CreateQuoteForbiddenException
      *
-     * @return null|\OpenPayments\OpenApi\Generated\ResourceServer\Model\Quote|\Psr\Http\Message\ResponseInterface
+     * @return null|array|\OpenPayments\OpenApi\Generated\ResourceServer\Model\Quote|\Psr\Http\Message\ResponseInterface
      */
     public function createQuote($requestBody, array $headerParameters = [], string $fetch = self::FETCH_OBJECT)
     {
@@ -170,7 +170,7 @@ class Client extends \OpenPayments\OpenApi\Generated\ResourceServer\Runtime\Clie
      * @throws \OpenPayments\OpenApi\Generated\ResourceServer\Exception\GetOutgoingPaymentForbiddenException
      * @throws \OpenPayments\OpenApi\Generated\ResourceServer\Exception\GetOutgoingPaymentNotFoundException
      *
-     * @return null|\OpenPayments\OpenApi\Generated\ResourceServer\Model\OutgoingPayment|\Psr\Http\Message\ResponseInterface
+     * @return null|array|\OpenPayments\OpenApi\Generated\ResourceServer\Model\OutgoingPayment|\Psr\Http\Message\ResponseInterface
      */
     public function getOutgoingPayment(string $id, array $headerParameters = [], string $fetch = self::FETCH_OBJECT)
     {
@@ -189,7 +189,7 @@ class Client extends \OpenPayments\OpenApi\Generated\ResourceServer\Runtime\Clie
      * @throws \OpenPayments\OpenApi\Generated\ResourceServer\Exception\GetQuoteForbiddenException
      * @throws \OpenPayments\OpenApi\Generated\ResourceServer\Exception\GetQuoteNotFoundException
      *
-     * @return null|\OpenPayments\OpenApi\Generated\ResourceServer\Model\Quote|\Psr\Http\Message\ResponseInterface
+     * @return null|array|\OpenPayments\OpenApi\Generated\ResourceServer\Model\Quote|\Psr\Http\Message\ResponseInterface
      */
     public function getQuote(string $id, array $headerParameters = [], string $fetch = self::FETCH_OBJECT)
     {
