@@ -1,11 +1,9 @@
 <?php
 
 namespace OpenPayments\DTO\ResourceRequest;
-use OpenPayments\Traits\ArraySerializableTrait;
-
+use OpenPayments\Models\Amount;
 class Limits
 {
-    use ArraySerializableTrait;
 
     public ?string $receiver;
     public ?Amount $debitAmount;

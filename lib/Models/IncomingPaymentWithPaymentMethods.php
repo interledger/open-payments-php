@@ -2,49 +2,53 @@
 
 namespace OpenPayments\Models;
 
-use OpenPayments\OpenApi\Generated\ResourceServer\Model\IncomingPaymentWithMethods;
-use OpenPayments\OpenApi\Generated\ResourceServer\Model\IlpPaymentMethod;
-
-class IncomingPaymentWithPaymentMethods extends IncomingPaymentWithMethods
+use OpenPayments\Models\Amount;
+use OpenPayments\Traits\ArraySerializableTrait;
+class IncomingPaymentWithPaymentMethods
 {
+    use ArraySerializableTrait;
 
-    /**
-     * Constructor.
-     *
-     * @param array $data Associative array with payment data, including `methods`.
-     */
-    public function __construct(array $data)
+    public string $id;
+    public string $walletAddress;
+    public bool $completed;
+    public ?Amount $incomingAmount;
+    public ?Amount $receivedAmount;
+    public ?string $expiresAt;
+    public ?array $metadata;
+    public string $createdAt;
+    public string $updatedAt;
+    public ?array $methods;
+
+    public function __construct(array $payment)
     {
-        parent::__construct($data);
+        $this->id = $payment['id'] ?? '';
+        $this->walletAddress = $payment['walletAddress'] ?? '';
+        $this->completed = $payment['completed'] ?? false;
 
-        // Ensure 'methods' exists and is an array of PaymentMethod
-        if (!isset($data['methods']) || !is_array($data['methods'])) {
-            throw new \InvalidArgumentException('Missing or invalid methods');
-        }
-        
+        $this->incomingAmount = isset($payment['incomingAmount']) 
+            ? new Amount(
+                (string) $payment['incomingAmount']['value'],
+                (string) $payment['incomingAmount']['assetCode'],
+                (int) $payment['incomingAmount']['assetScale']
+            ) 
+            : null;
 
+        $this->receivedAmount = isset($payment['receivedAmount']) 
+            ? new Amount(
+                (string) $payment['receivedAmount']['value'],
+                (string) $payment['receivedAmount']['assetCode'],
+                (int) $payment['receivedAmount']['assetScale']
+            ) 
+            : null;
 
+        $this->expiresAt = $payment['expiresAt'] ?? null;
+        $this->metadata = $payment['metadata'] ?? [];
+        $this->createdAt = $payment['createdAt'] ?? '';
+        $this->updatedAt = $payment['updatedAt'] ?? '';
 
-    }
-
-    /**
-     * Get the payment methods.
-     *
-     * @return array<IlpPaymentMethod>
-     */
-    public function getMethods(): array
-    {
-        return $this->methods;
-    }
-
-    /**
-     * Add a payment method.
-     *
-     * @param IlpPaymentMethod $method
-     */
-    public function addMethod(IlpPaymentMethod $method): void
-    {
-        $this->methods[] = $method;
+        // Convert methods to IlpPaymentMethod objects
+        $this->methods = isset($payment['methods']) 
+            ? array_map(fn($method) => new IlpPaymentMethod($method), $payment['methods'])
+            : null;
     }
 }
-
