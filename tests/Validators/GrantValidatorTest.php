@@ -4,6 +4,7 @@ namespace Tests\Validators;
 
 use OpenPayments\Validators\GrantValidator;
 use PHPUnit\Framework\TestCase;
+use OpenPayments\Exceptions\ValidationException;
 
 class GrantValidatorTest extends TestCase
 {
@@ -44,7 +45,7 @@ class GrantValidatorTest extends TestCase
             'client' => 'not-a-url'
         ];
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(ValidationException::class);
         $validator->validateRequest($invalidData);
     }
 }

@@ -4,7 +4,7 @@ namespace Tests\Validators;
 
 use OpenPayments\Validators\IncomingPaymentValidator;
 use PHPUnit\Framework\TestCase;
-use RuntimeException;
+use OpenPayments\Exceptions\ValidationException;
 
 class IncomingPaymentValidatorTest extends TestCase
 {
@@ -44,7 +44,7 @@ class IncomingPaymentValidatorTest extends TestCase
             ]
         ];
 
-        $this->expectException(RuntimeException::class);
+        $this->expectException(ValidationException::class);
         $this->expectExceptionMessage("JSON validation failed");
 
         $this->validator->validateRequest($invalidData);
@@ -71,6 +71,17 @@ class IncomingPaymentValidatorTest extends TestCase
             "updatedAt" => "2022-04-01T10:24:36.11Z",
             "metadata" => [
                 "externalRef" => "INV2022-02-0137"
+            ],
+            "methods" => [
+                [
+                    "type" => "ilp",
+                    "destination" => "g.usd.ilpv4.dev.alice",
+                    "amount" => [
+                        "value" => "2500",
+                        "assetCode" => "USD",
+                        "assetScale" => 2
+                    ]
+                ]
             ]
         ];
 
@@ -85,7 +96,7 @@ class IncomingPaymentValidatorTest extends TestCase
             "completed" => "not-a-boolean", // Invalid type
         ];
 
-        $this->expectException(RuntimeException::class);
+        $this->expectException(ValidationException::class);
         $this->expectExceptionMessage("JSON validation failed");
 
         $this->validator->validateResponse($invalidData);

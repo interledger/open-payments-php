@@ -4,7 +4,7 @@ namespace Tests\Validators;
 
 use OpenPayments\Validators\OutgoingPaymentValidator;
 use PHPUnit\Framework\TestCase;
-use RuntimeException;
+use OpenPayments\Exceptions\ValidationException;
 
 class OutgoingPaymentValidatorTest extends TestCase
 {
@@ -52,7 +52,7 @@ class OutgoingPaymentValidatorTest extends TestCase
             "walletAddress" => null, // Missing required field
         ];
 
-        $this->expectException(RuntimeException::class);
+        $this->expectException(ValidationException::class);
         $this->expectExceptionMessage("JSON validation failed");
 
         $this->validator->validateResponse($invalidData);

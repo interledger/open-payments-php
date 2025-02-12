@@ -37,15 +37,21 @@
     "metadata": {
       "type": "object",
       "additionalProperties": true
+    },
+    "methods": { 
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
     }
   },
   "required": [
     "id",
     "walletAddress",
-    "incomingAmount",
     "receivedAmount",
     "completed",
     "createdAt",
-    "updatedAt"
+    "updatedAt",
+    "methods"
   ]
 }

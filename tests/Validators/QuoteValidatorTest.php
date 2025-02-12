@@ -4,7 +4,7 @@ namespace Tests\Validators;
 
 use OpenPayments\Validators\QuoteValidator;
 use PHPUnit\Framework\TestCase;
-use RuntimeException;
+use OpenPayments\Exceptions\ValidationException;
 
 class QuoteValidatorTest extends TestCase
 {
@@ -34,7 +34,7 @@ class QuoteValidatorTest extends TestCase
             "receiver" => "https://ilp.interledger-test.dev/incoming-payments/37a0d0ee-26dc-4c66-89e0-01fbf93156f7",
         ];
 
-        $this->expectException(RuntimeException::class);
+        $this->expectException(ValidationException::class);
         $this->expectExceptionMessage("JSON validation failed");
 
         $this->validator->validateRequest($invalidData);
@@ -71,7 +71,7 @@ class QuoteValidatorTest extends TestCase
             "method" => "unsupported-method" // Invalid enum value
         ];
 
-        $this->expectException(RuntimeException::class);
+        $this->expectException(ValidationException::class);
         $this->expectExceptionMessage("JSON validation failed");
 
         $this->validator->validateResponse($invalidData);
