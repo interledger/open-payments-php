@@ -9,7 +9,7 @@ use OpenPayments\OpenApi\Generated\ResourceServer\Model\IncomingPayment;
 use OpenPayments\OpenApi\Generated\ResourceServer\Model\IncomingPaymentWithMethods;
 use OpenPayments\OpenApi\Generated\ResourceServer\Model\IncomingPaymentsGetResponse200 as IncomingPaymentPaginationResult;
 
-use OpenPayments\Models\PaginationResult;
+use OpenPayments\Models\IncomingPaymentWithPaymentMethods;
 
 interface IncomingPaymentRoutes
 {
@@ -18,35 +18,35 @@ interface IncomingPaymentRoutes
      *
      * @param string $url
      * @param string|null $accessToken
-     * @return array|IncomingPaymentWithMethods
+     * @return IncomingPaymentWithMethods
      */
-    public function get(string $url, ?bool $returnArray = false): array|IncomingPaymentWithMethods;
+    public function get(string $url): IncomingPaymentWithMethods;
 
     /**
      * Get a public incoming payment by URL.
      *
      * @param string $url
-     * @return array|PublicIncomingPayment
+     * @return PublicIncomingPayment
      */
-    public function getPublic(string $url, ?bool $returnArray = false): array|PublicIncomingPayment;
+    public function getPublic(string $url): PublicIncomingPayment;
 
     /**
      * Create an incoming payment.
      *
      * @param array $incomingPaymentRequest
      * @param string|null $accessToken
-     * @return array|IncomingPaymentWithMethods
+     * @return IncomingPaymentWithPaymentMethods
      */
-    public function create( array $incomingPaymentRequest, ?bool $returnArray = false): array|IncomingPaymentWithMethods;
+    public function create( array $incomingPaymentRequest): IncomingPaymentWithPaymentMethods;
 
     /**
      * Complete an incoming payment.
      *
      * @param string $url
      * @param string|null $accessToken
-     * @return array|IncomingPayment
+     * @return IncomingPayment
      */
-    public function complete(string $url, ?bool $returnArray = false): array|IncomingPayment;
+    public function complete(string $url): IncomingPayment;
 
     /**
      * List incoming payments.
@@ -54,8 +54,8 @@ interface IncomingPaymentRoutes
      * @param array $queryParams
      * @param string|null $accessToken
      * @param array|null $pagination
-     * @return array|IncomingPaymentPaginationResult
+     * @return IncomingPaymentPaginationResult
      */
-    public function list(array $queryParams, ?bool $returnArray = false): array|IncomingPaymentPaginationResult;
+    public function list(array $queryParams): IncomingPaymentPaginationResult;
 }
 

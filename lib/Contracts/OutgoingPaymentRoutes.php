@@ -2,8 +2,7 @@
 
 namespace OpenPayments\Contracts;
 
-use OpenPayments\OpenApi\Generated\ResourceServer\Model\OutgoingPayment;
-use OpenPayments\OpenApi\Generated\ResourceServer\Model\OutgoingPaymentWithSpentAmounts;
+use OpenPayments\Models\OutgoingPayment;
 use OpenPayments\OpenApi\Generated\ResourceServer\Model\OutgoingPaymentsGetResponse200 as OutgoingPaymentPaginationResult;
 use Psr\Http\Message\ResponseInterface;
 
@@ -32,7 +31,7 @@ interface OutgoingPaymentRoutes
      *
      * @param mixed $requestBody The body of the request for creating an outgoing payment.
      * @param array $headerParameters Headers including `Signature-Input` and `Signature`.
-     * @return OutgoingPaymentWithSpentAmounts|ResponseInterface|array|null
+     * @return OutgoingPayment|ResponseInterface|array|null
      */
-    public function create($requestBody, array $headerParameters): array|OutgoingPaymentWithSpentAmounts;
+    public function create($requestBody, array $headerParameters): array|OutgoingPayment;
 }

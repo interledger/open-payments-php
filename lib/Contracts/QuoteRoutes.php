@@ -2,7 +2,7 @@
 
 namespace OpenPayments\Contracts;
 
-use OpenPayments\OpenApi\Generated\ResourceServer\Model\Quote;
+use OpenPayments\Models\Quote;
 use Psr\Http\Message\ResponseInterface;
 
 interface QuoteRoutes
@@ -14,7 +14,7 @@ interface QuoteRoutes
      * @param array $headerParameters The header parameters including `Signature-Input` and `Signature`.
      * @return Quote|ResponseInterface|null
      */
-    public function get(string $id, array $headerParameters): Quote|ResponseInterface|null;
+    public function get(string $id, ?bool $returnArray = false): Quote|ResponseInterface|null;
 
     /**
      * Creates a new quote.
@@ -23,5 +23,5 @@ interface QuoteRoutes
      * @param array $headerParameters The header parameters including `Signature-Input` and `Signature`.
      * @return Quote|ResponseInterface|null
      */
-    public function create($requestBody, ?string $accessToken = null): Quote|ResponseInterface|null;
+    public function create($requestBody, ?bool $returnArray = false): Quote|ResponseInterface|null;
 }
