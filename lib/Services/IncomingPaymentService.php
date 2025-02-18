@@ -30,9 +30,10 @@ use GuzzleHttp\Exception\RequestException;
 use OpenPayments\OpenApi\Generated\ResourceServer\Client as OpenApiResourceServerClient;
 use OpenPayments\Exceptions\ValidationException;
 use OpenPayments\Validators\IncomingPaymentValidator;
-
+use OpenPayments\Traits\GetIdFromUrl;
 class IncomingPaymentService implements IncomingPaymentRoutes
 {
+    use GetIdFromUrl;
     private OpenApiResourceServerClient $openApiClient;
     private IncomingPaymentValidator $validator;
 
@@ -44,30 +45,25 @@ class IncomingPaymentService implements IncomingPaymentRoutes
         $this->validator = $validator;
     }
 
-    private function getIncomingPaymentIdFromUrl(string $url): string
-    {
-        $urlParts = explode('/', $url);
-        return end($urlParts);
-    }
     /**
      * Fetches the latest state of an incoming payment by its ID.
      *
      * @param string $url The identifier of the incoming payment.
      * @param bool|null $returnArray
-     * @return IncomingPaymentWithMethods|array
+     * @return IncomingPaymentWithPaymentMethods|array
      * @throws GetIncomingPaymentUnauthorizedException
      * @throws GetIncomingPaymentForbiddenException
      * @throws GetIncomingPaymentNotFoundException
      * @throws CompleteIncomingPaymentNotFoundException
      */
-    public function get(string $url): IncomingPaymentWithMethods
+    public function get(string $url): IncomingPaymentWithPaymentMethods
     {
-        $id = $this->getIncomingPaymentIdFromUrl($url);
+        $id = $this->getIdFromUrl($url);
 
         $response = $this->openApiClient->getIncomingPayment($id);
         if(is_array($response)) {
             $this->validator->validateResponse($response);
-            return new IncomingPaymentWithMethods($response);
+            return new IncomingPaymentWithPaymentMethods($response);
         } else {
             throw new \UnexpectedValueException('Unexpected response type '.gettype($response).' '.print_r($response, true));
         }
@@ -145,7 +141,7 @@ class IncomingPaymentService implements IncomingPaymentRoutes
      */
     public function complete(string $url): IncomingPayment
     {
-        $id = $this->getIncomingPaymentIdFromUrl($url);
+        $id = $this->getIdFromUrl($url);
        
         $response = $this->openApiClient->completeIncomingPayment($id);
         

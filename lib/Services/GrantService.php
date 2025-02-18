@@ -1,12 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OpenPayments\Services;
 
 use OpenPayments\Contracts\GrantRoutes;
 use OpenPayments\Validators\GrantValidator;
 use OpenPayments\DTO\UnauthenticatedResourceRequestArgs;
-use OpenPayments\DTO\GrantRequest;
-use OpenPayments\DTO\GrantContinuationRequest;
 use OpenPayments\Models\Grant;
 use OpenPayments\Models\PendingGrant;
 use OpenPayments\Models\GrantContinuation;
@@ -17,8 +17,7 @@ use OpenPayments\OpenApi\Generated\AuthServer\Model\ContinueIdPostBody;
 use OpenPayments\Transformers\GrantTransformer;
 use OpenPayments\Transformers\PendingGrantTransformer;
 use OpenPayments\OpenApi\Generated\AuthServer\Client as OpenApiAuthServerClient;
-use Psr\Http\Message\ResponseInterface;
-use stdClass;
+
 
 class GrantService implements GrantRoutes
 {
@@ -33,7 +32,7 @@ class GrantService implements GrantRoutes
         $this->validator = $validator;
     }
 
-    public function request(array $grantRequest, bool $returnArray = false): array|PendingGrant|Grant
+    public function request(array $grantRequest): PendingGrant|Grant
     {
     
         $this->validator->validateRequest($grantRequest);
@@ -52,9 +51,6 @@ class GrantService implements GrantRoutes
         $response = $this->openApiClient->postRequest($postBody);
         $this->validator->validateResponse($response);
 
-        if($returnArray){
-            return $response;
-        }
         if (isset($response['interact']) && isset($response['continue'])) {
             return PendingGrantTransformer::createPendingGrantFromResponse($response);
         } else {
@@ -62,15 +58,13 @@ class GrantService implements GrantRoutes
         }
     }
 
-    public function continue(array $continueRequest, ?string $accessToken = null, ?bool $returnArray = false): array|stdClass|Grant|GrantContinuation
+    public function continue(array $continueRequest, ?string $accessToken = null): Grant|GrantContinuation
     {
         // Validate the input
        // $this->validator->validateRequest($continueRequest);
 
         $response = $this->openApiClient->postContinue($continueRequest['id'], new ContinueIdPostBody($continueRequest));
-        if($returnArray){
-            return $response;
-        }
+        $this->validator->validateResponse($response);
         return GrantTransformer::createGrantFromResponse($response);
     }
 

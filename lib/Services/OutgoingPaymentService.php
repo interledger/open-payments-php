@@ -40,7 +40,7 @@ class OutgoingPaymentService implements OutgoingPaymentRoutes
      * @throws GetOutgoingPaymentForbiddenException
      * @throws GetOutgoingPaymentNotFoundException
      */
-    public function get(string $id, array $headerParameters): OutgoingPayment
+    public function get(string $id, array $headerParameters = []): OutgoingPayment
     {
         $response =  $this->openApiClient->getOutgoingPayment($id, $headerParameters);
 
@@ -79,8 +79,8 @@ class OutgoingPaymentService implements OutgoingPaymentRoutes
      */
     public function create(
         $requestBody, 
-        array $headerParameters
-    ): array|OutgoingPayment
+        array $headerParameters = []
+    ): OutgoingPayment
     {
         $this->validator->validateRequest($requestBody);
         $response = $this->openApiClient->createOutgoingPayment($requestBody, $headerParameters);

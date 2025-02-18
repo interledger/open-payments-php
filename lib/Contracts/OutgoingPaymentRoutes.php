@@ -15,7 +15,7 @@ interface OutgoingPaymentRoutes
      * @param array $headerParameters Headers including `Signature-Input` and `Signature`.
      * @return OutgoingPayment|ResponseInterface|null
      */
-    public function get(string $id, array $headerParameters): OutgoingPayment;
+    public function get(string $id, array $headerParameters = []): OutgoingPayment;
 
     /**
      * Lists all outgoing payments on a wallet address.
@@ -31,7 +31,7 @@ interface OutgoingPaymentRoutes
      *
      * @param mixed $requestBody The body of the request for creating an outgoing payment.
      * @param array $headerParameters Headers including `Signature-Input` and `Signature`.
-     * @return OutgoingPayment|ResponseInterface|array|null
+     * @return OutgoingPayment|ResponseInterface|null
      */
-    public function create($requestBody, array $headerParameters): array|OutgoingPayment;
+    public function create($requestBody, array $headerParameters): OutgoingPayment;
 }
