@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "access_token": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "The new access token."
+        },
+        "manage": {
+          "type": "string",
+          "format": "uri",
+          "description": "The management URI for this access token."
+        },
+        "expires_in": {
+          "type": "integer",
+          "description": "The expiration time in seconds."
+        },
+        "access": {
+          "type": "array",
+          "description": "The associated access rights.",
+          "items": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "type": { "const": "incoming-payment" },
+                  "actions": {
+                    "type": "array",
+                    "items": { "type": "string", "enum": ["create", "complete", "read", "read-all", "list", "list-all"] },
+                    "uniqueItems": true
+                  },
+                  "identifier": { "type": "string", "format": "uri" }
+                },
+                "required": ["type", "actions"]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": { "const": "outgoing-payment" },
+                  "actions": {
+                    "type": "array",
+                    "items": { "type": "string", "enum": ["create", "read", "read-all", "list", "list-all"] },
+                    "uniqueItems": true
+                  },
+                  "identifier": { "type": "string", "format": "uri" },
+                  "limits": {
+                    "type": "object",
+                    "properties": {
+                      "receiver": { "type": "string", "format": "uri" },
+                      "debitAmount": { 
+                        "type": "object",
+                        "properties": { 
+                          "value": { "type": "string" }, 
+                          "assetCode": { "type": "string" }, 
+                          "assetScale": { "type": "integer" } 
+                        }
+                      },
+                      "receiveAmount": { 
+                        "type": "object",
+                        "properties": { 
+                          "value": { "type": "string" }, 
+                          "assetCode": { "type": "string" }, 
+                          "assetScale": { "type": "integer" } 
+                        }
+                      },
+                      "interval": { "type": "string", "description": "ISO8601 repeating interval" }
+                    }
+                  }
+                },
+                "required": ["type", "actions", "identifier"]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": { "const": "quote" },
+                  "actions": {
+                    "type": "array",
+                    "items": { "type": "string", "enum": ["create", "read", "read-all"] },
+                    "uniqueItems": true
+                  }
+                },
+                "required": ["type", "actions"]
+              }
+            ]
+          }
+        }
+      },
+      "required": ["value", "manage", "access"]
+    }
+  },
+  "required": ["access_token"]
+}

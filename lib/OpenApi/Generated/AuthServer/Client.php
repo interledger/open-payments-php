@@ -44,7 +44,7 @@ class Client extends \OpenPayments\OpenApi\Generated\AuthServer\Runtime\Client\C
      * @throws \OpenPayments\OpenApi\Generated\AuthServer\Exception\PostContinueUnauthorizedException
      * @throws \OpenPayments\OpenApi\Generated\AuthServer\Exception\PostContinueNotFoundException
      *
-     * @return null|stdClass|\OpenPayments\OpenApi\Generated\AuthServer\Model\ContinueIdPostResponse200|\Psr\Http\Message\ResponseInterface
+     * @return null|array|stdClass|\OpenPayments\OpenApi\Generated\AuthServer\Model\ContinueIdPostResponse200|\Psr\Http\Message\ResponseInterface
      */
     public function postContinue(string $id, ?\OpenPayments\OpenApi\Generated\AuthServer\Model\ContinueIdPostBody $requestBody = null, string $fetch = self::FETCH_OBJECT)
     {
@@ -73,7 +73,7 @@ class Client extends \OpenPayments\OpenApi\Generated\AuthServer\Runtime\Client\C
      * @throws \OpenPayments\OpenApi\Generated\AuthServer\Exception\PostTokenUnauthorizedException
      * @throws \OpenPayments\OpenApi\Generated\AuthServer\Exception\PostTokenNotFoundException
      *
-     * @return null|\OpenPayments\OpenApi\Generated\AuthServer\Model\TokenIdPostResponse200|\Psr\Http\Message\ResponseInterface
+     * @return null|array|\OpenPayments\OpenApi\Generated\AuthServer\Model\TokenIdPostResponse200|\Psr\Http\Message\ResponseInterface
      */
     public function postToken(string $id, string $fetch = self::FETCH_OBJECT)
     {

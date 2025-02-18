@@ -6,7 +6,6 @@ namespace OpenPayments\Contracts;
 
 use OpenPayments\OpenApi\Generated\ResourceServer\Model\PublicIncomingPayment;
 use OpenPayments\OpenApi\Generated\ResourceServer\Model\IncomingPayment;
-use OpenPayments\OpenApi\Generated\ResourceServer\Model\IncomingPaymentWithMethods;
 use OpenPayments\OpenApi\Generated\ResourceServer\Model\IncomingPaymentsGetResponse200 as IncomingPaymentPaginationResult;
 
 use OpenPayments\Models\IncomingPaymentWithPaymentMethods;
@@ -18,9 +17,9 @@ interface IncomingPaymentRoutes
      *
      * @param string $url
      * @param string|null $accessToken
-     * @return IncomingPaymentWithMethods
+     * @return IncomingPaymentWithPaymentMethods
      */
-    public function get(string $url): IncomingPaymentWithMethods;
+    public function get(string $url): IncomingPaymentWithPaymentMethods;
 
     /**
      * Get a public incoming payment by URL.
