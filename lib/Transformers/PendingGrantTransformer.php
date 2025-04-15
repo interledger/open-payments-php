@@ -2,18 +2,18 @@
 
 namespace OpenPayments\Transformers;
 
-use Psr\Http\Message\ResponseInterface;
 use OpenPayments\Models\PendingGrant;
-use OpenPayments\Models\PendingGrantInteract;
 use OpenPayments\Models\PendingGrantContinue;
+use OpenPayments\Models\PendingGrantInteract;
 use OpenPayments\Models\SimpleAccessToken;
+use Psr\Http\Message\ResponseInterface;
 use stdClass;
 
 class PendingGrantTransformer
 {
-    public static function createPendingGrantFromResponse(array | stdClass | ResponseInterface $response): PendingGrant
+    public function createFromResponse(array|stdClass|ResponseInterface $response): PendingGrant
     {
-        if( $response instanceof stdClass) {
+        if ($response instanceof stdClass) {
             $response = json_decode(json_encode($response), true);
         }
         // Create PendingGrantInteract instance

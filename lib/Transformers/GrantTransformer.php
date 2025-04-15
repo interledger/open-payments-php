@@ -2,28 +2,26 @@
 
 namespace OpenPayments\Transformers;
 
-use Psr\Http\Message\ResponseInterface;
-use OpenPayments\Models\Grant;
 use OpenPayments\Models\AccessToken;
+use OpenPayments\Models\Grant;
+use OpenPayments\Models\GrantContinue;
 use OpenPayments\Models\IncomingPaymentAccess;
 use OpenPayments\Models\OutgoingPaymentAccess;
 use OpenPayments\Models\QuoteAccess;
-use OpenPayments\Models\GrantContinue;
+use Psr\Http\Message\ResponseInterface;
 use stdClass;
-
-//use stdClass;
 
 class GrantTransformer
 {
-    public static function createGrantFromResponse(array | stdClass | ResponseInterface $response): Grant
+    public function createFromResponse(array|stdClass|ResponseInterface $response): Grant
     {
-        if( $response instanceof stdClass || $response instanceof ResponseInterface) {
+        if ($response instanceof stdClass || $response instanceof ResponseInterface) {
             $response = json_decode(json_encode($response), true);
         }
         $accessTokenData = $response['access_token'];
-        
+
         $accessData = $accessTokenData['access'][0];
-       
+
         // Determine which access type we are dealing with and create the appropriate object.
         switch ($accessData['type']) {
             case 'incoming-payment':
