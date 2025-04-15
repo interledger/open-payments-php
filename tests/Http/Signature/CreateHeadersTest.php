@@ -1,12 +1,16 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
+
 class CreateHeadersTest extends TestCase
 {
     protected $privateKey;
+
     protected $keyPair;
+
     protected $keyId;
-    public function setUp(): void
+
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -14,22 +18,23 @@ class CreateHeadersTest extends TestCase
         $this->privateKey = sodium_crypto_sign_secretkey($this->keyPair);
         $this->keyId = 'exampleKeyId';
     }
-    public function testCreateHeadersWithBody()
+
+    public function test_create_headers_with_body()
     {
         // Mock request structure with a body
         $request = [
             'method' => 'POST',
             'url' => 'https://example.com/api/resource',
             'headers' => [
-                'Authorization' => 'Bearer exampleToken'
+                'Authorization' => 'Bearer exampleToken',
             ],
-            'body' => '{"key":"value"}'
+            'body' => '{"key":"value"}',
         ];
         // Call the function
         $result = \OpenPayments\Utils\createHeaders([
             'request' => $request,
             'privateKey' => $this->privateKey,
-            'keyId' => $this->keyId
+            'keyId' => $this->keyId,
         ]);
 
         // Assertions
@@ -41,22 +46,22 @@ class CreateHeadersTest extends TestCase
         $this->assertArrayHasKey('Signature-Input', $result);
     }
 
-    public function testCreateHeadersWithoutBody()
+    public function test_create_headers_without_body()
     {
         // Mock request structure without a body
         $request = [
             'method' => 'GET',
             'url' => 'https://example.com/api/resource',
             'headers' => [
-                'Authorization' => 'Bearer exampleToken'
-            ]
+                'Authorization' => 'Bearer exampleToken',
+            ],
         ];
 
         // Call the function
         $result = \OpenPayments\Utils\createHeaders([
             'request' => $request,
             'privateKey' => $this->privateKey,
-            'keyId' => $this->keyId
+            'keyId' => $this->keyId,
         ]);
 
         // Assertions

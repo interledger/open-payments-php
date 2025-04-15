@@ -1,97 +1,92 @@
 <?php
 
-use PHPUnit\Framework\TestCase;
-use OpenPayments\OpenApi\Generated\WalletAddressServer\Client as OpenApiClient;
-use OpenPayments\OpenApi\Generated\WalletAddressServer\Model\WalletAddress;
-use OpenPayments\OpenApi\Generated\WalletAddressServer\Model\JsonWebKeySet;
+declare(strict_types=1);
+
+use OpenPayments\ApiClient;
+use OpenPayments\Models\JsonWebKeySet;
+use OpenPayments\Models\WalletAddress;
 use OpenPayments\Services\WalletAddressService;
+use PHPUnit\Framework\TestCase;
 
 class WalletAddressServiceTest extends TestCase
 {
-    private $mockOpenApiClient;
-    private $walletAddressService;
+    private ApiClient $apiClient;
+
+    private WalletAddressService $service;
 
     protected function setUp(): void
     {
-        $this->mockOpenApiClient = $this->createMock(OpenApiClient::class);
-        $this->walletAddressService = new WalletAddressService($this->mockOpenApiClient);
+        /** @var \PHPUnit\Framework\MockObject\MockObject&\OpenPayments\ApiClient $apiClient */
+        $this->apiClient = $this->createMock(ApiClient::class);
+        $this->service = new WalletAddressService($this->apiClient);
     }
 
-    public function testGetReturnsWalletAddress()
+    public function test_get_throws_exception_if_url_missing(): void
     {
-        // Mock the WalletAddress response
-        $mockResponse = $this->createMock(WalletAddress::class);
-        $this->mockOpenApiClient->method('getWalletAddress')->willReturn($mockResponse);
-
-        // Call the method
-        $result = $this->walletAddressService->get();
-
-        // Assert that the returned value is a WalletAddress
-        $this->assertInstanceOf(WalletAddress::class, $result);
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Missing required url for get wallet address');
+        $this->service->get([]);
     }
 
-    public function testGetThrowsExceptionOnInvalidResponse()
+    public function test_get_returns_wallet_address(): void
     {
-        // Mock an invalid response
-        $this->mockOpenApiClient->method('getWalletAddress')->willReturn(new \stdClass());
+        $walletData = ['id' => 'wallet123', 'address' => 'user@ilp.interledger-test.dev'];
+        $this->apiClient
+            ->expects($this->once())
+            ->method('request')
+            ->with('GET', 'https://ilp.interledger-test.dev/wallet')
+            ->willReturn($walletData);
 
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessage("Invalid WalletAddress response.");
+        $wallet = $this->service->get(['url' => 'https://ilp.interledger-test.dev/wallet']);
 
-        // Call the method
-        $this->walletAddressService->get();
+        $this->assertInstanceOf(WalletAddress::class, $wallet);
     }
 
-    public function testGetKeysReturnsJsonWebKeySet()
+    public function test_get_throws_exception_on_error_response(): void
     {
-        // Mock the JsonWebKeySet response
-        $mockResponse = $this->createMock(JsonWebKeySet::class);
-        $this->mockOpenApiClient->method('getWalletAddressKeys')->willReturn($mockResponse);
+        $this->expectException(\UnexpectedValueException::class);
+        $this->apiClient
+            ->method('request')
+            ->willReturn(['error' => 'not found']);
 
-        // Call the method
-        $result = $this->walletAddressService->getKeys();
+        $this->service->get(['url' => 'https://ilp.interledger-test.dev/wallet']);
+    }
 
-        // Assert that the returned value is a JsonWebKeySet
+    public function test_get_keys_returns_json_web_key_set(): void
+    {
+        $keysData = ['keys' => [['kty' => 'RSA', 'alg' => 'aalg', 'kid' => 'key1']]];
+        $this->apiClient
+            ->expects($this->once())
+            ->method('request')
+            ->with('GET', 'https://ilp.interledger-test.dev/wallet/jwks.json')
+            ->willReturn($keysData);
+
+        $result = $this->service->getKeys(['url' => 'https://ilp.interledger-test.dev/wallet']);
         $this->assertInstanceOf(JsonWebKeySet::class, $result);
     }
 
-    public function testGetKeysThrowsExceptionOnInvalidResponse()
+    public function test_get_keys_throws_exception_if_url_missing(): void
     {
-        // Mock an invalid response
-        $this->mockOpenApiClient->method('getWalletAddressKeys')->willReturn(new \stdClass());
-
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessage("Invalid JWKS response.");
-
-        // Call the method
-        $this->walletAddressService->getKeys();
+        $this->expectException(\InvalidArgumentException::class);
+        $this->service->getKeys([]);
     }
 
-    // Disabled test for getDIDDocument method
-    // Uncomment to enable when the method is implemented in Rafiki
-    public function testGetDIDDocumentReturnsResponseInterface()
+    public function test_get_did_document_returns_array(): void
     {
-        // Mock the ResponseInterface response
-        //$mockResponse = $this->createMock(ResponseInterface::class);
-        //$this->mockOpenApiClient->method('getWalletAddressDidDocument')->willReturn($mockResponse);
+        $didData = ['id' => 'did:example:123'];
+        $this->apiClient
+            ->expects($this->once())
+            ->method('request')
+            ->with('GET', 'https://ilp.interledger-test.dev/wallet/did-document')
+            ->willReturn($didData);
 
-        // Call the method
-        //$result = $this->walletAddressService->getDIDDocument();
-
-        // Assert that the returned value is a ResponseInterface
-        //$this->assertInstanceOf(ResponseInterface::class, $result);
-        $this->expectNotToPerformAssertions();
+        $result = $this->service->getDIDDocument(['url' => 'https://ilp.interledger-test.dev/wallet']);
+        $this->assertEquals($didData, $result);
     }
 
-    public function testGetDIDDocumentThrowsExceptionOnInvalidResponse()
+    public function test_get_did_document_throws_exception_if_url_missing(): void
     {
-        // Mock an invalid response
-        $this->mockOpenApiClient->method('getWalletAddressDidDocument')->willReturn(new \stdClass());
-
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessage("Invalid DIDDocument response.");
-
-        // Call the method
-        $this->walletAddressService->getDIDDocument();
+        $this->expectException(\InvalidArgumentException::class);
+        $this->service->getDIDDocument([]);
     }
 }

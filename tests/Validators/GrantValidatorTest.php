@@ -2,47 +2,46 @@
 
 namespace Tests\Validators;
 
+use OpenPayments\Exceptions\ValidationException;
 use OpenPayments\Validators\GrantValidator;
 use PHPUnit\Framework\TestCase;
-use OpenPayments\Exceptions\ValidationException;
 
 class GrantValidatorTest extends TestCase
 {
-    
-    public function testValidRequest(): void
+    public function test_valid_request(): void
     {
-        $validator = new GrantValidator();
+        $validator = new GrantValidator;
 
         $validData = [
             'access_token' => [
                 'access' => [
                     [
                         'type' => 'quote',
-                        'actions' => ['create', 'read', 'read-all']
-                    ]
-                ]
+                        'actions' => ['create', 'read', 'read-all'],
+                    ],
+                ],
             ],
-            'client' => 'https://ilp.interledger-test.dev/interledger'
+            'client' => 'https://ilp.interledger-test.dev/interledger',
         ];
 
         $this->expectNotToPerformAssertions(); // Passes if no exception is thrown
         $validator->validateRequest($validData);
     }
 
-    public function testInvalidRequest(): void
+    public function test_invalid_request(): void
     {
-        $validator = new GrantValidator();
+        $validator = new GrantValidator;
 
         $invalidData = [
             'access_token' => [
                 'access' => [
                     [
                         'type' => 'invalid-type',
-                        'actions' => ['create']
-                    ]
-                ]
+                        'actions' => ['create'],
+                    ],
+                ],
             ],
-            'client' => 'not-a-url'
+            'client' => 'not-a-url',
         ];
 
         $this->expectException(ValidationException::class);
