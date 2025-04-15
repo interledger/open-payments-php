@@ -2,10 +2,9 @@
 
 namespace OpenPayments\Validators;
 
-use JsonSchema\Validator;
 use JsonSchema\Constraints\Constraint;
+use JsonSchema\Validator;
 use OpenPayments\Exceptions\ValidationException;
-
 
 abstract class AbstractValidator
 {
@@ -13,18 +12,19 @@ abstract class AbstractValidator
 
     public function __construct()
     {
-        $this->validator = new Validator();
+        $this->validator = new Validator;
     }
 
     protected function loadSchema(string $schemaPath): object
     {
-        $path = __DIR__ . "/$schemaPath";
+        $path = __DIR__."/$schemaPath";
 
-        if (!file_exists($path)) {
+        if (! file_exists($path)) {
             throw new ValidationException("Schema file not found: $schemaPath");
         }
 
         $schemaJson = file_get_contents($path);
+
         return json_decode($schemaJson);
     }
 
@@ -33,9 +33,9 @@ abstract class AbstractValidator
         $data = json_decode(json_encode($data, JSON_UNESCAPED_SLASHES));
         $this->validator->validate($data, $schema, Constraint::CHECK_MODE_APPLY_DEFAULTS);
 
-        if (!$this->validator->isValid()) {
+        if (! $this->validator->isValid()) {
             $errors = array_map(fn ($error) => "{$error['property']}: {$error['message']}", $this->validator->getErrors());
-            throw new ValidationException('JSON validation failed: ' . implode(', ', $errors));
+            throw new ValidationException('JSON validation failed: '.implode(', ', $errors));
         }
     }
 }

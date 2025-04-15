@@ -9,27 +9,138 @@
         "access": {
           "type": "array",
           "items": {
-            "type": "object",
-            "required": ["type", "actions"],
-            "properties": {
-              "type": {
-                "type": "string",
-                "enum": ["quote","incoming-payment","outgoing-payment"]
+            "oneOf": [
+              {
+                "type": "object",
+                "required": ["type", "actions"],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "const": "incoming-payment"
+                  },
+                  "actions": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": ["create", "complete", "read", "read-all", "list", "list-all"]
+                    },
+                    "uniqueItems": true
+                  },
+                  "identifier": {
+                    "type": "string",
+                    "format": "uri"
+                  }
+                },
+                "additionalProperties": false
               },
-              "actions": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
+              {
+                "type": "object",
+                "required": ["type", "actions", "identifier"],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "const": "outgoing-payment"
+                  },
+                  "actions": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": ["create", "read", "read-all", "list", "list-all"]
+                    },
+                    "uniqueItems": true
+                  },
+                  "identifier": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "limits": {
+                    "type": "object",
+                    "properties": {
+                      "receiver": {
+                        "type": "string",
+                        "format": "uri"
+                      },
+                      "debitAmount": {
+                        "type": "object",
+                        "properties": {
+                          "value": { "type": "string" },
+                          "assetCode": { "type": "string" },
+                          "assetScale": { "type": "integer" }
+                        },
+                        "required": ["value", "assetCode", "assetScale"]
+                      },
+                      "receiveAmount": {
+                        "type": "object",
+                        "properties": {
+                          "value": { "type": "string" },
+                          "assetCode": { "type": "string" },
+                          "assetScale": { "type": "integer" }
+                        },
+                        "required": ["value", "assetCode", "assetScale"]
+                      },
+                      "interval": {
+                        "type": "string"
+                      }
+                    },
+                    "anyOf": [
+                      { "required": ["debitAmount"] },
+                      { "required": ["receiveAmount"] },
+                      { "not": { "required": ["interval"] } }
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "required": ["type", "actions"],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "const": "quote"
+                  },
+                  "actions": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": ["create", "read", "read-all"]
+                    },
+                    "uniqueItems": true
+                  }
+                },
+                "additionalProperties": false
               }
-            }
-          }
+            ]
+          },
+          "maxItems": 3,
+          "uniqueItems": true
         }
-      }
+      },
+      "additionalProperties": false
     },
     "client": {
       "type": "string",
       "format": "uri"
+    }
+  },
+  "definitions": {
+    "amount": {
+      "type": "object",
+      "required": ["value", "assetCode", "assetScale"],
+      "properties": {
+        "value": {
+          "type": "string",
+          "pattern": "^[0-9]+$"
+        },
+        "assetCode": {
+          "type": "string"
+        },
+        "assetScale": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
     }
   }
 }
