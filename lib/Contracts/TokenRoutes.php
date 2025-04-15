@@ -8,17 +8,16 @@ interface TokenRoutes
 {
     /**
      * Rotate an access token and return a new one.
-     * 
-     * @param string $url Contains manage token 'url'.
+     *
+     * @param  array  $reqParams  Contains manage token 'url'.
      * @return AccessToken The new access token.
      */
-    public function rotate(string $url): AccessToken;
+    public function rotate(array $reqParams): AccessToken;
 
     /**
      * Revoke an access token.
-     * 
-     * @param string $url Contains manage token 'url'.
-     * @return void
+     *
+     * @param  array  $reqParams  Contains manage token 'url'.
      */
-    public function revoke(string $url): void;
+    public function revoke(array $reqParams): mixed;
 }

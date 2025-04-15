@@ -2,13 +2,14 @@
 
 namespace OpenPayments\Contracts;
 
-use OpenPayments\OpenApi\Generated\WalletAddressServer\Model\WalletAddress;
-use OpenPayments\OpenApi\Generated\WalletAddressServer\Model\JsonWebKeySet;
-use Psr\Http\Message\ResponseInterface;
+use OpenPayments\Models\JsonWebKeySet;
+use OpenPayments\Models\WalletAddress;
 
 interface WalletAddressRoutes
 {
-    public function get(): WalletAddress;
-    public function getKeys(): JsonWebKeySet;
-    public function getDIDDocument(): ResponseInterface;
+    public function get(array $requestParams): WalletAddress;
+
+    public function getKeys(array $requestParams): JsonWebKeySet;
+
+    public function getDIDDocument(array $requestParams): array;
 }

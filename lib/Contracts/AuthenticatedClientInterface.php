@@ -12,7 +12,7 @@ interface AuthenticatedClientInterface
 
     public function incomingPayment(string $resourceServer, string $accessToken): IncomingPaymentRoutes;
 
-    //public function outgoingPayment(): OutgoingPaymentRoutes;
+    // public function outgoingPayment(): OutgoingPaymentRoutes;
 
-    //public function token(): TokenRoutes;
+    // public function token(): TokenRoutes;
 }

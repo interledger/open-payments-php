@@ -3,7 +3,7 @@
 namespace OpenPayments\Contracts;
 
 use OpenPayments\Models\OutgoingPayment;
-use OpenPayments\OpenApi\Generated\ResourceServer\Model\OutgoingPaymentsGetResponse200 as OutgoingPaymentPaginationResult;
+use OpenPayments\Models\OutgoingPaymentsList;
 use Psr\Http\Message\ResponseInterface;
 
 interface OutgoingPaymentRoutes
@@ -11,27 +11,21 @@ interface OutgoingPaymentRoutes
     /**
      * Fetches the latest state of an outgoing payment by its ID.
      *
-     * @param string $id The identifier of the outgoing payment.
-     * @param array $headerParameters Headers including `Signature-Input` and `Signature`.
-     * @return OutgoingPayment|ResponseInterface|null
+     * @return OutgoingPayment|null
      */
-    public function get(string $id, array $headerParameters = []): OutgoingPayment;
+    public function get(array $reqParams): OutgoingPayment;
 
     /**
      * Lists all outgoing payments on a wallet address.
      *
-     * @param array $queryParameters Query parameters for pagination and filtering.
-     * @param array $headerParameters Headers including `Signature-Input` and `Signature`.
-     * @return OutgoingPaymentPaginationResult|ResponseInterface|null
+     * @return OutgoingPaymentsList|null
      */
-    public function list(array $queryParameters, array $headerParameters): OutgoingPaymentPaginationResult;
+    public function list(array $queryParams, array $listParams): OutgoingPaymentsList;
 
     /**
      * Creates a new outgoing payment.
      *
-     * @param mixed $requestBody The body of the request for creating an outgoing payment.
-     * @param array $headerParameters Headers including `Signature-Input` and `Signature`.
      * @return OutgoingPayment|ResponseInterface|null
      */
-    public function create($requestBody, array $headerParameters): OutgoingPayment;
+    public function create(array $params, array $outgoingPaymentRequest): OutgoingPayment;
 }

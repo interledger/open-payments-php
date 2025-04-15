@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 namespace OpenPayments\Contracts;
 
 interface UnauthenticatedClientInterface

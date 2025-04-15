@@ -4,33 +4,28 @@ declare(strict_types=1);
 
 namespace OpenPayments\Services;
 
+use OpenPayments\ApiClient;
 use OpenPayments\Contracts\UnauthenticatedIncomingPaymentRoutes;
-use OpenPayments\DTO\UnauthenticatedResourceRequestArgs;
-
-use OpenPayments\OpenApi\Generated\ResourceServer\Model\PublicIncomingPayment;
-
-use OpenPayments\OpenApi\Generated\ResourceServer\Client as OpenApiClient;
+use OpenPayments\Models\IncomingPayment;
 
 class PublicIncomingPaymentService implements UnauthenticatedIncomingPaymentRoutes
 {
-    private OpenApiClient $openApiClient;
+    private ApiClient $apiClient;
 
-    public function __construct(OpenApiClient $openApiClient)
+    public function __construct(ApiClient $apiClient)
     {
-        $this->openApiClient = $openApiClient;
+        $this->apiClient = $apiClient;
     }
 
-    public function get(UnauthenticatedResourceRequestArgs $args): PublicIncomingPayment
+    public function get(array $args): IncomingPayment
     {
-        $paymentUrl = $args->url;
-        $publicIPresponse = $this->openApiClient->getIncomingPayment($paymentUrl);
+        if (! isset($reqParams['url'])) {
+            throw new \InvalidArgumentException('Missing required data');
+        }
+        $publicIPresponse = $this->apiClient->request('GET', $reqParams['url']);
 
-        // if (!ApiResponseValidator::validateWalletAddress($response)) {
-        //     throw new \Exception("Invalid WalletAddress response.");
-        // }
+        $response = new IncomingPayment($publicIPresponse, 200);
 
-        $response = new PublicIncomingPayment($publicIPresponse, 200);
         return $response;
     }
-
 }
