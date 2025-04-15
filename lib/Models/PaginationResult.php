@@ -2,8 +2,6 @@
 
 namespace OpenPayments\Models;
 
-use OpenPayments\OpenApi\Generated\ResourceServer\Model\PageInfo;
-
 class PaginationResult
 {
     private PageInfo $pagination;
@@ -16,8 +14,8 @@ class PaginationResult
     /**
      * Constructor.
      *
-     * @param PageInfo $pagination Pagination details.
-     * @param array<mixed> $result The results array.
+     * @param  PageInfo  $pagination  Pagination details.
+     * @param  array<mixed>  $result  The results array.
      */
     public function __construct(PageInfo $pagination, array $result)
     {
@@ -27,8 +25,6 @@ class PaginationResult
 
     /**
      * Get the pagination details.
-     *
-     * @return PageInfo
      */
     public function getPagination(): PageInfo
     {
@@ -48,7 +44,7 @@ class PaginationResult
     /**
      * Set the results array.
      *
-     * @param array<mixed> $result
+     * @param  array<mixed>  $result
      */
     public function setResult(array $result): void
     {

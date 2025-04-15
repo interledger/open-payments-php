@@ -2,7 +2,6 @@
 
 namespace OpenPayments\Models;
 
-use OpenPayments\Models\GrantAccess;
 // IncomingPayment Access Class
 class IncomingPaymentAccess extends GrantAccess
 {

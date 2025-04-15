@@ -5,7 +5,9 @@ namespace OpenPayments\Models;
 class IlpPaymentMethod
 {
     public string $type;
+
     public string $ilpAddress;
+
     public string $sharedSecret;
 
     public function __construct(array $data)
@@ -20,7 +22,7 @@ class IlpPaymentMethod
         return [
             'type' => $this->type,
             'ilpAddress' => $this->ilpAddress,
-            'sharedSecret' => $this->sharedSecret
+            'sharedSecret' => $this->sharedSecret,
         ];
     }
 }

@@ -2,8 +2,6 @@
 
 namespace OpenPayments\Models;
 
-use OpenPayments\Models\GrantAccess;
-
 // Quote Access Class
 class QuoteAccess extends GrantAccess
 {
