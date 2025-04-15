@@ -4,18 +4,6 @@ namespace OpenPayments\DTO;
 
 use OpenPayments\Traits\ArraySerializableTrait;
 
-// class GrantRequest
-// {
-//     public function __construct(
-//         public string $scope,
-//         public string $interact,
-//         public ?string $client = null // 'client' can be omitted if null
-//     ) {}
-// }
-// use OpenPayments\DTO\ResourceRequest\IncomingPaymentAccess;
-// use OpenPayments\DTO\ResourceRequest\OutgoingPaymentAccess;
-// use OpenPayments\DTO\ResourceRequest\QuoteAccess;
-
 class GrantRequest
 {
     use ArraySerializableTrait;

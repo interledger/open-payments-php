@@ -5,9 +5,6 @@ declare(strict_types=1);
 namespace OpenPayments;
 
 use GuzzleHttp\Client;
-// use GuzzleHttp\HandlerStack;
-// use GuzzleHttp\Middleware;
-// use Psr\Http\Message\RequestInterface;
 use GuzzleHttp\Exception\RequestException;
 
 class ApiClient
@@ -34,7 +31,7 @@ class ApiClient
     public function request(string $method, string $endpoint, array $data = [], array $headers = []): array
     {
         try {
-            $httpClient = new Client(['debug' => true, 'headers' => []]);
+            $httpClient = new Client(['debug' => false, 'headers' => []]);
 
             $jsonBody = (! empty($data) && strtoupper($method) !== 'GET')
                 ? json_encode($data, JSON_UNESCAPED_SLASHES)
@@ -46,7 +43,6 @@ class ApiClient
             }
             $headers = array_merge([
                 'Content-Length' => strlen($jsonBody),
-                'Content-Body' => $jsonBody, // useful for debugging
             ], $headers);
             $options['headers'] = array_merge($this->getDefaultHeaders(), $headers);
 

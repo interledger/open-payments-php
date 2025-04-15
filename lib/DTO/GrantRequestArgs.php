@@ -12,15 +12,3 @@ class GrantOrTokenRequestArgs extends UnauthenticatedResourceRequestArgs
         $this->accessToken = $accessToken;
     }
 }
-
-// {
-//   access: components["schemas"]["access"];
-// };
-
-// export type GrantRequest = {
-//   access_token: {
-//   access: components["schemas"]["access"];
-// };
-//   client: ASOperations['post-request']['requestBody']['content']['application/json']['client'];
-//   interact?: ASOperations['post-request']['requestBody']['content']['application/json']['interact'];
-// };

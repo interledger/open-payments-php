@@ -520,11 +520,10 @@ function createHeaders(array $options): array
 
     $contentHeaders = isset($request['body']) ? createContentHeaders($request['body']) : [];
 
-
     if ($contentHeaders) {
         $request['headers'] = array_merge($request['headers'], $contentHeaders);
     }
-    
+
     $signatureHeaders = createSignatureHeaders([
         'request' => $request,
         'privateKey' => $privateKey,
