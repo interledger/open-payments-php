@@ -1,7 +1,7 @@
 {
     "name": "interledger/open-payments-php",
     "description": "Open Payments PHP Library",
-    "version": "v1.0.0.dev",
+    "version": "v1.0.0",
     "type": "library",
     "keywords": ["interledger", "payments", "open payments"],
     "author": "Interledger Tech Team <tech@interledger.org>",
