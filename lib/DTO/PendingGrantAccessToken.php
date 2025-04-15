@@ -7,7 +7,7 @@ class PendingGrantAccessToken
     public string $value;
 
     /**
-     * @param string $value The value of the continuation access token.
+     * @param  string  $value  The value of the continuation access token.
      */
     public function __construct(string $value)
     {

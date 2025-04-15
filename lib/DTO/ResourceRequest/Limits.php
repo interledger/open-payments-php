@@ -1,13 +1,17 @@
 <?php
 
 namespace OpenPayments\DTO\ResourceRequest;
+
 use OpenPayments\Models\Amount;
+
 class Limits
 {
-
     public ?string $receiver;
+
     public ?Amount $debitAmount;
+
     public ?Amount $receiveAmount;
+
     public ?string $interval;
 
     public function __construct(
@@ -24,8 +28,6 @@ class Limits
 
     /**
      * Convert the DTO to an associative array.
-     *
-     * @return array
      */
     public function toArray(): array
     {
@@ -42,6 +44,7 @@ class Limits
         if ($this->interval !== null) {
             $array['interval'] = $this->interval;
         }
+
         return $array;
     }
 }

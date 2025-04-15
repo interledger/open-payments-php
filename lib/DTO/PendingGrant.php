@@ -5,6 +5,7 @@ namespace OpenPayments\DTO;
 class PendingGrant
 {
     public PendingGrantInteraction $interact;
+
     public PendingGrantContinuation $continue;
 
     public function __construct(

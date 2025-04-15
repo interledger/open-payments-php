@@ -5,7 +5,9 @@ namespace OpenPayments\DTO;
 class GrantInteractionFinish
 {
     public string $method; // Always "redirect"
+
     public string $uri;
+
     public string $nonce;
 
     public function __construct(string $method, string $uri, string $nonce)
@@ -17,15 +19,13 @@ class GrantInteractionFinish
 
     /**
      * Convert the DTO to an associative array.
-     *
-     * @return array
      */
     public function toArray(): array
     {
         return [
             'method' => $this->method,
             'uri' => $this->uri,
-            'nonce' => $this->nonce
+            'nonce' => $this->nonce,
         ];
     }
 }

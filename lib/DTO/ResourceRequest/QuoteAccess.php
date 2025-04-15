@@ -1,6 +1,7 @@
 <?php
 
 namespace OpenPayments\DTO\ResourceRequest;
+
 use OpenPayments\Enums\QuoteAccessAction;
 
 class QuoteAccess
@@ -8,21 +9,21 @@ class QuoteAccess
     public const TYPE = 'quote';
 
     public string $type = self::TYPE;
+
     /**
      * @var QuoteAccessAction[] List of allowed actions
      */
     public array $actions;
-    
+
     /**
      * __construct
      *
-     * @param array $actions
      * @return void
      */
     public function __construct(array $actions)
     {
         foreach ($actions as $action) {
-            if (!$action instanceof QuoteAccessAction) {
+            if (! $action instanceof QuoteAccessAction) {
                 throw new \InvalidArgumentException('Invalid action provided');
             }
         }
@@ -31,14 +32,12 @@ class QuoteAccess
 
     /**
      * Convert the DTO to an associative array.
-     *
-     * @return array
      */
     public function toArray(): array
     {
         return [
             'type' => $this->type,
-            'actions' => array_map(fn($action) => $action->value, $this->actions)
+            'actions' => array_map(fn ($action) => $action->value, $this->actions),
         ];
     }
 }

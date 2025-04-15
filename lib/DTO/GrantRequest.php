@@ -1,6 +1,7 @@
 <?php
 
 namespace OpenPayments\DTO;
+
 use OpenPayments\Traits\ArraySerializableTrait;
 
 // class GrantRequest
@@ -20,7 +21,9 @@ class GrantRequest
     use ArraySerializableTrait;
 
     public BasicAccessToken $accessToken;
+
     public ?string $client;
+
     public ?GrantInteraction $interact;
 
     public function __construct(
@@ -35,13 +38,11 @@ class GrantRequest
 
     /**
      * Convert the DTO to an associative array.
-     *
-     * @return array
      */
     public function toArray(): array
     {
         $array = [
-            'accessToken' => $this->accessToken->toArray()
+            'accessToken' => $this->accessToken->toArray(),
         ];
         if ($this->client !== null) {
             $array['client'] = $this->client;
@@ -49,6 +50,7 @@ class GrantRequest
         if ($this->interact !== null) {
             $array['interact'] = $this->interact->toArray();
         }
+
         return $array;
     }
 }
