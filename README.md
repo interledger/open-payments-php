@@ -1,4 +1,4 @@
-# WIP - PHP Open Payments SDK
+# PHP Open Payments SDK
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/interledger/open-payments/main/docs/public/img/logo.svg" width="700" alt="Open Payments">
@@ -56,3 +56,18 @@ More phone numbers: https://tel.meet/htd-eefo-ovn?hs=5
 
 ## Local Development Environment
 
+run tests:
+```
+./vendor/bin/phpunit tests
+```
+
+run pint:
+```
+./vendor/bin/pint
+```
+
+
+Exdended Open Payments documentation: [Open Payments](https://openpayments.dev/) 
+
+
+Snippets library: [Open Payments Php Snippets](https://github.com/interledger/open-payments-php-snippets)

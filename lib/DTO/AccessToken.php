@@ -9,8 +9,11 @@ use OpenPayments\DTO\ResourceRequest\QuoteAccess;
 class AccessToken
 {
     public string $value;
+
     public string $manage;
+
     public IncomingPaymentAccess|OutgoingPaymentAccess|QuoteAccess $access;
+
     public ?int $expiresIn;
 
     public function __construct(
@@ -27,19 +30,18 @@ class AccessToken
 
     /**
      * Convert the DTO to an associative array.
-     *
-     * @return array
      */
     public function toArray(): array
     {
         $array = [
             'value' => $this->value,
             'manage' => $this->manage,
-            'access' => $this->access->toArray()
+            'access' => $this->access->toArray(),
         ];
         if ($this->expiresIn !== null) {
             $array['expiresIn'] = $this->expiresIn;
         }
+
         return $array;
     }
 }

@@ -20,6 +20,7 @@ class ApiRequest
     {
         try {
             $response = $this->client->request($method, $uri, $options);
+
             return new ApiResponse($response);
         } catch (\Exception $e) {
             throw ApiException::fromResponse($e->getMessage());

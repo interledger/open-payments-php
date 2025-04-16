@@ -2,9 +2,8 @@
 
 namespace OpenPayments\Validators;
 
-use OpenPayments\OpenApi\Generated\WalletAddressServer\Model\WalletAddress;
-use OpenPayments\OpenApi\Generated\WalletAddressServer\Model\JsonWebKeySet;
-use OpenPayments\OpenApi\Generated\WalletAddressServer\Endpoint\GetWalletAddressDidDocument;
+use OpenPayments\Models\JsonWebKeySet;
+use OpenPayments\Models\WalletAddress;
 
 class WalletAddressApiResponseValidator
 {
@@ -20,6 +19,6 @@ class WalletAddressApiResponseValidator
 
     public static function validateDIDDocument($response): bool
     {
-        return $response instanceof GetWalletAddressDidDocument;
+        return false;
     }
 }

@@ -7,11 +7,14 @@ namespace OpenPayments\Config;
 class Config
 {
     protected string $walletAddressUrl;
+
     protected string $privateKey;
+
     protected string $keyId;
+
     protected bool $useHttp;
 
-    public function __construct(string $walletAddressUrl, string $privateKey, string $keyId, bool $useHttp = false)
+    public function __construct(string $walletAddressUrl, string $privateKey = '', string $keyId = '', bool $useHttp = false)
     {
         $this->walletAddressUrl = $walletAddressUrl;
         $this->privateKey = $privateKey;

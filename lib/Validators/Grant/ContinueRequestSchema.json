@@ -1,0 +1,9 @@
+{
+  "type": "object",
+  "required": ["interact_ref"],
+  "properties": {
+    "interact_ref": {
+      "type": "string"
+    }
+  }
+}

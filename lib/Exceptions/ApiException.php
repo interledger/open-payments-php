@@ -10,6 +10,6 @@ class ApiException extends Exception
 {
     public static function fromResponse($response): self
     {
-        return new self('API error: ' . $response->getStatusCode() . ' ' . $response->getBody());
+        return new self('API error: '.$response->getStatusCode().' '.$response->getBody());
     }
 }

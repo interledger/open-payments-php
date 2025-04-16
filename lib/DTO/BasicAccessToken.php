@@ -6,7 +6,6 @@ use OpenPayments\DTO\ResourceRequest\IncomingPaymentRequest;
 use OpenPayments\DTO\ResourceRequest\OutgoingPaymentRequest;
 use OpenPayments\DTO\ResourceRequest\QuoteRequest;
 
-
 class BasicAccessToken
 {
     public array $access = [];
@@ -15,10 +14,9 @@ class BasicAccessToken
     {
         $this->access[] = $access;
     }
+
     /**
      * Convert ChildDTO to an associative array.
-     *
-     * @return array
      */
     public function toArray(): array
     {

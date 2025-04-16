@@ -5,9 +5,13 @@ namespace OpenPayments\Models;
 class PublicIncomingPayment
 {
     public string $id;
+
     public string $status;
+
     public string $amount;
+
     public string $assetCode;
+
     public int $assetScale;
 
     public function __construct(array $data)

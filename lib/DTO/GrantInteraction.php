@@ -5,6 +5,7 @@ namespace OpenPayments\DTO;
 class GrantInteraction
 {
     public array $start; // Only contains "redirect" values
+
     public ?GrantInteractionFinish $finish;
 
     public function __construct(array $start, ?GrantInteractionFinish $finish = null)
@@ -15,8 +16,6 @@ class GrantInteraction
 
     /**
      * Convert the DTO to an associative array.
-     *
-     * @return array
      */
     public function toArray(): array
     {

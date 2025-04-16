@@ -4,47 +4,49 @@ declare(strict_types=1);
 
 namespace OpenPayments\Services;
 
-use OpenPayments\OpenApi\Generated\WalletAddressServer\Client as OpenApiClient;
-use OpenPayments\OpenApi\Generated\WalletAddressServer\Model\WalletAddress;
-use OpenPayments\OpenApi\Generated\WalletAddressServer\Model\JsonWebKeySet;
-use Psr\Http\Message\ResponseInterface;
-
-use OpenPayments\Validators\WalletAddressApiResponseValidator as ApiResponseValidator;
+use OpenPayments\ApiClient;
 use OpenPayments\Contracts\WalletAddressRoutes;
+use OpenPayments\Models\JsonWebKeySet;
+use OpenPayments\Models\WalletAddress;
 
 class WalletAddressService implements WalletAddressRoutes
 {
-    private OpenApiClient $openApiClient;
+    private ApiClient $apiClient;
 
-    public function __construct(OpenApiClient $openApiClient)
+    public function __construct(ApiClient $apiClient)
     {
-        $this->openApiClient = $openApiClient;
+        $this->apiClient = $apiClient;
     }
 
-    public function get(): WalletAddress
+    public function get(array $requestParams): WalletAddress
     {
-        $response = $this->openApiClient->getWalletAddress();
-        if (!ApiResponseValidator::validateWalletAddress($response)) {
-            throw new \Exception("Invalid WalletAddress response.");
+        if (! isset($requestParams['url'])) {
+            throw new \InvalidArgumentException('Missing required url for get wallet address');
         }
-        return $response;
+        $walletInfo = $this->apiClient->request('GET', $requestParams['url']);
+        if (is_array($walletInfo) && ! isset($walletInfo['error'])) {
+            return new WalletAddress($walletInfo);
+        } else {
+            throw new \UnexpectedValueException('Unexpected response type '.gettype($walletInfo).' '.print_r($walletInfo, true));
+        }
     }
 
-    public function getKeys(): JsonWebKeySet
+    public function getKeys(array $requestParams): JsonWebKeySet
     {
-        $response = $this->openApiClient->getWalletAddressKeys();
-        if (!ApiResponseValidator::validateJWKS($response)) {
-            throw new \Exception("Invalid JWKS response.");
+        if (! isset($requestParams['url'])) {
+            throw new \InvalidArgumentException('Missing required url for get wallet address keys ');
         }
-        return $response;
+        $keysInfo = $this->apiClient->request('GET', $requestParams['url'].'/jwks.json');
+
+        return new JsonWebKeySet($keysInfo);
     }
 
-    public function getDIDDocument(): ResponseInterface
+    public function getDIDDocument(array $requestParams): array
     {
-        $response = $this->openApiClient->getWalletAddressDidDocument();
-        if (!ApiResponseValidator::validateDIDDocument($response)) {
-            throw new \Exception("Invalid DIDDocument response.");
+        if (! isset($requestParams['url'])) {
+            throw new \InvalidArgumentException('Missing required url for get wallet address did document');
         }
-        return $response;
+
+        return $this->apiClient->request('GET', $requestParams['url'].'/did-document');
     }
 }

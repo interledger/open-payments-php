@@ -1,4 +1,5 @@
 <?php
+
 namespace OpenPayments\Contracts;
 
 use GuzzleHttp\ClientInterface as HttpClient;

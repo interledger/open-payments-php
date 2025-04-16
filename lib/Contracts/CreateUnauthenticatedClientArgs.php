@@ -7,9 +7,13 @@ use Psr\Log\LoggerInterface;
 class CreateUnauthenticatedClientArgs
 {
     public ?int $requestTimeoutMs;
+
     public ?LoggerInterface $logger;
+
     public ?string $logLevel;
+
     public bool $useHttp;
+
     public bool $validateResponses;
 
     public function __construct(

@@ -6,8 +6,6 @@ trait ArraySerializableTrait
 {
     /**
      * Convert the current object to an array.
-     *
-     * @return array
      */
     public function toArray(): array
     {

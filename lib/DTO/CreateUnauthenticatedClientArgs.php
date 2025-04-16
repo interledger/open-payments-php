@@ -33,12 +33,6 @@ class CreateUnauthenticatedClientArgs
 
     /**
      * Constructor to initialize the DTO.
-     *
-     * @param int|null $requestTimeoutMs
-     * @param LoggerInterface|null $logger
-     * @param string|null $logLevel
-     * @param bool $useHttp
-     * @param bool $validateResponses
      */
     public function __construct(
         ?int $requestTimeoutMs = null,
