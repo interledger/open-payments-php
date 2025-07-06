@@ -31,6 +31,7 @@ class GrantServiceTest extends TestCase
 
         $this->service = new GrantService(
             $this->apiClient,
+            'https://ilp.interledger-test.dev/wallet',
             $this->grantTransformer,
             $this->pendingTransformer
         );
@@ -68,8 +69,7 @@ class GrantServiceTest extends TestCase
                         'actions' => ['read', 'create', 'list'],
                     ],
                 ],
-            ],
-            'client' => 'https://ilp.interledger-test.dev/wallet',
+            ]
         ]);
         $this->assertInstanceOf(PendingGrant::class, $result);
     }
@@ -94,8 +94,7 @@ class GrantServiceTest extends TestCase
                         'actions' => ['read', 'create', 'list'],
                     ],
                 ],
-            ],
-            'client' => 'https://ilp.interledger-test.dev/wallet',
+            ]
         ]);
         $this->assertInstanceOf(Grant::class, $result);
     }

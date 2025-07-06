@@ -47,13 +47,13 @@ class AuthClient
     public function walletAddress(): WalletAddressService
     {
         if (! $this->walletService) {
-            $this->walletService = new WalletAddressService($this->apiClient, $this->config->getWalletAddressUrl());
+            $this->walletService = new WalletAddressService($this->apiClient);
         }
 
         return $this->walletService;
     }
 
-    public function incomingPayment(string $authServerUrl = ''): IncomingPaymentService
+    public function incomingPayment(): IncomingPaymentService
     {
         if (! $this->incomingPaymentService) {
             $this->incomingPaymentService = new IncomingPaymentService($this->apiClient);
@@ -83,7 +83,7 @@ class AuthClient
     public function grant(): GrantService
     {
         if (! $this->grantService) {
-            $this->grantService = new GrantService($this->apiClient);
+            $this->grantService = new GrantService($this->apiClient, $this->config->getWalletAddressUrl());
         }
 
         return $this->grantService;
