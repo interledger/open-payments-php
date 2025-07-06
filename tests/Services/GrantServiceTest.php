@@ -69,7 +69,7 @@ class GrantServiceTest extends TestCase
                         'actions' => ['read', 'create', 'list'],
                     ],
                 ],
-            ]
+            ],
         ]);
         $this->assertInstanceOf(PendingGrant::class, $result);
     }
@@ -94,7 +94,7 @@ class GrantServiceTest extends TestCase
                         'actions' => ['read', 'create', 'list'],
                     ],
                 ],
-            ]
+            ],
         ]);
         $this->assertInstanceOf(Grant::class, $result);
     }
