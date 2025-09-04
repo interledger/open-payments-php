@@ -28,7 +28,7 @@ class GrantService implements GrantRoutes
 
     private PendingGrantTransformer $pendingTransformer;
 
-    private string $clientUrl = '';
+    private string $clientUrl;
 
     /**
      * GrantService constructor.
