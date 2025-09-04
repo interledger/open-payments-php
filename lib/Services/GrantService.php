@@ -37,7 +37,7 @@ class GrantService implements GrantRoutes
      */
     public function __construct(
         ApiClient $apiClient,
-        string $clientUrl = '',
+        string $clientUrl,
         ?GrantTransformer $grantTransformer = null,
         ?PendingGrantTransformer $pendingTransformer = null
     ) {
