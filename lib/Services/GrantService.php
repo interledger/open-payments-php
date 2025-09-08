@@ -49,11 +49,9 @@ class GrantService implements GrantRoutes
             = $pendingTransformer ?? new PendingGrantTransformer;
     }
 
-    public function addClientToStruct(array $grantStructure): array
+    public function injectClientUrl(array &$grantStructure): void
     {
         $grantStructure['client'] = $this->clientUrl;
-
-        return $grantStructure;
     }
 
     /**
@@ -70,7 +68,7 @@ class GrantService implements GrantRoutes
         if (! isset($requestParams['url'])) {
             throw new \InvalidArgumentException('Missing required data');
         }
-        $grantRequest = $this->addClientToStruct($grantRequest);
+        $this->injectClientUrl($grantRequest);
         $this->validator->validateRequest($grantRequest);
         $url = $requestParams['url'];
         if (substr($url, -1) !== '/') {
@@ -105,7 +103,7 @@ class GrantService implements GrantRoutes
             $url .= '/';
         }
         $this->apiClient->setAccessToken($requestParams['access_token']);
-        $grantRequest = $this->addClientToStruct($grantRequest);
+        $this->injectClientUrl($grantRequest);
         $response = $this->apiClient->request('POST', $url, $grantRequest);
 
         if (is_array($response) && ! isset($response['error'])) {
