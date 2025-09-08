@@ -49,7 +49,13 @@ class GrantService implements GrantRoutes
             = $pendingTransformer ?? new PendingGrantTransformer;
     }
 
-    public function injectClientUrl(array &$grantStructure): void
+    /**
+     * Injects the client URL into the grant structure.
+     *
+     * @param array $grantStructure The grant structure to modify.
+     * @return void
+     */
+    private function injectClientUrl(array &$grantStructure): void
     {
         $grantStructure['client'] = $this->clientUrl;
     }
