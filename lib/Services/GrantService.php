@@ -28,6 +28,8 @@ class GrantService implements GrantRoutes
 
     private PendingGrantTransformer $pendingTransformer;
 
+    private string $clientUrl;
+
     /**
      * GrantService constructor.
      *
@@ -35,20 +37,44 @@ class GrantService implements GrantRoutes
      */
     public function __construct(
         ApiClient $apiClient,
+        string $clientUrl,
         ?GrantTransformer $grantTransformer = null,
         ?PendingGrantTransformer $pendingTransformer = null
     ) {
         $this->apiClient = $apiClient;
+        $this->clientUrl = $clientUrl;
         $this->validator = new GrantValidator;
         $this->grantTransformer = $grantTransformer ?? new GrantTransformer;
-        $this->pendingTransformer = $pendingTransformer ?? new PendingGrantTransformer;
+        $this->pendingTransformer
+            = $pendingTransformer ?? new PendingGrantTransformer;
     }
 
+    /**
+     * Injects the client URL into the grant structure.
+     *
+     * @param array $grantStructure The grant structure to modify.
+     * @return void
+     */
+    private function injectClientUrl(array &$grantStructure): void
+    {
+        $grantStructure['client'] = $this->clientUrl;
+    }
+
+    /**
+     * Requests a new grant or pending grant.
+     *
+     * @param  array  $requestParams  Parameters for the request, including 'url'.
+     * @param  array  $grantRequest  The grant request data.
+     *
+     * @throws \InvalidArgumentException
+     * @throws \Exception
+     */
     public function request(array $requestParams, array $grantRequest): Grant|PendingGrant
     {
         if (! isset($requestParams['url'])) {
             throw new \InvalidArgumentException('Missing required data');
         }
+        $this->injectClientUrl($grantRequest);
         $this->validator->validateRequest($grantRequest);
         $url = $requestParams['url'];
         if (substr($url, -1) !== '/') {
@@ -83,6 +109,7 @@ class GrantService implements GrantRoutes
             $url .= '/';
         }
         $this->apiClient->setAccessToken($requestParams['access_token']);
+        $this->injectClientUrl($grantRequest);
         $response = $this->apiClient->request('POST', $url, $grantRequest);
 
         if (is_array($response) && ! isset($response['error'])) {

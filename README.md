@@ -57,17 +57,17 @@ More phone numbers: https://tel.meet/htd-eefo-ovn?hs=5
 ## Local Development Environment
 
 run tests:
+
 ```
 ./vendor/bin/phpunit tests
 ```
 
 run pint:
+
 ```
 ./vendor/bin/pint
 ```
 
-
-Exdended Open Payments documentation: [Open Payments](https://openpayments.dev/) 
-
+Exdended Open Payments documentation: [Open Payments](https://openpayments.dev/)
 
 Snippets library: [Open Payments Php Snippets](https://github.com/interledger/open-payments-php-snippets)
