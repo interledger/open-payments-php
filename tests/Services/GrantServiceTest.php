@@ -105,19 +105,13 @@ class GrantServiceTest extends TestCase
         $this->service->continue(['access_token' => 'EAB18A53A6F67F9F1247'], ['interact_ref' => 'ref']);
     }
 
-    public function test_continue_throws_if_missing_interact_ref(): void
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->service->continue(['url' => 'https://ilp.interledger-test.dev/continue/', 'access_token' => 'EAB18A53A6F67F9F1247'], []);
-    }
-
     public function test_continue_throws_if_invalid_url(): void
     {
         $this->expectException(\InvalidArgumentException::class);
         $this->service->continue(['url' => 'https://ilp.interledger-test.dev/not-continue/'], ['interact_ref' => 'ref']);
     }
 
-    public function test_continue_returns_grant(): void
+    public function test_continue_returns_grant_with_interact_ref(): void
     {
         $response = ['access_token' => 'xyz'];
         $this->apiClient
@@ -135,6 +129,28 @@ class GrantServiceTest extends TestCase
             'url' => 'https://ilp.interledger-test.dev/continue/abc',
             'access_token' => 'EAB18A53A6F67F9F1247',
         ], ['interact_ref' => 'xyz']);
+
+        $this->assertInstanceOf(Grant::class, $result);
+    }
+
+    public function test_continue_returns_grant_without_interact_ref(): void
+    {
+        $response = ['access_token' => 'xyz'];
+        $this->apiClient
+            ->expects($this->once())
+            ->method('request')
+            ->willReturn($response);
+
+        $this->grantTransformer
+            ->expects($this->once())
+            ->method('createFromResponse')
+            ->with($response)
+            ->willReturn($this->createMock(Grant::class));
+
+        $result = $this->service->continue([
+            'url' => 'https://ilp.interledger-test.dev/continue/abc',
+            'access_token' => 'EAB18A53A6F67F9F1247',
+        ], []);
 
         $this->assertInstanceOf(Grant::class, $result);
     }
