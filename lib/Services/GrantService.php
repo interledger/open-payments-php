@@ -98,9 +98,6 @@ class GrantService implements GrantRoutes
         if (! isset($requestParams['url']) || ! isset($requestParams['access_token'])) {
             throw new \InvalidArgumentException('Missing required data');
         }
-        if (! isset($grantRequest['interact_ref'])) {
-            throw new \InvalidArgumentException('Missing interact_ref in grantRequest');
-        }
         if (strpos($requestParams['url'], 'continue/') === false) {
             throw new \InvalidArgumentException('Invalid continuation grant URL');
         }
