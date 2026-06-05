@@ -56,6 +56,12 @@ More phone numbers: https://tel.meet/htd-eefo-ovn?hs=5
 
 ## Local Development Environment
 
+After cloning the repository, initialise the OpenAPI specifications submodule:
+
+```
+git submodule update --init
+```
+
 run tests:
 
 ```
