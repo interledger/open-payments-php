@@ -36,4 +36,9 @@ class Config
     {
         return $this->keyId;
     }
+
+    public function getUseHttp(): bool
+    {
+        return $this->useHttp;
+    }
 }
