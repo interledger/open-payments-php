@@ -84,6 +84,26 @@ class WalletAddressServiceTest extends TestCase
         $this->assertEquals($didData, $result);
     }
 
+    public function test_get_did_document_triggers_deprecation_notice(): void
+    {
+        $this->apiClient->method('request')->willReturn(['id' => 'did:example:123']);
+
+        $deprecationTriggered = false;
+        set_error_handler(function (int $errno, string $errstr) use (&$deprecationTriggered): bool {
+            if ($errno === E_USER_DEPRECATED && str_contains($errstr, 'getDIDDocument')) {
+                $deprecationTriggered = true;
+            }
+
+            return true;
+        });
+
+        $this->service->getDIDDocument(['url' => 'https://ilp.interledger-test.dev/wallet']);
+
+        restore_error_handler();
+
+        $this->assertTrue($deprecationTriggered, 'getDIDDocument() should trigger an E_USER_DEPRECATED notice');
+    }
+
     public function test_get_did_document_throws_exception_if_url_missing(): void
     {
         $this->expectException(\InvalidArgumentException::class);
