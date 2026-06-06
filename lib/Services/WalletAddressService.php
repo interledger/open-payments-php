@@ -41,12 +41,24 @@ class WalletAddressService implements WalletAddressRoutes
         return new JsonWebKeySet($keysInfo);
     }
 
+    /**
+     * @deprecated since v1.1.0. The DID Document endpoint has been removed from the upstream
+     *             Open Payments specification. This method will be removed in v1.2.1.
+     *
+     * @see https://github.com/interledger/open-payments-specifications
+     */
     public function getDIDDocument(array $requestParams): array
     {
+        trigger_error(
+            'WalletAddressService::getDIDDocument() is deprecated since v1.1.0 and will be removed in v1.2.1.'
+            .'The DID Document endpoint has been removed from the Open Payments specification.',
+            E_USER_DEPRECATED
+        );
+
         if (! isset($requestParams['url'])) {
             throw new \InvalidArgumentException('Missing required url for get wallet address did document');
         }
 
-        return $this->apiClient->request('GET', $requestParams['url'].'/did-document');
+        return $this->apiClient->request('GET', $requestParams['url'].'/did.json');
     }
 }
