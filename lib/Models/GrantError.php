@@ -15,9 +15,9 @@ use OpenPayments\Enums\GrantErrorCode;
  */
 class GrantError
 {
-    public ?GrantErrorCode $code;
+    public readonly ?GrantErrorCode $code;
 
-    public ?string $description;
+    public readonly ?string $description;
 
     public function __construct(array $data)
     {

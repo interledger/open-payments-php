@@ -6,9 +6,9 @@ namespace OpenPayments\Models;
 
 class OutgoingPaymentGrant
 {
-    public ?Amount $spentReceiveAmount;
+    public readonly ?Amount $spentReceiveAmount;
 
-    public ?Amount $spentDebitAmount;
+    public readonly ?Amount $spentDebitAmount;
 
     public function __construct(array $data)
     {

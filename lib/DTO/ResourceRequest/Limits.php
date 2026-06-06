@@ -1,18 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OpenPayments\DTO\ResourceRequest;
 
 use OpenPayments\Models\Amount;
 
 class Limits
 {
-    public ?string $receiver;
+    public readonly ?string $receiver;
 
-    public ?Amount $debitAmount;
+    public readonly ?Amount $debitAmount;
 
-    public ?Amount $receiveAmount;
+    public readonly ?Amount $receiveAmount;
 
-    public ?string $interval;
+    public readonly ?string $interval;
 
     public function __construct(
         ?string $receiver = null,

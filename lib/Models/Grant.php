@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OpenPayments\Models;
 
 class Grant
 {
-    public AccessToken $access_token;
+    public readonly AccessToken $access_token;
 
-    public GrantContinue $continue;
+    public readonly GrantContinue $continue;
 
     public function __construct(AccessToken $access_token, GrantContinue $continue)
     {

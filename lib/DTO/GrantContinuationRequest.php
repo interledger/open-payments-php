@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OpenPayments\DTO;
 
 class GrantContinuationRequestOld
@@ -12,7 +14,7 @@ class GrantContinuationRequestOld
 
 class GrantContinuationRequest
 {
-    public ?string $interactRef;
+    public readonly ?string $interactRef;
 
     public function __construct(?string $interactRef = null)
     {

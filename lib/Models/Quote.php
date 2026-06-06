@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OpenPayments\Models;
 
 use OpenPayments\Traits\ArraySerializableTrait;
@@ -8,21 +10,21 @@ class Quote
 {
     use ArraySerializableTrait;
 
-    public string $id;
+    public readonly string $id;
 
-    public string $walletAddress;
+    public readonly string $walletAddress;
 
-    public string $receiver;
+    public readonly string $receiver;
 
-    public ?Amount $receiveAmount;
+    public readonly ?Amount $receiveAmount;
 
-    public ?Amount $debitAmount;
+    public readonly ?Amount $debitAmount;
 
-    public string $method;
+    public readonly string $method;
 
-    public ?string $expiresAt;
+    public readonly ?string $expiresAt;
 
-    public string $createdAt;
+    public readonly string $createdAt;
 
     public function __construct(array $data)
     {

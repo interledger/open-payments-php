@@ -1,16 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OpenPayments\Models;
 
 class AccessToken
 {
-    public string $value;
+    public readonly string $value;
 
-    public string $manage;
+    public readonly string $manage;
 
-    public ?int $expires_in = null;
+    public readonly ?int $expires_in;
 
-    public GrantAccess $access;
+    public readonly GrantAccess $access;
 
     public function __construct(string $value, string $manage, GrantAccess $access, ?int $expires_in = null)
     {

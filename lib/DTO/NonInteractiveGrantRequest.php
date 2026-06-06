@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OpenPayments\DTO;
 
 use OpenPayments\Traits\ArraySerializableTrait;
@@ -8,9 +10,9 @@ class NonInteractiveGrantRequest
 {
     use ArraySerializableTrait;
 
-    public BasicAccessToken $accessToken;
+    public readonly BasicAccessToken $accessToken;
 
-    public string $client;
+    public readonly string $client;
 
     public function __construct(BasicAccessToken $accessToken, string $client)
     {

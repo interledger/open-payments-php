@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OpenPayments\DTO;
 
 use OpenPayments\DTO\ResourceRequest\IncomingPaymentAccess;
@@ -8,13 +10,13 @@ use OpenPayments\DTO\ResourceRequest\QuoteAccess;
 
 class AccessToken
 {
-    public string $value;
+    public readonly string $value;
 
-    public string $manage;
+    public readonly string $manage;
 
-    public IncomingPaymentAccess|OutgoingPaymentAccess|QuoteAccess $access;
+    public readonly IncomingPaymentAccess|OutgoingPaymentAccess|QuoteAccess $access;
 
-    public ?int $expiresIn;
+    public readonly ?int $expiresIn;
 
     public function __construct(
         string $value,

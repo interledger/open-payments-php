@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OpenPayments\DTO;
 
 class GrantInteraction
 {
     public array $start; // Only contains "redirect" values
 
-    public ?GrantInteractionFinish $finish;
+    public readonly ?GrantInteractionFinish $finish;
 
     public function __construct(array $start, ?GrantInteractionFinish $finish = null)
     {

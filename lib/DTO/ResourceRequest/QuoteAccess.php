@@ -1,19 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OpenPayments\DTO\ResourceRequest;
 
 use OpenPayments\Enums\QuoteAccessAction;
 
 class QuoteAccess
 {
-    public const TYPE = 'quote';
+    public const string TYPE = 'quote';
 
-    public string $type = self::TYPE;
+    public readonly string $type;
 
     /**
      * @var QuoteAccessAction[] List of allowed actions
      */
-    public array $actions;
+    public readonly array $actions;
 
     /**
      * __construct
@@ -22,6 +24,7 @@ class QuoteAccess
      */
     public function __construct(array $actions)
     {
+        $this->type = self::TYPE;
         foreach ($actions as $action) {
             if (! $action instanceof QuoteAccessAction) {
                 throw new \InvalidArgumentException('Invalid action provided');

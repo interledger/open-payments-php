@@ -1,18 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OpenPayments\Models;
 
 class PublicIncomingPayment
 {
-    public string $id;
+    public readonly string $id;
 
-    public string $status;
+    public readonly string $status;
 
-    public string $amount;
+    public readonly string $amount;
 
-    public string $assetCode;
+    public readonly string $assetCode;
 
-    public int $assetScale;
+    public readonly int $assetScale;
 
     public function __construct(array $data)
     {

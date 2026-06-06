@@ -1,20 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OpenPayments\Models;
 
 class WalletAddress
 {
-    public string $id;
+    public readonly string $id;
 
-    public string $publicName;
+    public readonly string $publicName;
 
-    public string $assetCode;
+    public readonly string $assetCode;
 
-    public int $assetScale;
+    public readonly int $assetScale;
 
-    public string $authServer;
+    public readonly string $authServer;
 
-    public string $resourceServer;
+    public readonly string $resourceServer;
 
     public function __construct(array $data)
     {

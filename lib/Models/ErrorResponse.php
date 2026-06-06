@@ -11,9 +11,9 @@ namespace OpenPayments\Models;
  */
 class ErrorResponse
 {
-    public string $error;
+    public readonly string $error;
 
-    public ?string $message;
+    public readonly ?string $message;
 
     public function __construct(array $data)
     {

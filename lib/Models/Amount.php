@@ -1,14 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OpenPayments\Models;
 
 class Amount
 {
-    public string $value;
+    public readonly string $value;
 
-    public string $assetCode;
+    public readonly string $assetCode;
 
-    public int $assetScale;
+    public readonly int $assetScale;
 
     public function __construct(string $value, string $assetCode, int $assetScale)
     {
@@ -18,7 +20,7 @@ class Amount
     }
 
     /**
-     * Convert the DTO to an associative array.
+     * Convert the model to an associative array.
      */
     public function toArray(): array
     {

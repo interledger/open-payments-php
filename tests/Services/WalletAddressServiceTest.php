@@ -77,7 +77,7 @@ class WalletAddressServiceTest extends TestCase
         $this->apiClient
             ->expects($this->once())
             ->method('request')
-            ->with('GET', 'https://ilp.interledger-test.dev/wallet/did-document')
+            ->with('GET', 'https://ilp.interledger-test.dev/wallet/did.json')
             ->willReturn($didData);
 
         $result = $this->service->getDIDDocument(['url' => 'https://ilp.interledger-test.dev/wallet']);
