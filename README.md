@@ -74,6 +74,6 @@ run pint:
 ./vendor/bin/pint
 ```
 
-Exdended Open Payments documentation: [Open Payments](https://openpayments.dev/)
+Extended Open Payments documentation: [Open Payments](https://openpayments.dev/)
 
 Snippets library: [Open Payments Php Snippets](https://github.com/interledger/open-payments-php-snippets)
