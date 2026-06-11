@@ -23,7 +23,7 @@ class GrantInteraction
     {
         return [
             'start' => $this->start,
-            'finish' => $this->finish->toArray(),
+            'finish' => $this->finish?->toArray(),
         ];
     }
 }

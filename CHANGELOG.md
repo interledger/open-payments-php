@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.1.0] - 2026-06-06
+## [1.1.0] - 2026-06-13
 
 ### Added
 - `GET /outgoing-payment-grant` endpoint via `OutgoingPaymentService::getGrant()` — returns spent amounts (`spentReceiveAmount`, `spentDebitAmount`) for the current GNAP grant interval ([spec](https://openpayments.dev))
@@ -28,10 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `JsonWebKey` optional fields (`use`, `kty`, `crv`, `x`) made nullable and always initialised in constructor
 
 ### Deprecated
-- `WalletAddressService::getDIDDocument()` — the `/did.json` endpoint was removed from the upstream Open Payments specification. The method remains functional but triggers `E_USER_DEPRECATED`. It will be removed in **v1.2.1**.
-
-### Fixed
-- `WalletAddressService::getDIDDocument()` was calling `/did-document` instead of the spec-correct `/did.json`
+- `WalletAddressService::getDIDDocument()` — the DID Document endpoint is no longer part of the upstream Open Payments specification. The method remains available for backwards compatibility, triggers `E_USER_DEPRECATED`, and will be removed in **v1.2.1**.
 
 ## [1.0.2] - 2025-10-22
 

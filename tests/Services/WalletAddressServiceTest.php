@@ -6,6 +6,7 @@ use OpenPayments\ApiClient;
 use OpenPayments\Models\JsonWebKeySet;
 use OpenPayments\Models\WalletAddress;
 use OpenPayments\Services\WalletAddressService;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use PHPUnit\Framework\TestCase;
 
 class WalletAddressServiceTest extends TestCase
@@ -71,6 +72,7 @@ class WalletAddressServiceTest extends TestCase
         $this->service->getKeys([]);
     }
 
+    #[IgnoreDeprecations]
     public function test_get_did_document_returns_array(): void
     {
         $didData = ['id' => 'did:example:123'];
@@ -79,6 +81,8 @@ class WalletAddressServiceTest extends TestCase
             ->method('request')
             ->with('GET', 'https://ilp.interledger-test.dev/wallet/did.json')
             ->willReturn($didData);
+
+        $this->expectUserDeprecationMessageMatches('/getDIDDocument\(\) is deprecated/');
 
         $result = $this->service->getDIDDocument(['url' => 'https://ilp.interledger-test.dev/wallet']);
         $this->assertEquals($didData, $result);
@@ -92,20 +96,25 @@ class WalletAddressServiceTest extends TestCase
         set_error_handler(function (int $errno, string $errstr) use (&$deprecationTriggered): bool {
             if ($errno === E_USER_DEPRECATED && str_contains($errstr, 'getDIDDocument')) {
                 $deprecationTriggered = true;
+                return true;
             }
 
-            return true;
+            return false;
         });
 
-        $this->service->getDIDDocument(['url' => 'https://ilp.interledger-test.dev/wallet']);
-
-        restore_error_handler();
+        try {
+             $this->service->getDIDDocument(['url' => 'https://ilp.interledger-test.dev/wallet']);
+        } finally {
+             restore_error_handler();
+        }
 
         $this->assertTrue($deprecationTriggered, 'getDIDDocument() should trigger an E_USER_DEPRECATED notice');
     }
 
+    #[IgnoreDeprecations]
     public function test_get_did_document_throws_exception_if_url_missing(): void
     {
+        $this->expectUserDeprecationMessageMatches('/getDIDDocument\(\) is deprecated/');
         $this->expectException(\InvalidArgumentException::class);
         $this->service->getDIDDocument([]);
     }

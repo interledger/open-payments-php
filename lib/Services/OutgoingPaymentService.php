@@ -165,15 +165,22 @@ class OutgoingPaymentService implements OutgoingPaymentRoutes
 
         if (is_array($response) && ! isset($response['error'])) {
             return new OutgoingPaymentGrant($response);
-        } else {
-            $status = $response['status_code'] ?? 0;
-            if ($status === 401) {
-                throw new GetOutgoingPaymentGrantUnauthorizedException($response['message']);
-            }
-            if ($status === 403) {
-                throw new GetOutgoingPaymentGrantForbiddenException($response['message']);
-            }
-            throw new \UnexpectedValueException('Unexpected response '.print_r($response, true));
         }
+
+        if (! is_array($response)) {
+            throw new \UnexpectedValueException(
+                'Unexpected response type '.gettype($response).' '.print_r($response, true)
+            );
+        }
+
+        $status = $response['status_code'] ?? 0;
+        if ($status === 401) {
+            throw new GetOutgoingPaymentGrantUnauthorizedException($response['message']);
+        }
+        if ($status === 403) {
+            throw new GetOutgoingPaymentGrantForbiddenException($response['message']);
+        }
+
+        throw new \UnexpectedValueException('Unexpected response '.print_r($response, true));
     }
 }

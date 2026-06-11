@@ -50,7 +50,7 @@ class WalletAddressService implements WalletAddressRoutes
     public function getDIDDocument(array $requestParams): array
     {
         trigger_error(
-            'WalletAddressService::getDIDDocument() is deprecated since v1.1.0 and will be removed in v1.2.1.'
+            'WalletAddressService::getDIDDocument() is deprecated since v1.1.0 and will be removed in v1.2.1. '
             .'The DID Document endpoint has been removed from the Open Payments specification.',
             E_USER_DEPRECATED
         );
