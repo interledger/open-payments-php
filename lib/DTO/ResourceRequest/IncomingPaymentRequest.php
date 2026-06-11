@@ -21,7 +21,6 @@ class IncomingPaymentRequest
 
     /**
      * @param  IncomingPaymentRequestAction[]  $actions
-     * @param  string|null  $identifier
      *
      * @throws \InvalidArgumentException if an invalid action is provided
      */

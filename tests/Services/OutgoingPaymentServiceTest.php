@@ -6,10 +6,10 @@ use OpenPayments\ApiClient;
 use OpenPayments\Exceptions\CreateOutgoingPaymentForbiddenException;
 use OpenPayments\Exceptions\CreateOutgoingPaymentUnauthorizedException;
 use OpenPayments\Exceptions\GetOutgoingPaymentForbiddenException;
-use OpenPayments\Exceptions\GetOutgoingPaymentNotFoundException;
-use OpenPayments\Exceptions\GetOutgoingPaymentUnauthorizedException;
 use OpenPayments\Exceptions\GetOutgoingPaymentGrantForbiddenException;
 use OpenPayments\Exceptions\GetOutgoingPaymentGrantUnauthorizedException;
+use OpenPayments\Exceptions\GetOutgoingPaymentNotFoundException;
+use OpenPayments\Exceptions\GetOutgoingPaymentUnauthorizedException;
 use OpenPayments\Exceptions\ListOutgoingPaymentsForbiddenException;
 use OpenPayments\Exceptions\ListOutgoingPaymentsUnauthorizedException;
 use OpenPayments\Models\OutgoingPayment;
@@ -236,7 +236,7 @@ class OutgoingPaymentServiceTest extends TestCase
     {
         $response = [
             'spentReceiveAmount' => ['value' => '2500', 'assetCode' => 'USD', 'assetScale' => 2],
-            'spentDebitAmount'   => ['value' => '2600', 'assetCode' => 'USD', 'assetScale' => 2],
+            'spentDebitAmount' => ['value' => '2600', 'assetCode' => 'USD', 'assetScale' => 2],
         ];
         $this->apiClient
             ->expects($this->once())
@@ -245,7 +245,7 @@ class OutgoingPaymentServiceTest extends TestCase
             ->willReturn($response);
 
         $result = $this->service->getGrant([
-            'url'          => 'https://ilp.interledger-test.dev',
+            'url' => 'https://ilp.interledger-test.dev',
             'access_token' => 'token',
         ]);
 
@@ -260,12 +260,12 @@ class OutgoingPaymentServiceTest extends TestCase
     {
         $response = [
             'spentReceiveAmount' => null,
-            'spentDebitAmount'   => null,
+            'spentDebitAmount' => null,
         ];
         $this->apiClient->method('request')->willReturn($response);
 
         $result = $this->service->getGrant([
-            'url'          => 'https://ilp.interledger-test.dev',
+            'url' => 'https://ilp.interledger-test.dev',
             'access_token' => 'token',
         ]);
 
@@ -291,12 +291,12 @@ class OutgoingPaymentServiceTest extends TestCase
         $this->expectException(GetOutgoingPaymentGrantUnauthorizedException::class);
         $this->apiClient->method('request')->willReturn([
             'status_code' => 401,
-            'error'       => '1',
-            'message'     => 'Unauthorized',
+            'error' => '1',
+            'message' => 'Unauthorized',
         ]);
 
         $this->service->getGrant([
-            'url'          => 'https://ilp.interledger-test.dev',
+            'url' => 'https://ilp.interledger-test.dev',
             'access_token' => 'token',
         ]);
     }
@@ -306,12 +306,12 @@ class OutgoingPaymentServiceTest extends TestCase
         $this->expectException(GetOutgoingPaymentGrantForbiddenException::class);
         $this->apiClient->method('request')->willReturn([
             'status_code' => 403,
-            'error'       => '1',
-            'message'     => 'Forbidden',
+            'error' => '1',
+            'message' => 'Forbidden',
         ]);
 
         $this->service->getGrant([
-            'url'          => 'https://ilp.interledger-test.dev',
+            'url' => 'https://ilp.interledger-test.dev',
             'access_token' => 'token',
         ]);
     }
@@ -325,7 +325,7 @@ class OutgoingPaymentServiceTest extends TestCase
             ->willReturn(['spentReceiveAmount' => null, 'spentDebitAmount' => null]);
 
         $this->service->getGrant([
-            'url'          => 'https://ilp.interledger-test.dev/',
+            'url' => 'https://ilp.interledger-test.dev/',
             'access_token' => 'token',
         ]);
     }

@@ -52,8 +52,7 @@ class GrantService implements GrantRoutes
     /**
      * Injects the client URL into the grant structure.
      *
-     * @param array $grantStructure The grant structure to modify.
-     * @return void
+     * @param  array  $grantStructure  The grant structure to modify.
      */
     private function injectClientUrl(array &$grantStructure): void
     {

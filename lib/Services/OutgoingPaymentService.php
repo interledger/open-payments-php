@@ -8,12 +8,12 @@ use OpenPayments\Exceptions\BadRequestException;
 use OpenPayments\Exceptions\CreateOutgoingPaymentForbiddenException;
 use OpenPayments\Exceptions\CreateOutgoingPaymentUnauthorizedException;
 use OpenPayments\Exceptions\GetOutgoingPaymentForbiddenException;
+use OpenPayments\Exceptions\GetOutgoingPaymentGrantForbiddenException;
+use OpenPayments\Exceptions\GetOutgoingPaymentGrantUnauthorizedException;
 use OpenPayments\Exceptions\GetOutgoingPaymentNotFoundException;
 use OpenPayments\Exceptions\GetOutgoingPaymentUnauthorizedException;
 use OpenPayments\Exceptions\ListOutgoingPaymentsForbiddenException;
 use OpenPayments\Exceptions\ListOutgoingPaymentsUnauthorizedException;
-use OpenPayments\Exceptions\GetOutgoingPaymentGrantForbiddenException;
-use OpenPayments\Exceptions\GetOutgoingPaymentGrantUnauthorizedException;
 use OpenPayments\Models\OutgoingPayment;
 use OpenPayments\Models\OutgoingPaymentGrant;
 use OpenPayments\Models\OutgoingPaymentsList;
@@ -149,7 +149,6 @@ class OutgoingPaymentService implements OutgoingPaymentRoutes
      * Returns the spent amounts for the current outgoing payment grant.
      *
      * @param  array  $reqParams  Must include `url` (wallet address URL) and `access_token`.
-     * @return OutgoingPaymentGrant
      *
      * @throws GetOutgoingPaymentGrantUnauthorizedException
      * @throws GetOutgoingPaymentGrantForbiddenException

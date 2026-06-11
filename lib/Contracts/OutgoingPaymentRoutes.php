@@ -35,8 +35,6 @@ interface OutgoingPaymentRoutes
      * corresponding to the presented GNAP access token.
      * If a grant was created with an interval (recurring), the amounts returned
      * are for the current interval.
-     *
-     * @return OutgoingPaymentGrant
      */
     public function getGrant(array $reqParams): OutgoingPaymentGrant;
 }

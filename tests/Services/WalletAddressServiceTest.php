@@ -96,6 +96,7 @@ class WalletAddressServiceTest extends TestCase
         set_error_handler(function (int $errno, string $errstr) use (&$deprecationTriggered): bool {
             if ($errno === E_USER_DEPRECATED && str_contains($errstr, 'getDIDDocument')) {
                 $deprecationTriggered = true;
+
                 return true;
             }
 
@@ -103,9 +104,9 @@ class WalletAddressServiceTest extends TestCase
         });
 
         try {
-             $this->service->getDIDDocument(['url' => 'https://ilp.interledger-test.dev/wallet']);
+            $this->service->getDIDDocument(['url' => 'https://ilp.interledger-test.dev/wallet']);
         } finally {
-             restore_error_handler();
+            restore_error_handler();
         }
 
         $this->assertTrue($deprecationTriggered, 'getDIDDocument() should trigger an E_USER_DEPRECATED notice');
