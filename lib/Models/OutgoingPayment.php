@@ -1,34 +1,36 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OpenPayments\Models;
 
 class OutgoingPayment
 {
-    public string $id;
+    public readonly string $id;
 
-    public string $walletAddress;
+    public readonly string $walletAddress;
 
-    public ?string $quoteId;
+    public readonly ?string $quoteId;
 
-    public ?bool $failed;
+    public readonly ?bool $failed;
 
-    public string $receiver;
+    public readonly string $receiver;
 
-    public Amount $receiveAmount;
+    public readonly Amount $receiveAmount;
 
-    public Amount $debitAmount;
+    public readonly Amount $debitAmount;
 
-    public Amount $sentAmount;
+    public readonly Amount $sentAmount;
 
-    public ?Amount $grantSpentDebitAmount;
+    public readonly ?Amount $grantSpentDebitAmount;
 
-    public ?Amount $grantSpentReceiveAmount;
+    public readonly ?Amount $grantSpentReceiveAmount;
 
-    public ?array $metadata;
+    public readonly ?array $metadata;
 
-    public string $createdAt;
+    public readonly string $createdAt;
 
-    public string $updatedAt;
+    public readonly string $updatedAt;
 
     public function __construct(array $data)
     {

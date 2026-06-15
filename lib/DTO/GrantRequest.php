@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OpenPayments\DTO;
 
 use OpenPayments\Traits\ArraySerializableTrait;
@@ -8,11 +10,11 @@ class GrantRequest
 {
     use ArraySerializableTrait;
 
-    public BasicAccessToken $accessToken;
+    public readonly BasicAccessToken $accessToken;
 
-    public ?string $client;
+    public readonly ?string $client;
 
-    public ?GrantInteraction $interact;
+    public readonly ?GrantInteraction $interact;
 
     public function __construct(
         BasicAccessToken $accessToken,

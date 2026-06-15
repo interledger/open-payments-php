@@ -1,14 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OpenPayments\Models;
 
 class PendingGrantContinue
 {
-    public SimpleAccessToken $access_token;
+    public readonly SimpleAccessToken $access_token;
 
-    public string $uri;
+    public readonly string $uri;
 
-    public ?int $wait = null;
+    public readonly ?int $wait;
 
     public function __construct(SimpleAccessToken $access_token, string $uri, ?int $wait = null)
     {

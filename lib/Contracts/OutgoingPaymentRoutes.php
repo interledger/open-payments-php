@@ -3,6 +3,7 @@
 namespace OpenPayments\Contracts;
 
 use OpenPayments\Models\OutgoingPayment;
+use OpenPayments\Models\OutgoingPaymentGrant;
 use OpenPayments\Models\OutgoingPaymentsList;
 use Psr\Http\Message\ResponseInterface;
 
@@ -28,4 +29,12 @@ interface OutgoingPaymentRoutes
      * @return OutgoingPayment|ResponseInterface|null
      */
     public function create(array $params, array $outgoingPaymentRequest): OutgoingPayment;
+
+    /**
+     * Returns the spent amounts for the current outgoing payment grant
+     * corresponding to the presented GNAP access token.
+     * If a grant was created with an interval (recurring), the amounts returned
+     * are for the current interval.
+     */
+    public function getGrant(array $reqParams): OutgoingPaymentGrant;
 }

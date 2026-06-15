@@ -1,23 +1,25 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OpenPayments\DTO\ResourceRequest;
 
 use OpenPayments\Enums\OutgoingPaymentAccessAction;
 
 class OutgoingPaymentAccess
 {
-    public const TYPE = 'outgoing-payment';
+    public const string TYPE = 'outgoing-payment';
 
-    public string $type = self::TYPE;
+    public readonly string $type;
 
     /**
      * @var OutgoingPaymentAccessAction[] List of allowed actions
      */
-    public array $actions;
+    public readonly array $actions;
 
-    public string $identifier;
+    public readonly string $identifier;
 
-    public ?Limits $limits;
+    public readonly ?Limits $limits;
 
     /**
      * __construct
@@ -30,6 +32,7 @@ class OutgoingPaymentAccess
      */
     public function __construct(array $actions, string $identifier, ?Limits $limits = null)
     {
+        $this->type = self::TYPE;
         foreach ($actions as $action) {
             if (! $action instanceof OutgoingPaymentAccessAction) {
                 throw new \InvalidArgumentException('Invalid action provided');

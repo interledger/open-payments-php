@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OpenPayments\Models;
 
 class PendingGrant
 {
-    public PendingGrantInteract $interact;
+    public readonly PendingGrantInteract $interact;
 
-    public PendingGrantContinue $continue;
+    public readonly PendingGrantContinue $continue;
 
     public function __construct(PendingGrantInteract $interact, PendingGrantContinue $continue)
     {

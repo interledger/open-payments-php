@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OpenPayments\DTO;
 
 class PendingGrantInteraction
 {
-    public string $redirect;
+    public readonly string $redirect;
 
-    public string $finish;
+    public readonly string $finish;
 
     /**
      * @param  string  $redirect  The URI to direct the end user to.

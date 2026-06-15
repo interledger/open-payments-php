@@ -1,14 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OpenPayments\Models;
 
 class IlpPaymentMethod
 {
-    public string $type;
+    public readonly string $type;
 
-    public string $ilpAddress;
+    public readonly string $ilpAddress;
 
-    public string $sharedSecret;
+    public readonly string $sharedSecret;
 
     public function __construct(array $data)
     {

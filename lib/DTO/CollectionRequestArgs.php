@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OpenPayments\DTO;
 
 class CollectionRequestArgs extends GrantOrTokenRequestArgs
 {
-    public string $walletAddress;
+    public readonly string $walletAddress;
 
     public function __construct(string $url, string $accessToken, string $walletAddress)
     {

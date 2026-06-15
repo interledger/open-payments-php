@@ -807,6 +807,57 @@ paths:
         - $ref: '#/components/parameters/signature'
     parameters:
       - $ref: '#/components/parameters/id'
+  '/outgoing-payment-grant':
+    get:
+      summary: Get spent amounts for current outgoing payment grant
+      tags:
+        - outgoing-payment
+      operationId: get-outgoing-payment-grant
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - spentReceiveAmount
+                  - spentDebitAmount
+                properties:
+                  spentReceiveAmount:
+                    description: The total amount successfully received (by all receivers) using the current outgoing payment grant.
+                    anyOf:
+                      - $ref: '#/components/schemas/amount'
+                      - type: 'null'
+                  spentDebitAmount:
+                    description: The total amount successfully deducted from the sender's account using the current outgoing payment grant.
+                    anyOf:
+                      - $ref: '#/components/schemas/amount'
+                      - type: 'null'
+              examples:
+                Grant spent amounts:
+                  value:
+                    spentReceiveAmount:
+                      value: '2500'
+                      assetCode: USD
+                      assetScale: 2
+                    spentDebitAmount:
+                      value: '2600'
+                      assetCode: USD
+                      assetScale: 2
+                No spent amounts:
+                  value:
+                    spentReceiveAmount: null
+                    spentDebitAmount: null
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+      description: |-
+        Returns the spent amounts for the current outgoing payment grant corresponding to the presented GNAP access token, if any. If a grant was created with an interval (recurring), the amounts returned are for the current interval.
+      parameters:
+        - $ref: '#/components/parameters/signature-input'
+        - $ref: '#/components/parameters/signature'
 components:
   schemas:
     incoming-payment:

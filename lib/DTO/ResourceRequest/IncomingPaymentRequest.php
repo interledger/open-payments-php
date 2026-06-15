@@ -1,42 +1,39 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OpenPayments\DTO\ResourceRequest;
 
 use OpenPayments\Enums\IncomingPaymentRequestAction;
 
 class IncomingPaymentRequest
 {
-    public const TYPE = 'incoming-payment';
+    public const string TYPE = 'incoming-payment';
 
-    public string $type = self::TYPE;
+    public readonly string $type;
 
     /**
      * @var IncomingPaymentRequestAction[] List of allowed actions
      */
-    public array $actions;
+    public readonly array $actions;
 
-    public ?string $identifier;
+    public readonly ?string $identifier;
 
     /**
-     * __construct
-     *
      * @param  IncomingPaymentRequestAction[]  $actions
-     * @param  mixed  $identifier
-     * @return void
      *
      * @throws \InvalidArgumentException if an invalid action is provided
      */
     public function __construct(array $actions, ?string $identifier = null)
     {
+        $this->type = self::TYPE;
         foreach ($actions as $action) {
             if (! $action instanceof IncomingPaymentRequestAction) {
                 throw new \InvalidArgumentException('Invalid action provided');
             }
         }
         $this->actions = $actions;
-        if ($identifier) {
-            $this->identifier = $identifier;
-        }
+        $this->identifier = $identifier;
     }
 
     /**

@@ -1,14 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OpenPayments\DTO;
 
 class PendingGrantContinuation
 {
-    public PendingGrantAccessToken $accessToken;
+    public readonly PendingGrantAccessToken $accessToken;
 
-    public string $uri;
+    public readonly string $uri;
 
-    public ?int $wait;
+    public readonly ?int $wait;
 
     /**
      * @param  PendingGrantAccessToken  $accessToken  A unique access token for continuing the request.

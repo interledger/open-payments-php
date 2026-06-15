@@ -1,20 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OpenPayments\Models;
 
 class JsonWebKey
 {
-    public string $kid;
+    public readonly string $kid;
 
-    public string $alg;
+    public readonly string $alg;
 
-    public string $use;
+    public readonly ?string $use;
 
-    public string $kty;
+    public readonly ?string $kty;
 
-    public string $crv;
+    public readonly ?string $crv;
 
-    public string $x;
+    public readonly ?string $x;
 
     public function __construct(array $data)
     {
@@ -26,33 +28,21 @@ class JsonWebKey
         }
         $this->kid = $data['kid'];
         $this->alg = $data['alg'];
-        if (isset($data['use'])) {
-            $this->use = $data['use'];
-        }
-        if (isset($data['kty'])) {
-            $this->kty = $data['kty'];
-        }
-        if (isset($data['crv'])) {
-            $this->crv = $data['crv'];
-        }
-        if (isset($data['x'])) {
-            $this->x = $data['x'];
-        }
+        $this->use = $data['use'] ?? null;
+        $this->kty = $data['kty'] ?? null;
+        $this->crv = $data['crv'] ?? null;
+        $this->x = $data['x'] ?? null;
     }
 
     public function toArray(): array
     {
-        $return = [
+        return array_filter([
             'kid' => $this->kid,
             'alg' => $this->alg,
             'use' => $this->use,
             'kty' => $this->kty,
             'crv' => $this->crv,
             'x' => $this->x,
-        ];
-
-        return array_filter($return, function ($value) {
-            return $value !== null;
-        });
+        ], fn ($value) => $value !== null);
     }
 }

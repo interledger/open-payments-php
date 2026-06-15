@@ -8,11 +8,14 @@ use OpenPayments\Exceptions\BadRequestException;
 use OpenPayments\Exceptions\CreateOutgoingPaymentForbiddenException;
 use OpenPayments\Exceptions\CreateOutgoingPaymentUnauthorizedException;
 use OpenPayments\Exceptions\GetOutgoingPaymentForbiddenException;
+use OpenPayments\Exceptions\GetOutgoingPaymentGrantForbiddenException;
+use OpenPayments\Exceptions\GetOutgoingPaymentGrantUnauthorizedException;
 use OpenPayments\Exceptions\GetOutgoingPaymentNotFoundException;
 use OpenPayments\Exceptions\GetOutgoingPaymentUnauthorizedException;
 use OpenPayments\Exceptions\ListOutgoingPaymentsForbiddenException;
 use OpenPayments\Exceptions\ListOutgoingPaymentsUnauthorizedException;
 use OpenPayments\Models\OutgoingPayment;
+use OpenPayments\Models\OutgoingPaymentGrant;
 use OpenPayments\Models\OutgoingPaymentsList;
 use OpenPayments\Validators\OutgoingPaymentValidator;
 use Psr\Http\Message\ResponseInterface;
@@ -140,5 +143,43 @@ class OutgoingPaymentService implements OutgoingPaymentRoutes
             }
             throw new \UnexpectedValueException('Unexpected response '.print_r($response, true));
         }
+    }
+
+    /**
+     * Returns the spent amounts for the current outgoing payment grant.
+     *
+     * @param  array  $reqParams  Must include `url` (wallet address URL) and `access_token`.
+     *
+     * @throws GetOutgoingPaymentGrantUnauthorizedException
+     * @throws GetOutgoingPaymentGrantForbiddenException
+     */
+    public function getGrant(array $reqParams): OutgoingPaymentGrant
+    {
+        if (! isset($reqParams['url']) || ! isset($reqParams['access_token'])) {
+            throw new \InvalidArgumentException('Missing required data');
+        }
+
+        $this->apiClient->setAccessToken($reqParams['access_token']);
+        $response = $this->apiClient->request('GET', rtrim($reqParams['url'], '/').'/outgoing-payment-grant');
+
+        if (is_array($response) && ! isset($response['error'])) {
+            return new OutgoingPaymentGrant($response);
+        }
+
+        if (! is_array($response)) {
+            throw new \UnexpectedValueException(
+                'Unexpected response type '.gettype($response).' '.print_r($response, true)
+            );
+        }
+
+        $status = $response['status_code'] ?? 0;
+        if ($status === 401) {
+            throw new GetOutgoingPaymentGrantUnauthorizedException($response['message']);
+        }
+        if ($status === 403) {
+            throw new GetOutgoingPaymentGrantForbiddenException($response['message']);
+        }
+
+        throw new \UnexpectedValueException('Unexpected response '.print_r($response, true));
     }
 }

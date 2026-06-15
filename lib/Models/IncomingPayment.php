@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OpenPayments\Models;
 
 use OpenPayments\Traits\ArraySerializableTrait;
@@ -8,9 +10,9 @@ class IncomingPayment
 {
     use ArraySerializableTrait;
 
-    public ?Amount $receivedAmount;
+    public readonly ?Amount $receivedAmount;
 
-    public string $authServer;
+    public readonly string $authServer;
 
     public function __construct(array $payment)
     {

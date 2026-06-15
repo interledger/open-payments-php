@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OpenPayments\Models;
 
 class JsonWebKeySet
 {
-    public array $keys;
+    public readonly array $keys;
 
     public function __construct(array $data)
     {

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OpenPayments\Models;
 
 // Continue Class for Grant
@@ -8,11 +10,11 @@ namespace OpenPayments\Models;
  */
 class GrantContinue
 {
-    public AccessToken $access_token;
+    public readonly AccessToken $access_token;
 
-    public string $uri;
+    public readonly string $uri;
 
-    public ?int $wait = null;
+    public readonly ?int $wait;
 
     public function __construct(AccessToken $access_token, string $uri, ?int $wait = null)
     {

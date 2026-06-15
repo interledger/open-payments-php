@@ -1,14 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OpenPayments\DTO;
 
 class GrantInteractionFinish
 {
     public string $method; // Always "redirect"
 
-    public string $uri;
+    public readonly string $uri;
 
-    public string $nonce;
+    public readonly string $nonce;
 
     public function __construct(string $method, string $uri, string $nonce)
     {
