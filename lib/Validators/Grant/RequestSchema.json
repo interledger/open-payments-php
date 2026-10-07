@@ -1,9 +1,26 @@
 {
   "type": "object",
   "required": ["client"],
-  "anyOf": [
-    { "required": ["access_token"] },
-    { "required": ["interact", "subject"] }
+  "allOf": [
+    {
+      "anyOf": [
+        { "required": ["access_token"] },
+        { "required": ["interact", "subject"] }
+      ]
+    },
+    {
+      "description": "A jwk client can only be used for non-interactive grant requests",
+      "anyOf": [
+        { "not": { "required": ["interact"] } },
+        {
+          "properties": {
+            "client": {
+              "not": { "type": "object", "required": ["jwk"] }
+            }
+          }
+        }
+      ]
+    }
   ],
   "properties": {
     "access_token": {
@@ -123,8 +140,43 @@
       "additionalProperties": false
     },
     "client": {
-      "type": "string",
-      "format": "uri"
+      "oneOf": [
+        {
+          "type": "string",
+          "format": "uri"
+        },
+        {
+          "type": "object",
+          "required": ["walletAddress"],
+          "properties": {
+            "walletAddress": {
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["jwk"],
+          "properties": {
+            "jwk": {
+              "type": "object",
+              "required": ["kid", "alg", "kty", "crv", "x"],
+              "properties": {
+                "kid": { "type": "string" },
+                "alg": { "type": "string", "enum": ["EdDSA"] },
+                "use": { "type": "string", "enum": ["sig"] },
+                "kty": { "type": "string", "enum": ["OKP"] },
+                "crv": { "type": "string", "enum": ["Ed25519"] },
+                "x": { "type": "string", "pattern": "^[a-zA-Z0-9_-]{43}\\z" }
+              },
+              "not": { "required": ["d"] }
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
     },
     "interact": {
       "type": "object",

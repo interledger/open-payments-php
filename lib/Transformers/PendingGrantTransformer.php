@@ -25,11 +25,7 @@ class PendingGrantTransformer
 
         // Create AccessToken instance for the continue field
         $continueData = $response['continue'];
-        $accessToken = new SimpleAccessToken(
-            $continueData['access_token']['value'],
-            '', // The 'manage' field is not applicable here.
-            null
-        );
+        $accessToken = new SimpleAccessToken($continueData['access_token']['value']);
 
         // Create PendingGrantContinue instance
         $pendingGrantContinue = new PendingGrantContinue(
