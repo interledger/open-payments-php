@@ -6,6 +6,7 @@ namespace OpenPayments\Utils;
 
 use Bakame\Http\StructuredFields\ByteSequence;
 use Bakame\Http\StructuredFields\Dictionary;
+use Bakame\Http\StructuredFields\Item;
 use SodiumException;
 
 /**
@@ -198,7 +199,7 @@ function createSignatureHeaders(array $options): array
     if (! empty($request['headers']['Authorization']) || ! empty($request['headers']['authorization'])) {
         $components[] = 'authorization';
     }
-    if (! empty($request['body'])) {
+    if (isset($request['body']) && $request['body'] !== '') {
         $components = array_merge($components, ['content-digest', 'content-length', 'content-type']);
     }
 
@@ -313,6 +314,10 @@ function createSignatureInput(array $components, string $keyId): string
  */
 function validateSignatureHeaders(array $request): bool
 {
+    $request = normalizeHeaders($request);
+    if ($request === null) {
+        return false;
+    }
     $sig = $request['headers']['signature'] ?? null;
     $sigInput = $request['headers']['signature-input'] ?? null;
     if (! $sig || ! $sigInput || ! is_string($sig) || ! is_string($sigInput)) {
@@ -336,18 +341,57 @@ function validateSignatureHeaders(array $request): bool
  */
 function validateSignature(array $clientKey, array $request): bool
 {
+    $request = normalizeHeaders($request);
+    if ($request === null) {
+        return false;
+    }
     $sig = $request['headers']['signature'] ?? '';
     $sigInput = $request['headers']['signature-input'] ?? '';
+
+    if (! is_string($sig) || ! is_string($sigInput)) {
+        return false;
+    }
+
     $challenge = sigInputToChallenge($sigInput, $request);
 
     if ($challenge === null) {
         return false;
     }
 
-    $publicKey = sodium_crypto_sign_publickey($clientKey['x']);
-    $data = $challenge;
+    $publicKey = publicKeyFromJwk($clientKey);
+    // Accept only "sig1=<b64>" and the RFC 9421 byte sequence form "sig1=:<b64>:".
+    if (! preg_match('/^sig1=(:?)([A-Za-z0-9+\/]+={0,2})\1$/', $sig, $matches)) {
+        return false;
+    }
+    $signature = base64_decode($matches[2], true);
 
-    return sodium_crypto_sign_verify_detached(base64_decode(str_replace('sig1=', '', $sig)), $data, $publicKey);
+    if ($publicKey === null || $signature === false || strlen($signature) !== SODIUM_CRYPTO_SIGN_BYTES) {
+        return false;
+    }
+
+    try {
+        return sodium_crypto_sign_verify_detached($signature, $challenge, $publicKey);
+    } catch (SodiumException $e) {
+        return false;
+    }
+}
+
+/**
+ * Returns the raw Ed25519 public key from a JWK, or null if the JWK is not a valid Ed25519 key.
+ */
+function publicKeyFromJwk(array $jwk): ?string
+{
+    if (($jwk['kty'] ?? null) !== 'OKP' || ($jwk['crv'] ?? null) !== 'Ed25519' || ! is_string($jwk['x'] ?? null)) {
+        return null;
+    }
+
+    try {
+        $publicKey = sodium_base642bin($jwk['x'], SODIUM_BASE64_VARIANT_URLSAFE_NO_PADDING);
+    } catch (SodiumException $e) {
+        return null;
+    }
+
+    return strlen($publicKey) === SODIUM_CRYPTO_SIGN_PUBLICKEYBYTES ? $publicKey : null;
 }
 
 /**
@@ -361,6 +405,11 @@ function validateSignature(array $clientKey, array $request): bool
  */
 function sigInputToChallenge(string $sigInput, array $request): ?string
 {
+    $request = normalizeHeaders($request);
+    if ($request === null || ! is_string($request['method'] ?? null) || ! is_string($request['url'] ?? null)) {
+        return null;
+    }
+
     $sigInputComponents = getSigInputComponents($sigInput);
 
     if ($sigInputComponents === null || ! validateSigInputComponents($sigInputComponents, $request)) {
@@ -371,15 +420,22 @@ function sigInputToChallenge(string $sigInput, array $request): ?string
 
     foreach ($sigInputComponents as $component) {
         if ($component === '@method') {
-            $signatureBase .= '"@method": '.strtoupper($request['method'])."\n";
+            $value = strtoupper($request['method']);
         } elseif ($component === '@target-uri') {
-            $signatureBase .= '"@target-uri": '.$request['url']."\n";
+            $value = $request['url'];
         } else {
-            $signatureBase .= "\"$component\": ".($request['headers'][$component] ?? '')."\n";
+            $value = $request['headers'][$component] ?? '';
         }
+
+        // A line break in a value could inject extra lines into the signature base.
+        if ((! is_string($value) && ! is_int($value)) || preg_match('/[\r\n]/', (string) $value)) {
+            return null;
+        }
+
+        $signatureBase .= "\"$component\": $value\n";
     }
 
-    $signatureBase .= '"@signature-params": '.str_replace('sig1=', '', $request['headers']['signature-input'] ?? '');
+    $signatureBase .= '"@signature-params": '.substr($sigInput, strlen('sig1='));
 
     return $signatureBase;
 }
@@ -393,12 +449,34 @@ function sigInputToChallenge(string $sigInput, array $request): ?string
  */
 function getSigInputComponents(string $sigInput): ?array
 {
+    // Only a single "sig1" signature is supported.
+    if (! str_starts_with($sigInput, 'sig1=') || substr_count($sigInput, 'sig1=') !== 1) {
+        return null;
+    }
+
     $messageComponents = explode('sig1=', $sigInput)[1] ?? '';
 
     $components = explode(';', $messageComponents)[0] ?? '';
     $componentList = explode(' ', $components);
 
     return $componentList ? array_map(static fn ($component) => trim($component, '()"'), $componentList) : null;
+}
+
+/**
+ * Lowercases header names so lookups do not depend on the caller's casing.
+ * Returns null if headers is not an array or has names that differ only by case,
+ * since it is not clear which of those values was signed.
+ */
+function normalizeHeaders(array $request): ?array
+{
+    $headers = $request['headers'] ?? [];
+    if (! is_array($headers)) {
+        return null;
+    }
+
+    $request['headers'] = array_change_key_case($headers, CASE_LOWER);
+
+    return count($request['headers']) === count($headers) ? $request : null;
 }
 
 /**
@@ -418,18 +496,25 @@ function validateSigInputComponents(array $sigInputComponents, array $request): 
         }
     }
 
-    $hasBody = isset($request['body']) && $request['body'] !== '' && $request['body'] !== null;
-    // Open Payments / GNAP: when a body is present, content-digest MUST be covered
-    // and verified. Omitting it previously failed open (body could be swapped).
-    // Sibling of interledger/open-payments-go#50.
-    if ($hasBody) {
+    $request = normalizeHeaders($request);
+    if ($request === null) {
+        return false;
+    }
+    $body = $request['body'] ?? '';
+    $contentDigest = $request['headers']['content-digest'] ?? null;
+
+    if (! is_string($body) || ($contentDigest !== null && ! is_string($contentDigest))) {
+        return false;
+    }
+
+    // When a body is present, content-digest must be covered and verified.
+    if ($body !== '') {
         $isValidContentDigest = in_array('content-digest', $sigInputComponents, true) &&
-            isset($request['headers']['content-digest'], $request['headers']['content-length'], $request['headers']['content-type']) &&
-            verifyContentDigest($request['body'], $request['headers']['content-digest']);
+            isset($contentDigest, $request['headers']['content-length'], $request['headers']['content-type']) &&
+            verifyContentDigest($body, $contentDigest);
     } else {
         $isValidContentDigest = ! in_array('content-digest', $sigInputComponents, true) ||
-            (isset($request['headers']['content-digest']) &&
-                verifyContentDigest($request['body'] ?? '', $request['headers']['content-digest']));
+            ($contentDigest !== null && verifyContentDigest($body, $contentDigest));
     }
 
     return $isValidContentDigest &&
@@ -445,23 +530,31 @@ function validateSigInputComponents(array $sigInputComponents, array $request): 
  *
  * @param  string  $body  The message body.
  * @param  string  $digestHeader  The Content-Digest header value.
- * @return bool True if the digest matches; false otherwise.
- *
- * @throws InvalidArgumentException If the digest header is malformed or contains unsupported algorithms.
+ * @return bool True if every digest in the header matches; false if any does not match,
+ *              the header is empty or malformed, or it contains an unsupported algorithm.
  */
 function verifyContentDigest(string $body, string $digestHeader): bool
 {
-    $dictionary = Dictionary::fromHttpValue($digestHeader);
+    try {
+        $dictionary = Dictionary::fromHttpValue($digestHeader);
 
-    foreach ($dictionary->getIterator() as $algo => $digest) {
-        if (! ($digest instanceof ByteSequence)) {
-            throw new \InvalidArgumentException("Invalid value for digest with algorithm key of '{$algo}'");
-        }
-        $hash = base64_encode(hash(nodeAlgo($algo), $body, true));
-
-        if ($digest->encoded() !== $hash) {
+        if (count($dictionary) === 0) {
             return false;
         }
+
+        foreach ($dictionary->getIterator() as $algo => $member) {
+            $digest = $member instanceof Item ? $member->value() : null;
+            if (! ($digest instanceof ByteSequence)) {
+                return false;
+            }
+            $hash = base64_encode(hash(nodeAlgo($algo), $body, true));
+
+            if (! hash_equals($hash, $digest->encoded())) {
+                return false;
+            }
+        }
+    } catch (\InvalidArgumentException $e) {
+        return false;
     }
 
     return true;
@@ -528,7 +621,7 @@ function createHeaders(array $options): array
     $privateKey = $options['privateKey'];
     $keyId = $options['keyId'];
 
-    $contentHeaders = isset($request['body']) ? createContentHeaders($request['body']) : [];
+    $contentHeaders = isset($request['body']) && $request['body'] !== '' ? createContentHeaders($request['body']) : [];
 
     if ($contentHeaders) {
         $request['headers'] = array_merge($request['headers'], $contentHeaders);

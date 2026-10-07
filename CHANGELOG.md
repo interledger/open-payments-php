@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+- `validateSigInputComponents` requires `content-digest` to be covered and verified when the request has a body (#9)
+- `verifyContentDigest` threw on every valid `Content-Digest` header; it now verifies the digest. It returns `false` for an empty, malformed or unsupported header instead of throwing
+- `validateSignature` threw for every JWK; it now decodes the base64url `x` value. It returns `false` for an invalid key or signature, and accepts the RFC 9421 `sig1=:<b64>:` form
+- Signature validators ignore header name case. Before, an uncovered `Authorization` header was not detected
+- Signature validators return `false` for a non-string body instead of throwing a `TypeError`
+- `createSignatureHeaders` and `createHeaders` now treat the body `"0"` as a body
+- `createHeaders` no longer adds unsigned `Content-*` headers for an empty-string body
+- Signature validators return `false` for header names that differ only by case, header values with line breaks, a `Signature-Input` with more than one `sig1=`, and a missing or non-string `method` or `url`
+
+### Added
+- GitHub Actions CI: PHPUnit, PHPStan and Pint
+
 ## [1.1.0] - 2026-06-13
 
 ### Added
