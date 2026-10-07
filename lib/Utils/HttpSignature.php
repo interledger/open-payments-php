@@ -191,12 +191,21 @@ function createSignatureHeaders(array $options): array
     $privateKey = $options['privateKey'];
     $keyId = $options['keyId'];
 
-    if (! isset($request['method'], $request['url'], $request['headers']) || empty($keyId)) {
+    if (! isset($request['method'], $request['url'], $request['headers']) || ! is_array($request['headers']) || empty($keyId)) {
         throw new \Exception('Invalid signing options');
     }
+    // keyid is a quoted string in Signature-Input, so a quote or backslash would change the header.
+    if (! is_string($keyId) || preg_match('/[^\x20-\x7e]|["\\\\]/', $keyId)) {
+        throw new \Exception('Invalid key ID');
+    }
+    $headers = array_change_key_case($request['headers'], CASE_LOWER);
+    if (count($headers) !== count($request['headers'])) {
+        throw new \Exception('Header names must not differ only by case');
+    }
+    $request['headers'] = $headers;
 
     $components = ['@method', '@target-uri'];
-    if (! empty($request['headers']['Authorization']) || ! empty($request['headers']['authorization'])) {
+    if (! empty($request['headers']['authorization'])) {
         $components[] = 'authorization';
     }
     if (isset($request['body']) && $request['body'] !== '') {
@@ -265,7 +274,7 @@ function prepareSigningData(array $request, array $components): string
                 $dataToSign .= '"@target-uri": '.$request['url']."\n";
                 break;
             case 'authorization':
-                $authorization = $request['headers']['authorization'] ?? $request['headers']['Authorization'] ?? '';
+                $authorization = $request['headers']['authorization'] ?? '';
                 $dataToSign .= "\"authorization\": $authorization\n";
                 break;
             case 'content-digest':
@@ -277,7 +286,7 @@ function prepareSigningData(array $request, array $components): string
                 $dataToSign .= "\"content-length\": $contentLength\n";
                 break;
             case 'content-type':
-                $contentType = $request['headers']['Content-Type'] ?? 'application/octet-stream';
+                $contentType = $request['headers']['content-type'] ?? 'application/octet-stream';
                 $dataToSign .= "\"content-type\": $contentType\n";
                 break;
             default:
@@ -312,7 +321,7 @@ function createSignatureInput(array $components, string $keyId): string
  *
  * @param  mixed  $request
  */
-function validateSignatureHeaders(array $request): bool
+function validateSignatureHeaders(array $request, array $options = []): bool
 {
     $request = normalizeHeaders($request);
     if ($request === null) {
@@ -325,8 +334,11 @@ function validateSignatureHeaders(array $request): bool
     }
 
     $sigInputComponents = getSigInputComponents($sigInput);
+    $params = getSigInputParams($sigInput);
 
     return $sigInputComponents !== null &&
+        $params !== null &&
+        validateSigInputTime($params, $options) &&
         validateSigInputComponents($sigInputComponents, $request);
 }
 
@@ -339,7 +351,7 @@ function validateSignatureHeaders(array $request): bool
  * @param  mixed  $clientKey
  * @param  mixed  $request
  */
-function validateSignature(array $clientKey, array $request): bool
+function validateSignature(array $clientKey, array $request, array $options = []): bool
 {
     $request = normalizeHeaders($request);
     if ($request === null) {
@@ -349,6 +361,15 @@ function validateSignature(array $clientKey, array $request): bool
     $sigInput = $request['headers']['signature-input'] ?? '';
 
     if (! is_string($sig) || ! is_string($sigInput)) {
+        return false;
+    }
+
+    $params = getSigInputParams($sigInput);
+    // The signature must be made with the key in $clientKey.
+    if ($params === null ||
+        ! is_string($clientKey['kid'] ?? null) ||
+        ($params['keyid'] ?? null) !== $clientKey['kid'] ||
+        ! validateSigInputTime($params, $options)) {
         return false;
     }
 
@@ -441,25 +462,98 @@ function sigInputToChallenge(string $sigInput, array $request): ?string
 }
 
 /**
- * getSigInputComponents
+ * Parses the "sig1" Signature-Input, for example
+ * `sig1=("@method" "@target-uri");keyid="key-1";created=1700000000`.
  *
- * Parses and cleans up the components in signature-input, removing any special characters
+ * Components must be quoted lowercase names. Parameter values must be integers or
+ * strings without escapes. Returns null for any other input, for more than one label,
+ * or for a repeated parameter.
  *
- * @param  mixed  $sigInput
+ * @return array{components: string[], params: array<string, string|int>}|null
  */
-function getSigInputComponents(string $sigInput): ?array
+function parseSigInput(string $sigInput): ?array
 {
     // Only a single "sig1" signature is supported.
-    if (! str_starts_with($sigInput, 'sig1=') || substr_count($sigInput, 'sig1=') !== 1) {
+    if (substr_count($sigInput, 'sig1=') !== 1) {
         return null;
     }
 
-    $messageComponents = explode('sig1=', $sigInput)[1] ?? '';
+    $component = '"[a-z0-9@_.-]+"';
+    $param = '; *([a-z*][a-z0-9_.*-]*)=(?:"([\x20\x21\x23-\x5b\x5d-\x7e]*)"|(-?\d{1,15}))';
+    if (! preg_match('/^sig1=\(((?:'.$component.')(?: '.$component.')*)?\)((?:'.$param.')*)\z/', $sigInput, $matches)) {
+        return null;
+    }
 
-    $components = explode(';', $messageComponents)[0] ?? '';
-    $componentList = explode(' ', $components);
+    $components = ($matches[1] ?? '') === '' ? [] : array_map(
+        static fn ($name) => trim($name, '"'),
+        explode(' ', $matches[1])
+    );
 
-    return $componentList ? array_map(static fn ($component) => trim($component, '()"'), $componentList) : null;
+    preg_match_all('/'.$param.'/', $matches[2] ?? '', $pairs, PREG_SET_ORDER);
+    $params = [];
+    foreach ($pairs as $pair) {
+        if (array_key_exists($pair[1], $params)) {
+            return null;
+        }
+        $params[$pair[1]] = isset($pair[3]) && $pair[3] !== '' ? (int) $pair[3] : $pair[2];
+    }
+
+    return ['components' => $components, 'params' => $params];
+}
+
+/**
+ * getSigInputComponents
+ *
+ * Returns the component names of the "sig1" Signature-Input, or null if it is malformed.
+ */
+function getSigInputComponents(string $sigInput): ?array
+{
+    return parseSigInput($sigInput)['components'] ?? null;
+}
+
+/**
+ * Returns the parameters of the "sig1" Signature-Input.
+ * Returns null if the Signature-Input is malformed or `created` is missing.
+ *
+ * @return array<string, string|int>|null
+ */
+function getSigInputParams(string $sigInput): ?array
+{
+    $params = parseSigInput($sigInput)['params'] ?? null;
+
+    return is_int($params['created'] ?? null) ? $params : null;
+}
+
+/**
+ * Checks the `created` and `expires` signature parameters, to limit replay of old signatures.
+ *
+ * Options:
+ * - `maxAge`: seconds a signature is valid after `created` (default 300)
+ * - `clockSkew`: seconds `created` may be in the future (default 60)
+ * - `now`: current Unix time (default `time()`)
+ *
+ * @throws \InvalidArgumentException if an option is not a non-negative integer
+ */
+function validateSigInputTime(array $params, array $options = []): bool
+{
+    $now = $options['now'] ?? time();
+    $maxAge = $options['maxAge'] ?? 300;
+    $clockSkew = $options['clockSkew'] ?? 60;
+    foreach (['now' => $now, 'maxAge' => $maxAge, 'clockSkew' => $clockSkew] as $name => $value) {
+        if (! is_int($value) || $value < 0) {
+            throw new \InvalidArgumentException("Signature option $name must be a non-negative integer");
+        }
+    }
+
+    $created = $params['created'] ?? null;
+    $expires = $params['expires'] ?? null;
+
+    if (! is_int($created) || $created > $now + $clockSkew || $now - $created > $maxAge) {
+        return false;
+    }
+
+    // The signature is not valid at or after `expires`.
+    return $expires === null || (is_int($expires) && $expires > $now && $expires >= $created);
 }
 
 /**
@@ -509,7 +603,7 @@ function validateSigInputComponents(array $sigInputComponents, array $request): 
 
     // When a body is present, content-digest must be covered and verified.
     if ($body !== '') {
-        $isValidContentDigest = in_array('content-digest', $sigInputComponents, true) &&
+        $isValidContentDigest = ! array_diff(['content-digest', 'content-length', 'content-type'], $sigInputComponents) &&
             isset($contentDigest, $request['headers']['content-length'], $request['headers']['content-type']) &&
             verifyContentDigest($body, $contentDigest);
     } else {
@@ -624,6 +718,12 @@ function createHeaders(array $options): array
     $contentHeaders = isset($request['body']) && $request['body'] !== '' ? createContentHeaders($request['body']) : [];
 
     if ($contentHeaders) {
+        // Drop caller content headers with other name cases, so only the generated values are signed.
+        $request['headers'] = array_filter(
+            $request['headers'],
+            static fn ($name) => ! in_array(strtolower((string) $name), ['content-digest', 'content-length', 'content-type'], true),
+            ARRAY_FILTER_USE_KEY
+        );
         $request['headers'] = array_merge($request['headers'], $contentHeaders);
     }
 
