@@ -201,6 +201,18 @@ class ValidateSignatureTest extends TestCase
         $this->assertTrue(\OpenPayments\Utils\validateSignature($jwk, $request));
     }
 
+    public function test_validate_signature_rejects_malformed_signature_wrapper()
+    {
+        $jwk = \OpenPayments\Utils\generateJwk($this->keyId, $this->privateKey);
+        $request = $this->signedRequest('POST', '{"amount":"1"}');
+        $value = substr($request['headers']['signature'], strlen('sig1='));
+
+        foreach (["sig1=:$value", "sig1=$value:", "sig1=::$value::", "sig1=sig1=$value", $value, "sig2=:$value:"] as $signature) {
+            $request['headers']['signature'] = $signature;
+            $this->assertFalse(\OpenPayments\Utils\validateSignature($jwk, $request), $signature);
+        }
+    }
+
     public function test_rejects_header_names_that_differ_only_by_case()
     {
         $jwk = \OpenPayments\Utils\generateJwk($this->keyId, $this->privateKey);

@@ -359,8 +359,11 @@ function validateSignature(array $clientKey, array $request): bool
     }
 
     $publicKey = publicKeyFromJwk($clientKey);
-    // Accept both "sig1=<b64>" and the RFC 9421 byte sequence form "sig1=:<b64>:".
-    $signature = base64_decode(trim(str_replace('sig1=', '', $sig), ':'), true);
+    // Accept only "sig1=<b64>" and the RFC 9421 byte sequence form "sig1=:<b64>:".
+    if (! preg_match('/^sig1=(:?)([A-Za-z0-9+\/]+={0,2})\1$/', $sig, $matches)) {
+        return false;
+    }
+    $signature = base64_decode($matches[2], true);
 
     if ($publicKey === null || $signature === false || strlen($signature) !== SODIUM_CRYPTO_SIGN_BYTES) {
         return false;
