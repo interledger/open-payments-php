@@ -418,9 +418,19 @@ function validateSigInputComponents(array $sigInputComponents, array $request): 
         }
     }
 
-    $isValidContentDigest = ! in_array('content-digest', $sigInputComponents, true) ||
-        (isset($request['headers']['content-digest'], $request['headers']['content-length'], $request['headers']['content-type'], $request['body']) &&
-            verifyContentDigest($request['body'], $request['headers']['content-digest']));
+    $hasBody = isset($request['body']) && $request['body'] !== '' && $request['body'] !== null;
+    // Open Payments / GNAP: when a body is present, content-digest MUST be covered
+    // and verified. Omitting it previously failed open (body could be swapped).
+    // Sibling of interledger/open-payments-go#50.
+    if ($hasBody) {
+        $isValidContentDigest = in_array('content-digest', $sigInputComponents, true) &&
+            isset($request['headers']['content-digest'], $request['headers']['content-length'], $request['headers']['content-type']) &&
+            verifyContentDigest($request['body'], $request['headers']['content-digest']);
+    } else {
+        $isValidContentDigest = ! in_array('content-digest', $sigInputComponents, true) ||
+            (isset($request['headers']['content-digest']) &&
+                verifyContentDigest($request['body'] ?? '', $request['headers']['content-digest']));
+    }
 
     return $isValidContentDigest &&
         in_array('@method', $sigInputComponents, true) &&
