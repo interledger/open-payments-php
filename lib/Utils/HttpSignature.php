@@ -199,7 +199,7 @@ function createSignatureHeaders(array $options): array
     if (! empty($request['headers']['Authorization']) || ! empty($request['headers']['authorization'])) {
         $components[] = 'authorization';
     }
-    if (! empty($request['body'])) {
+    if (isset($request['body']) && $request['body'] !== '') {
         $components = array_merge($components, ['content-digest', 'content-length', 'content-type']);
     }
 
@@ -586,7 +586,7 @@ function createHeaders(array $options): array
     $privateKey = $options['privateKey'];
     $keyId = $options['keyId'];
 
-    $contentHeaders = isset($request['body']) ? createContentHeaders($request['body']) : [];
+    $contentHeaders = isset($request['body']) && $request['body'] !== '' ? createContentHeaders($request['body']) : [];
 
     if ($contentHeaders) {
         $request['headers'] = array_merge($request['headers'], $contentHeaders);
