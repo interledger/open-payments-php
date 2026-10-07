@@ -345,10 +345,37 @@ function validateSignature(array $clientKey, array $request): bool
         return false;
     }
 
-    $publicKey = sodium_crypto_sign_publickey($clientKey['x']);
-    $data = $challenge;
+    $publicKey = publicKeyFromJwk($clientKey);
+    // Accept both "sig1=<b64>" and the RFC 9421 byte sequence form "sig1=:<b64>:".
+    $signature = base64_decode(trim(str_replace('sig1=', '', $sig), ':'), true);
 
-    return sodium_crypto_sign_verify_detached(base64_decode(str_replace('sig1=', '', $sig)), $data, $publicKey);
+    if ($publicKey === null || $signature === false || strlen($signature) !== SODIUM_CRYPTO_SIGN_BYTES) {
+        return false;
+    }
+
+    try {
+        return sodium_crypto_sign_verify_detached($signature, $challenge, $publicKey);
+    } catch (SodiumException $e) {
+        return false;
+    }
+}
+
+/**
+ * Returns the raw Ed25519 public key from a JWK, or null if the JWK is not a valid Ed25519 key.
+ */
+function publicKeyFromJwk(array $jwk): ?string
+{
+    if (($jwk['kty'] ?? null) !== 'OKP' || ($jwk['crv'] ?? null) !== 'Ed25519' || ! is_string($jwk['x'] ?? null)) {
+        return null;
+    }
+
+    try {
+        $publicKey = sodium_base642bin($jwk['x'], SODIUM_BASE64_VARIANT_URLSAFE_NO_PADDING);
+    } catch (SodiumException $e) {
+        return null;
+    }
+
+    return strlen($publicKey) === SODIUM_CRYPTO_SIGN_PUBLICKEYBYTES ? $publicKey : null;
 }
 
 /**
