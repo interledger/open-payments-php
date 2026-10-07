@@ -272,4 +272,197 @@ class ValidateSignatureTest extends TestCase
 
         $this->assertSame(['Signature', 'Signature-Input'], array_keys($headers));
     }
+
+    public function test_rejects_signature_older_than_max_age()
+    {
+        $jwk = \OpenPayments\Utils\generateJwk($this->keyId, $this->privateKey);
+        $request = $this->signedRequest('POST', '{"amount":"1"}');
+        $later = ['now' => time() + 301];
+
+        $this->assertFalse(\OpenPayments\Utils\validateSignatureHeaders($request, $later));
+        $this->assertFalse(\OpenPayments\Utils\validateSignature($jwk, $request, $later));
+        $this->assertTrue(\OpenPayments\Utils\validateSignature($jwk, $request, ['now' => time() + 301, 'maxAge' => 600]));
+    }
+
+    public function test_rejects_signature_created_in_the_future()
+    {
+        $request = $this->signedRequest('GET', null);
+
+        $this->assertFalse(\OpenPayments\Utils\validateSignatureHeaders($request, ['now' => time() - 61]));
+        $this->assertTrue(\OpenPayments\Utils\validateSignatureHeaders($request, ['now' => time() - 30]));
+    }
+
+    public function test_rejects_expired_signature()
+    {
+        $request = $this->signedRequest('GET', null);
+        $request['headers']['signature-input'] .= ';expires='.(time() - 1);
+
+        $this->assertFalse(\OpenPayments\Utils\validateSignatureHeaders($request));
+    }
+
+    public function test_rejects_signature_input_without_created_or_with_bad_params()
+    {
+        $request = $this->signedRequest('GET', null);
+        $sigInput = $request['headers']['signature-input'];
+        $components = substr($sigInput, 0, strpos($sigInput, ')') + 1);
+
+        foreach ([
+            $components.';keyid="gnap-key"',
+            $components.';keyid="gnap-key";created=abc',
+            $components.';keyid="gnap-key";created='.time().';created='.time(),
+            $components.';keyid="gnap-key";created='.time()."\n",
+            $components.'keyid="gnap-key";created='.time(),
+        ] as $value) {
+            $request['headers']['signature-input'] = $value;
+            $this->assertFalse(\OpenPayments\Utils\validateSignatureHeaders($request), $value);
+        }
+    }
+
+    public function test_validate_signature_requires_keyid_to_match_jwk_kid()
+    {
+        $request = $this->signedRequest('POST', '{"amount":"1"}');
+        $jwk = \OpenPayments\Utils\generateJwk($this->keyId, $this->privateKey);
+
+        $this->assertFalse(\OpenPayments\Utils\validateSignature(['kid' => 'other-key'] + $jwk, $request));
+
+        $noKid = $jwk;
+        unset($noKid['kid']);
+        $this->assertFalse(\OpenPayments\Utils\validateSignature($noKid, $request));
+    }
+
+    public function test_rejects_body_when_content_type_or_length_is_not_covered()
+    {
+        $request = $this->signedRequest('POST', '{"amount":"1"}');
+        $sigInput = $request['headers']['signature-input'];
+
+        foreach (['"content-type"', '"content-length"'] as $component) {
+            $request['headers']['signature-input'] = str_replace(' '.$component, '', $sigInput);
+            $this->assertFalse(\OpenPayments\Utils\validateSignatureHeaders($request), $component);
+        }
+    }
+
+    public function test_signer_reads_header_names_in_any_case()
+    {
+        $jwk = \OpenPayments\Utils\generateJwk($this->keyId, $this->privateKey);
+
+        $request = $this->signedRequest('POST', '{"amount":"1"}', ['authorization' => 'GNAP token']);
+        $this->assertStringContainsString('"authorization"', $request['headers']['signature-input']);
+        $this->assertTrue(\OpenPayments\Utils\validateSignature($jwk, $request));
+
+        $request = $this->signedRequest('POST', '{"amount":"1"}', ['AUTHORIZATION' => 'GNAP token', 'content-type' => 'text/plain']);
+        $this->assertSame('application/json', $request['headers']['content-type']);
+        $this->assertTrue(\OpenPayments\Utils\validateSignature($jwk, $request));
+    }
+
+    public function test_signer_rejects_key_id_that_breaks_signature_input()
+    {
+        foreach (['key"1', 'key\\1', "key\n1"] as $keyId) {
+            try {
+                \OpenPayments\Utils\createHeaders([
+                    'request' => ['method' => 'GET', 'url' => 'https://example.com/incoming-payments', 'headers' => []],
+                    'privateKey' => $this->privateKey,
+                    'keyId' => $keyId,
+                ]);
+                $this->fail('Expected exception for key ID '.json_encode($keyId));
+            } catch (Exception $e) {
+                $this->assertSame('Invalid key ID', $e->getMessage());
+            }
+        }
+    }
+
+    /**
+     * Builds a request signed by hand, with the Signature-Input format used by the Node SDK and Rafiki.
+     */
+    private function handSignedRequest(string $params, string $components = '"@method" "@target-uri" "authorization"'): array
+    {
+        $request = [
+            'method' => 'GET',
+            'url' => 'https://example.com/incoming-payments',
+            'headers' => ['authorization' => 'GNAP token'],
+        ];
+        $sigInput = "sig1=($components)$params";
+        $base = "\"@method\": GET\n\"@target-uri\": https://example.com/incoming-payments\n\"authorization\": GNAP token\n";
+        $base .= '"@signature-params": '.substr($sigInput, strlen('sig1='));
+        $request['headers']['signature-input'] = $sigInput;
+        $request['headers']['signature'] = 'sig1=:'.base64_encode(sodium_crypto_sign_detached($base, $this->privateKey)).':';
+
+        return $request;
+    }
+
+    public function test_accepts_node_style_signature_input()
+    {
+        $jwk = \OpenPayments\Utils\generateJwk($this->keyId, $this->privateKey);
+        $now = time();
+
+        foreach ([
+            ";keyid=\"gnap-key\";created=$now",
+            ";created=$now;keyid=\"gnap-key\"",
+            ";created=$now;keyid=\"gnap-key\";alg=\"ed25519\";nonce=\"abc\";tag=\"gnap\"",
+            "; created=$now; keyid=\"gnap-key\"",
+            ";keyid=\"gnap-key\";created=$now;expires=".($now + 60),
+        ] as $params) {
+            $this->assertTrue(\OpenPayments\Utils\validateSignature($jwk, $this->handSignedRequest($params)), $params);
+        }
+    }
+
+    public function test_validate_signature_rejects_signed_but_expired_input()
+    {
+        $jwk = \OpenPayments\Utils\generateJwk($this->keyId, $this->privateKey);
+        $now = time();
+
+        foreach ([
+            ";keyid=\"gnap-key\";created=$now;expires=$now",
+            ';keyid="gnap-key";created='.($now - 10).';expires='.($now - 1),
+            ';keyid="gnap-key";created='.($now + 30).';expires='.($now + 10),
+            ";keyid=\"gnap-key\";created=\"$now\"",
+            ";created=$now",
+        ] as $params) {
+            $this->assertFalse(\OpenPayments\Utils\validateSignature($jwk, $this->handSignedRequest($params)), $params);
+        }
+    }
+
+    public function test_rejects_components_that_are_not_quoted_names()
+    {
+        $jwk = \OpenPayments\Utils\generateJwk($this->keyId, $this->privateKey);
+        $params = ';keyid="gnap-key";created='.time();
+
+        foreach ([
+            '@method @target-uri authorization',
+            '"@method" "@target-uri" "authorization";bs',
+            '"@method" "@target-uri" "authorization" "x;y"',
+            '"@method"  "@target-uri" "authorization"',
+        ] as $components) {
+            $this->assertFalse(\OpenPayments\Utils\validateSignature($jwk, $this->handSignedRequest($params, $components)), $components);
+        }
+    }
+
+    public function test_invalid_time_options_throw()
+    {
+        $request = $this->signedRequest('GET', null);
+
+        foreach ([['maxAge' => 'x'], ['clockSkew' => -1], ['now' => 'abc'], ['maxAge' => false]] as $options) {
+            try {
+                \OpenPayments\Utils\validateSignatureHeaders($request, $options);
+                $this->fail('Expected exception for '.json_encode($options));
+            } catch (InvalidArgumentException $e) {
+                $this->assertStringContainsString('must be a non-negative integer', $e->getMessage());
+            }
+        }
+    }
+
+    public function test_signer_rejects_header_names_that_differ_only_by_case()
+    {
+        $this->expectExceptionMessage('Header names must not differ only by case');
+        $this->signedRequest('GET', null, ['Authorization' => 'GNAP a', 'authorization' => 'GNAP b']);
+    }
+
+    public function test_signer_rejects_non_ascii_key_id()
+    {
+        $this->expectExceptionMessage('Invalid key ID');
+        \OpenPayments\Utils\createHeaders([
+            'request' => ['method' => 'GET', 'url' => 'https://example.com/incoming-payments', 'headers' => []],
+            'privateKey' => $this->privateKey,
+            'keyId' => 'ké',
+        ]);
+    }
 }

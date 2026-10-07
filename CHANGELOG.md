@@ -16,6 +16,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `createSignatureHeaders` and `createHeaders` now treat the body `"0"` as a body
 - `createHeaders` no longer adds unsigned `Content-*` headers for an empty-string body
 - Signature validators return `false` for header names that differ only by case, header values with line breaks, a `Signature-Input` with more than one `sig1=`, and a missing or non-string `method` or `url`
+- Signature validators check the `created` and `expires` parameters. They return `false` when `created` is missing, older than `maxAge` (default 300 seconds) or more than `clockSkew` (default 60 seconds) in the future, or when `expires` is in the past. This limits replay of old signatures. Pass `['maxAge' => ..., 'clockSkew' => ..., 'now' => ...]` as the last argument to change the limits
+- `validateSignature` returns `false` when the `keyid` parameter does not match the JWK `kid`
+- Signature validators require `content-length` and `content-type` to be signed when the request has a body. Before, they only had to be present
+- The signer reads `Authorization` and `Content-Type` with any name case. Before, it only read `Authorization` or `authorization`, and only `Content-Type`
+- `createHeaders` ignores caller `Content-*` headers with other name cases when it signs, so only the generated values are signed
+- The signer throws when header names differ only by case, because it is not clear which value to sign
+- `ApiClient` merges headers without regard to name case. The `Authorization`, `Host` and signature headers it sets replace caller headers with the same name in another case, so each header is sent once
+- `Signature-Input` is read by one strict parser: components must be quoted lowercase names, parameter values must be integers or strings without escapes, and a parameter must not repeat. A signature with `expires` is valid only before `expires`, and `expires` must not be before `created`
+- Signature validators throw `InvalidArgumentException` when `maxAge`, `clockSkew` or `now` is not a non-negative integer
+- The signer throws for a key ID with a quote, a backslash or a character outside printable ASCII, because it would change the `Signature-Input` header
 
 ### Added
 - GitHub Actions CI: PHPUnit, PHPStan and Pint
