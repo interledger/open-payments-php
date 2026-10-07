@@ -10,13 +10,13 @@ namespace OpenPayments\Models;
  */
 class GrantContinue
 {
-    public readonly AccessToken $access_token;
+    public readonly AccessToken|SimpleAccessToken $access_token;
 
     public readonly string $uri;
 
     public readonly ?int $wait;
 
-    public function __construct(AccessToken $access_token, string $uri, ?int $wait = null)
+    public function __construct(AccessToken|SimpleAccessToken $access_token, string $uri, ?int $wait = null)
     {
         $this->access_token = $access_token;
         $this->uri = $uri;

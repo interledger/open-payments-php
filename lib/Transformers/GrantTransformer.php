@@ -8,6 +8,9 @@ use OpenPayments\Models\GrantContinue;
 use OpenPayments\Models\IncomingPaymentAccess;
 use OpenPayments\Models\OutgoingPaymentAccess;
 use OpenPayments\Models\QuoteAccess;
+use OpenPayments\Models\SimpleAccessToken;
+use OpenPayments\Models\Subject;
+use OpenPayments\Models\SubjectId;
 use Psr\Http\Message\ResponseInterface;
 use stdClass;
 
@@ -18,6 +21,27 @@ class GrantTransformer
         if ($response instanceof stdClass || $response instanceof ResponseInterface) {
             $response = json_decode(json_encode($response), true);
         }
+        if (! isset($response['continue']['access_token']['value'], $response['continue']['uri'])) {
+            throw new \UnexpectedValueException('Grant response has no valid continue field');
+        }
+        if (! isset($response['access_token']) && ! isset($response['subject'])) {
+            throw new \UnexpectedValueException('Grant is not finalized: response has no access_token or subject');
+        }
+
+        $subject = isset($response['subject']) ? $this->createSubject($response['subject']) : null;
+
+        // A grant for subject information only has no access token.
+        if (! isset($response['access_token'])) {
+            $continueData = $response['continue'];
+            $grantContinue = new GrantContinue(
+                new SimpleAccessToken($continueData['access_token']['value']),
+                $continueData['uri'],
+                $continueData['wait'] ?? null
+            );
+
+            return new Grant(null, $grantContinue, $subject);
+        }
+
         $accessTokenData = $response['access_token'];
 
         $accessData = $accessTokenData['access'][0];
@@ -72,6 +96,16 @@ class GrantTransformer
         );
 
         // Return the complete Grant instance
-        return new Grant($accessToken, $grantContinue);
+        return new Grant($accessToken, $grantContinue, $subject);
+    }
+
+    private function createSubject(array $subjectData): Subject
+    {
+        $subIds = array_map(
+            fn (array $subId) => new SubjectId($subId['id'], $subId['format']),
+            $subjectData['sub_ids'] ?? []
+        );
+
+        return new Subject($subIds);
     }
 }

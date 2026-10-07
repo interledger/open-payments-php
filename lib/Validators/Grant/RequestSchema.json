@@ -1,6 +1,10 @@
 {
   "type": "object",
-  "required": ["access_token", "client"],
+  "required": ["client"],
+  "anyOf": [
+    { "required": ["access_token"] },
+    { "required": ["interact", "subject"] }
+  ],
   "properties": {
     "access_token": {
       "type": "object",
@@ -121,6 +125,60 @@
     "client": {
       "type": "string",
       "format": "uri"
+    },
+    "interact": {
+      "type": "object",
+      "required": ["start"],
+      "properties": {
+        "start": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["redirect"]
+          }
+        },
+        "finish": {
+          "type": ["object", "null"],
+          "required": ["method", "uri", "nonce"],
+          "properties": {
+            "method": {
+              "type": "string",
+              "enum": ["redirect"]
+            },
+            "uri": {
+              "type": "string",
+              "format": "uri"
+            },
+            "nonce": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "subject": {
+      "type": "object",
+      "required": ["sub_ids"],
+      "properties": {
+        "sub_ids": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id", "format"],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "format": {
+                "type": "string",
+                "enum": ["uri"]
+              }
+            }
+          }
+        }
+      }
     }
   },
   "definitions": {

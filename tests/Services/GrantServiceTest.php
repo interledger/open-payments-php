@@ -99,6 +99,62 @@ class GrantServiceTest extends TestCase
         $this->assertInstanceOf(Grant::class, $result);
     }
 
+    public function test_request_with_subject_returns_pending_grant(): void
+    {
+        $response = [
+            'interact' => ['redirect' => 'https://ilp.interledger-test.dev', 'finish' => 'abc'],
+            'continue' => ['access_token' => ['value' => 'EAB18A53A6F67F9F1247'], 'uri' => 'https://ilp.interledger-test.dev/continue/abc'],
+        ];
+        $this->apiClient->method('request')->willReturn($response);
+
+        $this->pendingTransformer
+            ->expects($this->once())
+            ->method('createFromResponse')
+            ->with($response)
+            ->willReturn($this->createMock(PendingGrant::class));
+
+        $result = $this->service->request(['url' => 'https://ilp.interledger-test.dev'], [
+            'subject' => [
+                'sub_ids' => [
+                    ['id' => 'https://ilp.interledger-test.dev/alice', 'format' => 'uri'],
+                ],
+            ],
+            'interact' => [
+                'start' => ['redirect'],
+                'finish' => [
+                    'method' => 'redirect',
+                    'uri' => 'https://example.com/finish',
+                    'nonce' => 'nonce-123',
+                ],
+            ],
+        ]);
+        $this->assertInstanceOf(PendingGrant::class, $result);
+    }
+
+    public function test_continue_returns_subject_grant(): void
+    {
+        $this->apiClient->method('request')->willReturn([
+            'subject' => [
+                'sub_ids' => [
+                    ['id' => 'https://ilp.interledger-test.dev/alice', 'format' => 'uri'],
+                ],
+            ],
+            'continue' => [
+                'access_token' => ['value' => '33OMUKMKSKU80UPRY5NM'],
+                'uri' => 'https://ilp.interledger-test.dev/continue/abc',
+            ],
+        ]);
+        $service = new GrantService($this->apiClient, 'https://ilp.interledger-test.dev/wallet');
+
+        $result = $service->continue([
+            'url' => 'https://ilp.interledger-test.dev/continue/abc',
+            'access_token' => 'EAB18A53A6F67F9F1247',
+        ], ['interact_ref' => 'xyz']);
+
+        $this->assertNull($result->access_token);
+        $this->assertSame('https://ilp.interledger-test.dev/alice', $result->subject->sub_ids[0]->id);
+    }
+
     public function test_continue_throws_if_missing_url_or_token(): void
     {
         $this->expectException(\InvalidArgumentException::class);
