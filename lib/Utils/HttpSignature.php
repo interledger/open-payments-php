@@ -6,6 +6,7 @@ namespace OpenPayments\Utils;
 
 use Bakame\Http\StructuredFields\ByteSequence;
 use Bakame\Http\StructuredFields\Dictionary;
+use Bakame\Http\StructuredFields\Item;
 use SodiumException;
 
 /**
@@ -445,23 +446,31 @@ function validateSigInputComponents(array $sigInputComponents, array $request): 
  *
  * @param  string  $body  The message body.
  * @param  string  $digestHeader  The Content-Digest header value.
- * @return bool True if the digest matches; false otherwise.
- *
- * @throws InvalidArgumentException If the digest header is malformed or contains unsupported algorithms.
+ * @return bool True if every digest in the header matches; false if any does not match,
+ *              the header is empty or malformed, or it contains an unsupported algorithm.
  */
 function verifyContentDigest(string $body, string $digestHeader): bool
 {
-    $dictionary = Dictionary::fromHttpValue($digestHeader);
+    try {
+        $dictionary = Dictionary::fromHttpValue($digestHeader);
 
-    foreach ($dictionary->getIterator() as $algo => $digest) {
-        if (! ($digest instanceof ByteSequence)) {
-            throw new \InvalidArgumentException("Invalid value for digest with algorithm key of '{$algo}'");
-        }
-        $hash = base64_encode(hash(nodeAlgo($algo), $body, true));
-
-        if ($digest->encoded() !== $hash) {
+        if (count($dictionary) === 0) {
             return false;
         }
+
+        foreach ($dictionary->getIterator() as $algo => $member) {
+            $digest = $member instanceof Item ? $member->value() : null;
+            if (! ($digest instanceof ByteSequence)) {
+                return false;
+            }
+            $hash = base64_encode(hash(nodeAlgo($algo), $body, true));
+
+            if (! hash_equals($hash, $digest->encoded())) {
+                return false;
+            }
+        }
+    } catch (\InvalidArgumentException $e) {
+        return false;
     }
 
     return true;
