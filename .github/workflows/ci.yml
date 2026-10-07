@@ -27,4 +27,4 @@ jobs:
         run: vendor/bin/phpstan analyse lib/Utils --level=1 --no-progress
 
       - name: Code style
-        run: vendor/bin/pint --test lib tests/Http tests/DTO tests/Validators
+        run: vendor/bin/pint --test lib tests/Http tests/DTO tests/Validators tests/Transformers

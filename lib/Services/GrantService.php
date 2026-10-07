@@ -60,6 +60,20 @@ class GrantService implements GrantRoutes
     }
 
     /**
+     * Injects the client URL into a grant request,
+     * unless the caller set a directed identity client (`['jwk' => ...]`).
+     *
+     * @param  array  $grantRequest  The grant request to modify.
+     */
+    private function injectClient(array &$grantRequest): void
+    {
+        if (is_array($grantRequest['client'] ?? null) && isset($grantRequest['client']['jwk'])) {
+            return;
+        }
+        $this->injectClientUrl($grantRequest);
+    }
+
+    /**
      * Requests a new grant or pending grant.
      *
      * @param  array  $requestParams  Parameters for the request, including 'url'.
@@ -73,7 +87,7 @@ class GrantService implements GrantRoutes
         if (! isset($requestParams['url'])) {
             throw new \InvalidArgumentException('Missing required data');
         }
-        $this->injectClientUrl($grantRequest);
+        $this->injectClient($grantRequest);
         $this->validator->validateRequest($grantRequest);
         $url = $requestParams['url'];
         if (substr($url, -1) !== '/') {

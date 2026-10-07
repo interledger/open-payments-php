@@ -99,6 +99,153 @@ class GrantServiceTest extends TestCase
         $this->assertInstanceOf(Grant::class, $result);
     }
 
+    public function test_request_with_subject_returns_pending_grant(): void
+    {
+        $response = [
+            'interact' => ['redirect' => 'https://ilp.interledger-test.dev', 'finish' => 'abc'],
+            'continue' => ['access_token' => ['value' => 'EAB18A53A6F67F9F1247'], 'uri' => 'https://ilp.interledger-test.dev/continue/abc'],
+        ];
+        $this->apiClient->method('request')->willReturn($response);
+
+        $this->pendingTransformer
+            ->expects($this->once())
+            ->method('createFromResponse')
+            ->with($response)
+            ->willReturn($this->createMock(PendingGrant::class));
+
+        $result = $this->service->request(['url' => 'https://ilp.interledger-test.dev'], [
+            'subject' => [
+                'sub_ids' => [
+                    ['id' => 'https://ilp.interledger-test.dev/alice', 'format' => 'uri'],
+                ],
+            ],
+            'interact' => [
+                'start' => ['redirect'],
+                'finish' => [
+                    'method' => 'redirect',
+                    'uri' => 'https://example.com/finish',
+                    'nonce' => 'nonce-123',
+                ],
+            ],
+        ]);
+        $this->assertInstanceOf(PendingGrant::class, $result);
+    }
+
+    public function test_continue_returns_subject_grant(): void
+    {
+        $this->apiClient->method('request')->willReturn([
+            'subject' => [
+                'sub_ids' => [
+                    ['id' => 'https://ilp.interledger-test.dev/alice', 'format' => 'uri'],
+                ],
+            ],
+            'continue' => [
+                'access_token' => ['value' => '33OMUKMKSKU80UPRY5NM'],
+                'uri' => 'https://ilp.interledger-test.dev/continue/abc',
+            ],
+        ]);
+        $service = new GrantService($this->apiClient, 'https://ilp.interledger-test.dev/wallet');
+
+        $result = $service->continue([
+            'url' => 'https://ilp.interledger-test.dev/continue/abc',
+            'access_token' => 'EAB18A53A6F67F9F1247',
+        ], ['interact_ref' => 'xyz']);
+
+        $this->assertNull($result->access_token);
+        $this->assertSame('https://ilp.interledger-test.dev/alice', $result->subject->sub_ids[0]->id);
+    }
+
+    public function test_request_injects_client_url_when_client_is_missing(): void
+    {
+        $this->apiClient
+            ->expects($this->once())
+            ->method('request')
+            ->with('POST', 'https://ilp.interledger-test.dev/', $this->callback(
+                fn (array $body) => $body['client'] === 'https://ilp.interledger-test.dev/wallet'
+            ))
+            ->willReturn(['access_token' => 'xyz', 'continue' => '']);
+        $this->grantTransformer->method('createFromResponse')->willReturn($this->createMock(Grant::class));
+
+        $this->service->request(['url' => 'https://ilp.interledger-test.dev'], [
+            'access_token' => ['access' => [['type' => 'quote', 'actions' => ['create']]]],
+        ]);
+    }
+
+    public function test_request_keeps_client_set_by_caller(): void
+    {
+        $client = ['jwk' => [
+            'kid' => 'key-1',
+            'alg' => 'EdDSA',
+            'kty' => 'OKP',
+            'crv' => 'Ed25519',
+            'x' => '11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo',
+        ]];
+        $this->apiClient
+            ->expects($this->once())
+            ->method('request')
+            ->with('POST', 'https://ilp.interledger-test.dev/', $this->callback(
+                fn (array $body) => $body['client'] === $client
+            ))
+            ->willReturn(['access_token' => 'xyz', 'continue' => '']);
+        $this->grantTransformer->method('createFromResponse')->willReturn($this->createMock(Grant::class));
+
+        $this->service->request(['url' => 'https://ilp.interledger-test.dev'], [
+            'access_token' => ['access' => [['type' => 'incoming-payment', 'actions' => ['create']]]],
+            'client' => $client,
+        ]);
+    }
+
+    public function test_request_replaces_client_that_is_not_a_jwk(): void
+    {
+        $this->apiClient
+            ->expects($this->once())
+            ->method('request')
+            ->with('POST', 'https://ilp.interledger-test.dev/', $this->callback(
+                fn (array $body) => $body['client'] === 'https://ilp.interledger-test.dev/wallet'
+            ))
+            ->willReturn(['access_token' => 'xyz', 'continue' => '']);
+        $this->grantTransformer->method('createFromResponse')->willReturn($this->createMock(Grant::class));
+
+        $this->service->request(['url' => 'https://ilp.interledger-test.dev'], [
+            'access_token' => ['access' => [['type' => 'quote', 'actions' => ['create']]]],
+            'client' => ['walletAddress' => 'https://ilp.interledger-test.dev/other'],
+        ]);
+    }
+
+    public function test_request_injects_client_url_when_client_is_null(): void
+    {
+        $this->apiClient
+            ->expects($this->once())
+            ->method('request')
+            ->with('POST', 'https://ilp.interledger-test.dev/', $this->callback(
+                fn (array $body) => $body['client'] === 'https://ilp.interledger-test.dev/wallet'
+            ))
+            ->willReturn(['access_token' => 'xyz', 'continue' => '']);
+        $this->grantTransformer->method('createFromResponse')->willReturn($this->createMock(Grant::class));
+
+        $this->service->request(['url' => 'https://ilp.interledger-test.dev'], [
+            'access_token' => ['access' => [['type' => 'quote', 'actions' => ['create']]]],
+            'client' => null,
+        ]);
+    }
+
+    public function test_continue_always_sends_configured_client(): void
+    {
+        $this->apiClient
+            ->expects($this->once())
+            ->method('request')
+            ->with('POST', 'https://ilp.interledger-test.dev/continue/abc/', $this->callback(
+                fn (array $body) => $body['client'] === 'https://ilp.interledger-test.dev/wallet'
+            ))
+            ->willReturn(['access_token' => 'xyz']);
+        $this->grantTransformer->method('createFromResponse')->willReturn($this->createMock(Grant::class));
+
+        $this->service->continue([
+            'url' => 'https://ilp.interledger-test.dev/continue/abc',
+            'access_token' => 'EAB18A53A6F67F9F1247',
+        ], ['interact_ref' => 'xyz', 'client' => ['jwk' => ['kid' => 'key-1']]]);
+    }
+
     public function test_continue_throws_if_missing_url_or_token(): void
     {
         $this->expectException(\InvalidArgumentException::class);

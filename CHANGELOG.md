@@ -19,6 +19,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - GitHub Actions CI: PHPUnit, PHPStan and Pint
+- Grant requests for subject information (spec v1.3 wallet address ownership). A request needs `access_token`, or `interact` and `subject`
+- `Subject` and `SubjectId` models. `Grant::$subject` holds the `subject` returned by the auth server
+- Grant requests can use a directed identity client: pass `'client' => ['jwk' => ...]` with the public key of the configured key pair. The spec allows this only for non-interactive grants (for example incoming payments), so a request with `jwk` and `interact` fails validation. A `jwk` with a private key (`d`) also fails validation
+- The request schema accepts all spec v1.3 `client` forms: wallet address string, `['walletAddress' => ...]` and `['jwk' => ...]`
+
+### Changed
+- `Grant::$access_token` is now nullable. It is `null` for a grant that only returns subject information. In that case `Grant::$subject` is set
+- `GrantContinue::$access_token` is now `AccessToken|SimpleAccessToken`. It is a `SimpleAccessToken` when the grant has no access token. Only `->value` is set for both types
+- These two property types changed, so code that uses static analysis may need a null check or an `instanceof` check
+- `GrantService::request()` keeps a caller `client` only when it is a `jwk` object. Any other value is replaced with the configured wallet address, as before. `continue()` always sends the configured wallet address, as before
+- `GrantTransformer` throws `UnexpectedValueException` when a grant response has no valid `continue` field, or has neither `access_token` nor `subject` (grant still pending). Before, it threw an `InvalidArgumentException` or a `TypeError`
 
 ## [1.1.0] - 2026-06-13
 
