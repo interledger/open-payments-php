@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: sodium, bcmath
+          coverage: none
+
+      - run: composer install --no-interaction --no-progress
+
+      - name: Tests
+        run: vendor/bin/phpunit tests
+
+      # Scoped to paths that pass today. Widen as the rest is cleaned up.
+      - name: Static analysis
+        run: vendor/bin/phpstan analyse lib/Utils --level=1 --no-progress
+
+      - name: Code style
+        run: vendor/bin/pint --test lib tests/Http tests/DTO tests/Validators
