@@ -314,6 +314,7 @@ function createSignatureInput(array $components, string $keyId): string
  */
 function validateSignatureHeaders(array $request): bool
 {
+    $request = normalizeHeaders($request);
     $sig = $request['headers']['signature'] ?? null;
     $sigInput = $request['headers']['signature-input'] ?? null;
     if (! $sig || ! $sigInput || ! is_string($sig) || ! is_string($sigInput)) {
@@ -337,8 +338,14 @@ function validateSignatureHeaders(array $request): bool
  */
 function validateSignature(array $clientKey, array $request): bool
 {
+    $request = normalizeHeaders($request);
     $sig = $request['headers']['signature'] ?? '';
     $sigInput = $request['headers']['signature-input'] ?? '';
+
+    if (! is_string($sig) || ! is_string($sigInput)) {
+        return false;
+    }
+
     $challenge = sigInputToChallenge($sigInput, $request);
 
     if ($challenge === null) {
@@ -389,6 +396,7 @@ function publicKeyFromJwk(array $jwk): ?string
  */
 function sigInputToChallenge(string $sigInput, array $request): ?string
 {
+    $request = normalizeHeaders($request);
     $sigInputComponents = getSigInputComponents($sigInput);
 
     if ($sigInputComponents === null || ! validateSigInputComponents($sigInputComponents, $request)) {
@@ -430,6 +438,16 @@ function getSigInputComponents(string $sigInput): ?array
 }
 
 /**
+ * Lowercases header names so lookups do not depend on the caller's casing.
+ */
+function normalizeHeaders(array $request): array
+{
+    $request['headers'] = array_change_key_case($request['headers'] ?? [], CASE_LOWER);
+
+    return $request;
+}
+
+/**
  * validateSigInputComponents
  *
  * Ensures that all components are lowercase and validates the presence of necessary headers like content-digest, @method, and @target-uri.
@@ -446,18 +464,22 @@ function validateSigInputComponents(array $sigInputComponents, array $request): 
         }
     }
 
-    $hasBody = isset($request['body']) && $request['body'] !== '' && $request['body'] !== null;
-    // Open Payments / GNAP: when a body is present, content-digest MUST be covered
-    // and verified. Omitting it previously failed open (body could be swapped).
-    // Sibling of interledger/open-payments-go#50.
-    if ($hasBody) {
+    $request = normalizeHeaders($request);
+    $body = $request['body'] ?? '';
+    $contentDigest = $request['headers']['content-digest'] ?? null;
+
+    if (! is_string($body) || ($contentDigest !== null && ! is_string($contentDigest))) {
+        return false;
+    }
+
+    // When a body is present, content-digest must be covered and verified.
+    if ($body !== '') {
         $isValidContentDigest = in_array('content-digest', $sigInputComponents, true) &&
-            isset($request['headers']['content-digest'], $request['headers']['content-length'], $request['headers']['content-type']) &&
-            verifyContentDigest($request['body'], $request['headers']['content-digest']);
+            isset($contentDigest, $request['headers']['content-length'], $request['headers']['content-type']) &&
+            verifyContentDigest($body, $contentDigest);
     } else {
         $isValidContentDigest = ! in_array('content-digest', $sigInputComponents, true) ||
-            (isset($request['headers']['content-digest']) &&
-                verifyContentDigest($request['body'] ?? '', $request['headers']['content-digest']));
+            ($contentDigest !== null && verifyContentDigest($body, $contentDigest));
     }
 
     return $isValidContentDigest &&
