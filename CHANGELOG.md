@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Signature validators ignore header name case. Before, an uncovered `Authorization` header was not detected
 - Signature validators return `false` for a non-string body instead of throwing a `TypeError`
 - `createSignatureHeaders` and `createHeaders` now treat the body `"0"` as a body
+- `createHeaders` no longer adds unsigned `Content-*` headers for an empty-string body
+- Signature validators return `false` for header names that differ only by case, header values with line breaks, a `Signature-Input` with more than one `sig1=`, and a missing or non-string `method` or `url`
 
 ### Added
 - GitHub Actions CI: PHPUnit, PHPStan and Pint

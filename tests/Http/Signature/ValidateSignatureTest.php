@@ -173,4 +173,91 @@ class ValidateSignatureTest extends TestCase
         $this->assertFalse(\OpenPayments\Utils\validateSignature(['kty' => 'OKP', 'crv' => 'Ed25519', 'x' => 'short'], $request));
         $this->assertFalse(\OpenPayments\Utils\validateSignature(['kty' => 'EC', 'crv' => 'P-256', 'x' => $jwk['x']], $request));
     }
+
+    public function test_validate_signature_rejects_tampered_method_url_or_authorization()
+    {
+        $jwk = \OpenPayments\Utils\generateJwk($this->keyId, $this->privateKey);
+        $request = $this->signedRequest('POST', '{"amount":"1"}');
+
+        $tampered = $request;
+        $tampered['method'] = 'PUT';
+        $this->assertFalse(\OpenPayments\Utils\validateSignature($jwk, $tampered));
+
+        $tampered = $request;
+        $tampered['url'] = 'https://example.com/outgoing-payments';
+        $this->assertFalse(\OpenPayments\Utils\validateSignature($jwk, $tampered));
+
+        $tampered = $request;
+        $tampered['headers']['authorization'] = 'GNAP other-token';
+        $this->assertFalse(\OpenPayments\Utils\validateSignature($jwk, $tampered));
+    }
+
+    public function test_validate_signature_accepts_byte_sequence_form()
+    {
+        $jwk = \OpenPayments\Utils\generateJwk($this->keyId, $this->privateKey);
+        $request = $this->signedRequest('POST', '{"amount":"1"}');
+        $request['headers']['signature'] = 'sig1=:'.substr($request['headers']['signature'], strlen('sig1=')).':';
+
+        $this->assertTrue(\OpenPayments\Utils\validateSignature($jwk, $request));
+    }
+
+    public function test_rejects_header_names_that_differ_only_by_case()
+    {
+        $jwk = \OpenPayments\Utils\generateJwk($this->keyId, $this->privateKey);
+        $request = $this->signedRequest('POST', '{"amount":"1"}', lowercase: false);
+        $request['headers'] = ['authorization' => 'GNAP other-token'] + $request['headers'];
+
+        $this->assertFalse(\OpenPayments\Utils\validateSignatureHeaders($request));
+        $this->assertFalse(\OpenPayments\Utils\validateSignature($jwk, $request));
+    }
+
+    public function test_rejects_line_break_in_covered_header()
+    {
+        $jwk = \OpenPayments\Utils\generateJwk($this->keyId, $this->privateKey);
+        $request = $this->signedRequest('GET', null, ['Authorization' => "GNAP token\n\"content-type\": text/plain"]);
+
+        $this->assertFalse(\OpenPayments\Utils\validateSignature($jwk, $request));
+    }
+
+    public function test_rejects_signature_input_with_more_than_one_label()
+    {
+        $request = $this->signedRequest('POST', '{"amount":"1"}');
+        $request['headers']['signature-input'] = str_replace('"authorization"', '"authorization"sig1=', $request['headers']['signature-input']);
+
+        $this->assertFalse(\OpenPayments\Utils\validateSignatureHeaders($request));
+    }
+
+    public function test_validate_signature_returns_false_for_malformed_request()
+    {
+        $jwk = \OpenPayments\Utils\generateJwk($this->keyId, $this->privateKey);
+        $request = $this->signedRequest('POST', '{"amount":"1"}');
+
+        $noMethod = $request;
+        unset($noMethod['method']);
+        $this->assertFalse(\OpenPayments\Utils\validateSignature($jwk, $noMethod));
+
+        $noUrl = $request;
+        unset($noUrl['url']);
+        $this->assertFalse(\OpenPayments\Utils\validateSignature($jwk, $noUrl));
+
+        $arrayHeader = $request;
+        $arrayHeader['headers']['authorization'] = ['GNAP token'];
+        $this->assertFalse(\OpenPayments\Utils\validateSignature($jwk, $arrayHeader));
+
+        $stringHeaders = $request;
+        $stringHeaders['headers'] = 'not-an-array';
+        $this->assertFalse(\OpenPayments\Utils\validateSignature($jwk, $stringHeaders));
+        $this->assertFalse(\OpenPayments\Utils\validateSignatureHeaders($stringHeaders));
+    }
+
+    public function test_create_headers_skips_content_headers_for_empty_body()
+    {
+        $headers = \OpenPayments\Utils\createHeaders([
+            'request' => ['method' => 'POST', 'url' => 'https://example.com/incoming-payments', 'headers' => [], 'body' => ''],
+            'privateKey' => $this->privateKey,
+            'keyId' => $this->keyId,
+        ]);
+
+        $this->assertSame(['Signature', 'Signature-Input'], array_keys($headers));
+    }
 }

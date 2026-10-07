@@ -315,6 +315,9 @@ function createSignatureInput(array $components, string $keyId): string
 function validateSignatureHeaders(array $request): bool
 {
     $request = normalizeHeaders($request);
+    if ($request === null) {
+        return false;
+    }
     $sig = $request['headers']['signature'] ?? null;
     $sigInput = $request['headers']['signature-input'] ?? null;
     if (! $sig || ! $sigInput || ! is_string($sig) || ! is_string($sigInput)) {
@@ -339,6 +342,9 @@ function validateSignatureHeaders(array $request): bool
 function validateSignature(array $clientKey, array $request): bool
 {
     $request = normalizeHeaders($request);
+    if ($request === null) {
+        return false;
+    }
     $sig = $request['headers']['signature'] ?? '';
     $sigInput = $request['headers']['signature-input'] ?? '';
 
@@ -397,6 +403,10 @@ function publicKeyFromJwk(array $jwk): ?string
 function sigInputToChallenge(string $sigInput, array $request): ?string
 {
     $request = normalizeHeaders($request);
+    if ($request === null || ! is_string($request['method'] ?? null) || ! is_string($request['url'] ?? null)) {
+        return null;
+    }
+
     $sigInputComponents = getSigInputComponents($sigInput);
 
     if ($sigInputComponents === null || ! validateSigInputComponents($sigInputComponents, $request)) {
@@ -407,15 +417,22 @@ function sigInputToChallenge(string $sigInput, array $request): ?string
 
     foreach ($sigInputComponents as $component) {
         if ($component === '@method') {
-            $signatureBase .= '"@method": '.strtoupper($request['method'])."\n";
+            $value = strtoupper($request['method']);
         } elseif ($component === '@target-uri') {
-            $signatureBase .= '"@target-uri": '.$request['url']."\n";
+            $value = $request['url'];
         } else {
-            $signatureBase .= "\"$component\": ".($request['headers'][$component] ?? '')."\n";
+            $value = $request['headers'][$component] ?? '';
         }
+
+        // A line break in a value could inject extra lines into the signature base.
+        if ((! is_string($value) && ! is_int($value)) || preg_match('/[\r\n]/', (string) $value)) {
+            return null;
+        }
+
+        $signatureBase .= "\"$component\": $value\n";
     }
 
-    $signatureBase .= '"@signature-params": '.str_replace('sig1=', '', $request['headers']['signature-input'] ?? '');
+    $signatureBase .= '"@signature-params": '.substr($sigInput, strlen('sig1='));
 
     return $signatureBase;
 }
@@ -429,6 +446,11 @@ function sigInputToChallenge(string $sigInput, array $request): ?string
  */
 function getSigInputComponents(string $sigInput): ?array
 {
+    // Only a single "sig1" signature is supported.
+    if (! str_starts_with($sigInput, 'sig1=') || substr_count($sigInput, 'sig1=') !== 1) {
+        return null;
+    }
+
     $messageComponents = explode('sig1=', $sigInput)[1] ?? '';
 
     $components = explode(';', $messageComponents)[0] ?? '';
@@ -439,12 +461,19 @@ function getSigInputComponents(string $sigInput): ?array
 
 /**
  * Lowercases header names so lookups do not depend on the caller's casing.
+ * Returns null if headers is not an array or has names that differ only by case,
+ * since it is not clear which of those values was signed.
  */
-function normalizeHeaders(array $request): array
+function normalizeHeaders(array $request): ?array
 {
-    $request['headers'] = array_change_key_case($request['headers'] ?? [], CASE_LOWER);
+    $headers = $request['headers'] ?? [];
+    if (! is_array($headers)) {
+        return null;
+    }
 
-    return $request;
+    $request['headers'] = array_change_key_case($headers, CASE_LOWER);
+
+    return count($request['headers']) === count($headers) ? $request : null;
 }
 
 /**
@@ -465,6 +494,9 @@ function validateSigInputComponents(array $sigInputComponents, array $request): 
     }
 
     $request = normalizeHeaders($request);
+    if ($request === null) {
+        return false;
+    }
     $body = $request['body'] ?? '';
     $contentDigest = $request['headers']['content-digest'] ?? null;
 
