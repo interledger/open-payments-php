@@ -11,6 +11,7 @@ use OpenPayments\Models\PendingGrant;
 use OpenPayments\Services\GrantService;
 use OpenPayments\Transformers\GrantTransformer;
 use OpenPayments\Transformers\PendingGrantTransformer;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class GrantServiceTest extends TestCase
@@ -155,12 +156,55 @@ class GrantServiceTest extends TestCase
         $this->assertSame('https://ilp.interledger-test.dev/alice', $result->subject->sub_ids[0]->id);
     }
 
+    /**
+     * The grant endpoint is the wallet address's `authServer`, and the request goes to exactly that
+     * URL. A server that routes strictly answers a URL with a slash added with 404.
+     */
+    #[DataProvider('grantUrls')]
+    public function test_request_is_sent_to_the_url_as_given(string $url): void
+    {
+        $this->apiClient
+            ->expects($this->once())
+            ->method('request')
+            ->with('POST', $url, $this->anything())
+            ->willReturn(['access_token' => 'xyz', 'continue' => '']);
+        $this->grantTransformer->method('createFromResponse')->willReturn($this->createMock(Grant::class));
+
+        $this->service->request(['url' => $url], [
+            'access_token' => ['access' => [['type' => 'quote', 'actions' => ['create']]]],
+        ]);
+    }
+
+    public static function grantUrls(): array
+    {
+        return [
+            'a path' => ['https://wallet.example/gnap'],
+            'a path that ends in a slash' => ['https://auth.example/tenant/'],
+            'no path' => ['https://auth.example'],
+        ];
+    }
+
+    public function test_continue_is_sent_to_the_url_as_given(): void
+    {
+        $this->apiClient
+            ->expects($this->once())
+            ->method('request')
+            ->with('POST', 'https://wallet.example/gnap/continue/abc', $this->anything())
+            ->willReturn(['access_token' => 'xyz']);
+        $this->grantTransformer->method('createFromResponse')->willReturn($this->createMock(Grant::class));
+
+        $this->service->continue([
+            'url' => 'https://wallet.example/gnap/continue/abc',
+            'access_token' => 'token',
+        ], ['interact_ref' => 'ref']);
+    }
+
     public function test_request_injects_client_url_when_client_is_missing(): void
     {
         $this->apiClient
             ->expects($this->once())
             ->method('request')
-            ->with('POST', 'https://ilp.interledger-test.dev/', $this->callback(
+            ->with('POST', 'https://ilp.interledger-test.dev', $this->callback(
                 fn (array $body) => $body['client'] === 'https://ilp.interledger-test.dev/wallet'
             ))
             ->willReturn(['access_token' => 'xyz', 'continue' => '']);
@@ -183,7 +227,7 @@ class GrantServiceTest extends TestCase
         $this->apiClient
             ->expects($this->once())
             ->method('request')
-            ->with('POST', 'https://ilp.interledger-test.dev/', $this->callback(
+            ->with('POST', 'https://ilp.interledger-test.dev', $this->callback(
                 fn (array $body) => $body['client'] === $client
             ))
             ->willReturn(['access_token' => 'xyz', 'continue' => '']);
@@ -200,7 +244,7 @@ class GrantServiceTest extends TestCase
         $this->apiClient
             ->expects($this->once())
             ->method('request')
-            ->with('POST', 'https://ilp.interledger-test.dev/', $this->callback(
+            ->with('POST', 'https://ilp.interledger-test.dev', $this->callback(
                 fn (array $body) => $body['client'] === 'https://ilp.interledger-test.dev/wallet'
             ))
             ->willReturn(['access_token' => 'xyz', 'continue' => '']);
@@ -217,7 +261,7 @@ class GrantServiceTest extends TestCase
         $this->apiClient
             ->expects($this->once())
             ->method('request')
-            ->with('POST', 'https://ilp.interledger-test.dev/', $this->callback(
+            ->with('POST', 'https://ilp.interledger-test.dev', $this->callback(
                 fn (array $body) => $body['client'] === 'https://ilp.interledger-test.dev/wallet'
             ))
             ->willReturn(['access_token' => 'xyz', 'continue' => '']);
@@ -234,7 +278,7 @@ class GrantServiceTest extends TestCase
         $this->apiClient
             ->expects($this->once())
             ->method('request')
-            ->with('POST', 'https://ilp.interledger-test.dev/continue/abc/', $this->callback(
+            ->with('POST', 'https://ilp.interledger-test.dev/continue/abc', $this->callback(
                 fn (array $body) => $body['client'] === 'https://ilp.interledger-test.dev/wallet'
             ))
             ->willReturn(['access_token' => 'xyz']);
