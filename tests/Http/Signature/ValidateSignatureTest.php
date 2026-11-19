@@ -47,6 +47,14 @@ class ValidateSignatureTest extends TestCase
         return $request;
     }
 
+    /**
+     * The base64 of a signed request's signature, without the label and the colons around it.
+     */
+    private function signatureValue(array $request): string
+    {
+        return substr($request['headers']['signature'], strlen('sig1=:'), -1);
+    }
+
     public function test_round_trip_request_with_body_validates()
     {
         $request = $this->signedRequest('POST', '{"amount":"1"}');
@@ -192,11 +200,25 @@ class ValidateSignatureTest extends TestCase
         $this->assertFalse(\OpenPayments\Utils\validateSignature($jwk, $tampered));
     }
 
-    public function test_validate_signature_accepts_byte_sequence_form()
+    public function test_signer_writes_the_byte_sequence_form()
     {
         $jwk = \OpenPayments\Utils\generateJwk($this->keyId, $this->privateKey);
         $request = $this->signedRequest('POST', '{"amount":"1"}');
-        $request['headers']['signature'] = 'sig1=:'.substr($request['headers']['signature'], strlen('sig1=')).':';
+
+        // RFC 9421, section 4.2: the Signature field is a dictionary of byte sequences (RFC 8941, section 3.3.5).
+        $this->assertMatchesRegularExpression('/^sig1=:[A-Za-z0-9+\/]{86}==:$/', $request['headers']['signature']);
+        $this->assertTrue(\OpenPayments\Utils\validateSignature($jwk, $request));
+    }
+
+    /**
+     * The form without colons is what this library wrote up to 1.2.0, so a server built on it
+     * keeps accepting requests from clients that have not been updated.
+     */
+    public function test_validate_signature_still_accepts_the_form_without_colons()
+    {
+        $jwk = \OpenPayments\Utils\generateJwk($this->keyId, $this->privateKey);
+        $request = $this->signedRequest('POST', '{"amount":"1"}');
+        $request['headers']['signature'] = 'sig1='.$this->signatureValue($request);
 
         $this->assertTrue(\OpenPayments\Utils\validateSignature($jwk, $request));
     }
@@ -205,7 +227,7 @@ class ValidateSignatureTest extends TestCase
     {
         $jwk = \OpenPayments\Utils\generateJwk($this->keyId, $this->privateKey);
         $request = $this->signedRequest('POST', '{"amount":"1"}');
-        $value = substr($request['headers']['signature'], strlen('sig1='));
+        $value = $this->signatureValue($request);
 
         foreach (["sig1=:$value", "sig1=$value:", "sig1=::$value::", "sig1=sig1=$value", $value, "sig2=:$value:"] as $signature) {
             $request['headers']['signature'] = $signature;

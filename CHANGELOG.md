@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- The signer writes the `Signature` header as an RFC 8941 byte sequence, `sig1=:<b64>:`, which is the form RFC 9421 defines. Before, it wrote `sig1=<b64>` without the colons. A server that parses the header as a structured field refused every signed request with 401; Rafiki accepts both forms. The validators keep accepting the form without colons, so a server built on this library still takes requests from clients on 1.2.0 and earlier
+- `GrantService::request` and `GrantService::continue` send the request to the URL as given. Before, they appended a slash when the URL did not end in one. The grant endpoint is the wallet address's `authServer`, and a server that routes strictly answered `.../gnap/` with 404
+
 ## [1.2.0] - 2026-10-07
 
 ### Fixed

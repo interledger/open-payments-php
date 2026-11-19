@@ -89,12 +89,9 @@ class GrantService implements GrantRoutes
         }
         $this->injectClient($grantRequest);
         $this->validator->validateRequest($grantRequest);
-        $url = $requestParams['url'];
-        if (substr($url, -1) !== '/') {
-            $url .= '/';
-        }
 
-        $response = $this->apiClient->request('POST', $url, $grantRequest);
+        // The URL as given: it is the wallet address's `authServer`, and a server may not route it with a slash added.
+        $response = $this->apiClient->request('POST', $requestParams['url'], $grantRequest);
 
         if (isset($response['error'])) {
             throw new \Exception('Error: '.print_r($response, true));
@@ -114,13 +111,11 @@ class GrantService implements GrantRoutes
         if (strpos($requestParams['url'], 'continue/') === false) {
             throw new \InvalidArgumentException('Invalid continuation grant URL');
         }
-        $url = $requestParams['url'];
-        if (substr($url, -1) !== '/') {
-            $url .= '/';
-        }
         $this->apiClient->setAccessToken($requestParams['access_token']);
         $this->injectClientUrl($grantRequest);
-        $response = $this->apiClient->request('POST', $url, $grantRequest);
+
+        // The URL as given: it is the grant's `continue.uri`.
+        $response = $this->apiClient->request('POST', $requestParams['url'], $grantRequest);
 
         if (is_array($response) && ! isset($response['error'])) {
             return $this->grantTransformer->createFromResponse($response);
