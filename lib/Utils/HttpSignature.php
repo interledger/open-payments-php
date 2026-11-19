@@ -229,8 +229,9 @@ function createSignatureHeaders(array $options): array
         throw new \Exception('Signing failed: '.$e->getMessage());
     }
 
+    // RFC 9421 carries a signature as a byte sequence of RFC 8941: base64 between colons.
     return [
-        'Signature' => "sig1=$signature",
+        'Signature' => "sig1=:$signature:",
         'Signature-Input' => $signatureInput,
     ];
 }
