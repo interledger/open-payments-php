@@ -6,6 +6,7 @@ namespace OpenPayments;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Psr7\Uri;
 
 class ApiClient
 {
@@ -78,16 +79,24 @@ class ApiClient
 
     public function generateHttpSignature($method, $url, $jsonBody, $defaultHeaders)
     {
+        // The URL in the form it is sent: Guzzle sends an empty path as "/", drops the
+        // default port and never sends a fragment. The server checks the signature
+        // against that URL, not the one given here.
+        $uri = (new Uri((string) $url))->withFragment('');
+        if ($uri->getPath() === '' && $uri->getHost() !== '') {
+            $uri = $uri->withPath('/');
+        }
+
         $headers = self::mergeHeaders([], $defaultHeaders);
         if ($this->accessToken) {
             $headers = self::mergeHeaders($headers, ['Authorization' => "GNAP {$this->accessToken}"]);
         }
-        $parse = parse_url($url);
-        $headers = self::mergeHeaders($headers, ['Host' => $parse['host']]);
+        $port = $uri->getPort();
+        $headers = self::mergeHeaders($headers, ['Host' => $uri->getHost().($port !== null ? ':'.$port : '')]);
 
         $requestArr = [
             'method' => $method,
-            'url' => (string) $url,
+            'url' => (string) $uri,
             'headers' => $headers,
             'body' => (string) $jsonBody,
         ];
