@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - The signer writes the `Signature` header as an RFC 8941 byte sequence, `sig1=:<b64>:`, which is the form RFC 9421 defines. Before, it wrote `sig1=<b64>` without the colons. A server that parses the header as a structured field refused every signed request with 401; Rafiki accepts both forms. The validators keep accepting the form without colons, so a server built on this library still takes requests from clients on 1.2.0 and earlier
-- `GrantService::request` and `GrantService::continue` send the request to the URL as given. Before, they appended a slash when the URL did not end in one. The grant endpoint is the wallet address's `authServer`, and a server that routes strictly answered `.../gnap/` with 404
+- `GrantService::request` and `GrantService::continue` send the request to the URL as given. Before, they appended a slash when the URL did not end in one. The grant endpoint is the wallet address's `authServer`, and a server that routes strictly answered `.../gnap/` with 404. This changes where a grant request goes: a caller that relied on the appended slash now reaches the URL it passed
+- `ApiClient::generateHttpSignature` signs the URL in the form it is sent: an empty path as `/`, without the default port, without a fragment and with the host in lowercase. Before, it signed the URL as given, and the server checked the signature against another one; a grant request to an `authServer` without a path, such as `https://auth.example`, was refused with 401. The `Host` header is written from the same URL, so it names a port other than the default, which it left out before
 
 ## [1.2.0] - 2026-10-07
 

@@ -157,11 +157,12 @@ class GrantServiceTest extends TestCase
     }
 
     /**
-     * The grant endpoint is the wallet address's `authServer`, and the request goes to exactly that
-     * URL. A server that routes strictly answers a URL with a slash added with 404.
+     * The grant endpoint is the wallet address's `authServer`, and GrantService hands exactly that
+     * URL to the ApiClient: a server that routes strictly answers a URL with a slash added with 404.
+     * The form it is signed and sent in is ApiClient's (ApiClientHeadersTest).
      */
     #[DataProvider('grantUrls')]
-    public function test_request_is_sent_to_the_url_as_given(string $url): void
+    public function test_request_hands_the_url_to_the_client_as_given(string $url): void
     {
         $this->apiClient
             ->expects($this->once())
@@ -184,7 +185,7 @@ class GrantServiceTest extends TestCase
         ];
     }
 
-    public function test_continue_is_sent_to_the_url_as_given(): void
+    public function test_continue_hands_the_url_to_the_client_as_given(): void
     {
         $this->apiClient
             ->expects($this->once())
